@@ -1,77 +1,106 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import './index.css'
 
 const Index = ({ enterAction }) => {
   const [todos, setTodos] = useState([])
   const [newTodo, setNewTodo] = useState('')
 
+  // 格式化日期
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr)
+    return new Intl.DateTimeFormat('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date)
+  }
+
+  // 对待办事项进行排序
+  const sortTodos = (items) => {
+    return [...items].sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
+  }
+
+  // 保存待办事项到数据库
+  const saveTodos = useCallback((updatedTodos) => {
+    const sortedTodos = sortTodos(updatedTodos)
+    window.utools.dbStorage.setItem('todos', sortedTodos)
+    setTodos(sortedTodos)
+  }, [])
+
+  // 显示通知
+  const showNotification = (content, type = 'add') => {
+    const action = type === 'add' ? '添加' : type === 'delete' ? '删除' : '更新'
+    window.utools.showNotification(`${action}【${content}】成功`)
+  }
+
   // 从数据库加载待办事项
   useEffect(() => {
     const loadTodos = async () => {
       const items = window.utools.dbStorage.getItem('todos') || []
-      items.sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
-      setTodos(items)
+      saveTodos(items)
     }
     loadTodos()
-  }, [])
+  }, [saveTodos])
 
   // 处理从 enterAction 添加待办事项
   useEffect(() => {
-    if (enterAction && enterAction.type === 'over' && enterAction.payload) {
-      const content = enterAction.payload
-      if (content.trim()) {
+    if (enterAction?.type === 'over' && enterAction?.payload) {
+      const content = enterAction.payload.trim()
+      if (content) {
         const newItem = {
           id: Date.now(),
-          content: content,
+          content,
           completed: false,
           createTime: new Date().toISOString()
         }
-        // 直接从数据库获取最新数据
         const currentTodos = window.utools.dbStorage.getItem('todos') || []
-        const updatedTodos = [...currentTodos, newItem]
-        updatedTodos.sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
-        window.utools.dbStorage.setItem('todos', updatedTodos)
-        setTodos(updatedTodos)
-        window.utools.showNotification(`添加【${content}】成功`)
+        saveTodos([...currentTodos, newItem])
+        showNotification(content)
       }
     }
-  }, [enterAction])
+  }, [enterAction, saveTodos])
 
-  const addTodo = () => {
-    if (!newTodo || typeof newTodo !== 'string' || !newTodo.trim()) return
+  const addTodo = useCallback(() => {
+    if (!newTodo?.trim()) return
+    
     const newItem = {
       id: Date.now(),
       content: newTodo.trim(),
       completed: false,
       createTime: new Date().toISOString()
     }
-    // 直接从数据库获取最新数据
+    
     const currentTodos = window.utools.dbStorage.getItem('todos') || []
-    const updatedTodos = [...currentTodos, newItem]
-    updatedTodos.sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
-    window.utools.dbStorage.setItem('todos', updatedTodos)
-    setTodos(updatedTodos)
+    saveTodos([...currentTodos, newItem])
     setNewTodo('')
-    window.utools.showNotification(`添加【${newItem.content}】成功`)
-  }
+    showNotification(newItem.content)
+  }, [newTodo, saveTodos])
 
-  const toggleTodo = (id) => {
-    // 直接从数据库获取最新数据
+  const toggleTodo = useCallback((id) => {
     const currentTodos = window.utools.dbStorage.getItem('todos') || []
     const updatedTodos = currentTodos.map(todo =>
       todo.id === id ? { ...todo, completed: !todo.completed } : todo
     )
-    window.utools.dbStorage.setItem('todos', updatedTodos)
-    setTodos(updatedTodos)
-  }
+    saveTodos(updatedTodos)
+    const toggledTodo = updatedTodos.find(todo => todo.id === id)
+    showNotification(toggledTodo.content, 'update')
+  }, [saveTodos])
 
-  const deleteTodo = (id) => {
-    // 直接从数据库获取最新数据
+  const deleteTodo = useCallback((id) => {
     const currentTodos = window.utools.dbStorage.getItem('todos') || []
+    const todoToDelete = currentTodos.find(todo => todo.id === id)
     const updatedTodos = currentTodos.filter(todo => todo.id !== id)
-    window.utools.dbStorage.setItem('todos', updatedTodos)
-    setTodos(updatedTodos)
-  }
+    saveTodos(updatedTodos)
+    showNotification(todoToDelete.content, 'delete')
+  }, [saveTodos])
+
+  const handleKeyPress = useCallback((e) => {
+    if (e.key === 'Enter') {
+      addTodo()
+    }
+  }, [addTodo])
 
   return (
     <div className="todo-container">
@@ -82,21 +111,30 @@ const Index = ({ enterAction }) => {
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
           placeholder="输入新的待办事项..."
-          onKeyPress={(e) => e.key === 'Enter' && addTodo()}
+          onKeyPress={handleKeyPress}
         />
         <button onClick={addTodo}>添加</button>
       </div>
       <ul className="todo-list">
         {todos.map(todo => (
           <li key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo.id)}
-            />
-            <span className="todo-content">{todo.content}</span>
-            <span className="todo-content">{todo.createTime}</span>
-            <button onClick={() => deleteTodo(todo.id)}>删除</button>
+            <div className="todo-item-left">
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleTodo(todo.id)}
+              />
+              <span className="todo-content">{todo.content}</span>
+            </div>
+            <div className="todo-item-right">
+              <span className="todo-time">{formatDate(todo.createTime)}</span>
+              <button 
+                onClick={() => deleteTodo(todo.id)}
+                className="delete-btn"
+              >
+                删除
+              </button>
+            </div>
           </li>
         ))}
       </ul>
