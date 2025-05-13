@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
-import Hello from './Hello'
-import Read from './Read'
-import Write from './Write'
+import Tode from './Todo/index.jsx'
 
 export default function App () {
   const [enterAction, setEnterAction] = useState({})
@@ -17,17 +15,9 @@ export default function App () {
     })
   }, [])
 
-  if (route === 'index') {
-    return <Read enterAction={enterAction} />
+  if (route === 'index' || route === 'addItem') {
+    return <Tode enterAction={enterAction}/>
   }
-
-  if (route === 'addItem') {
-    return <Hello enterAction={enterAction} />
-  }
-
-  // if (route === 'write') {
-  //   return <Write enterAction={enterAction} />
-  // }
 
   return false
 }
