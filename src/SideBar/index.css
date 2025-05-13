@@ -1,0 +1,148 @@
+.sidebar {
+    width: 200px;
+    height: 100%;
+    /*border-right: 1px solid #e9ecef;*/
+    padding-inline: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.stat-item {
+    background-color: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.filters-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filters-container h3 {
+    margin: 0;
+    color: #666;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    text-align: left;
+}
+
+.filter-item:hover {
+    background-color: #e9ecef;
+}
+
+.filter-item.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.filter-icon {
+    font-size: 1.25rem;
+    width: 24px;
+    text-align: center;
+}
+
+.filter-label {
+    flex: 1;
+    font-size: 0.875rem;
+}
+
+.filter-count {
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    min-width: 24px;
+    text-align: center;
+}
+
+.active .filter-count {
+    background-color: #1976d2;
+    color: white;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+}
+
+.app-info {
+    text-align: center;
+}
+
+.app-info h3 {
+    margin: 0 0 8px;
+    color: #666;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.app-info p {
+    margin: 0;
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.version {
+    color: #999 !important;
+    font-size: 0.75rem !important;
+    margin-top: 4px !important;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .stats-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .filter-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+}

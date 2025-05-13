@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import Sidebar from '../sidebar'
 import './index.css'
 
 const Index = ({ enterAction }) => {
   const [todos, setTodos] = useState([])
   const [newTodo, setNewTodo] = useState('')
+  const [currentFilter, setCurrentFilter] = useState('all')
 
   // 格式化日期
   const formatDate = (dateStr) => {
@@ -102,42 +104,69 @@ const Index = ({ enterAction }) => {
     }
   }, [addTodo])
 
+  // 过滤待办事项
+  const filteredTodos = todos.filter(todo => {
+    switch (currentFilter) {
+      case 'completed':
+        return todo.completed
+      case 'pending':
+        return !todo.completed
+      case 'today':
+        const today = new Date()
+        const todoDate = new Date(todo.createTime)
+        return (
+          todoDate.getDate() === today.getDate() &&
+          todoDate.getMonth() === today.getMonth() &&
+          todoDate.getFullYear() === today.getFullYear()
+        )
+      default:
+        return true
+    }
+  })
+
   return (
-    <div className="todo-container">
-      <h1>待办事项</h1>
-      <div className="todo-input">
-        <input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          placeholder="输入新的待办事项..."
-          onKeyPress={handleKeyPress}
-        />
-        <button onClick={addTodo}>添加</button>
+    <div className="todo-app">
+      <Sidebar 
+        todos={todos}
+        currentFilter={currentFilter}
+        onFilterChange={setCurrentFilter}
+      />
+      <div className="todo-main">
+        <h1>待办事项</h1>
+        <div className="todo-input">
+          <input
+            type="text"
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            placeholder="输入新的待办事项..."
+            onKeyPress={handleKeyPress}
+          />
+          <button onClick={addTodo}>添加</button>
+        </div>
+        <ul className="todo-list">
+          {filteredTodos.map(todo => (
+            <li key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
+              <div className="todo-item-left">
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => toggleTodo(todo.id)}
+                />
+                <span className="todo-content">{todo.content}</span>
+              </div>
+              <div className="todo-item-right">
+                <span className="todo-time">{formatDate(todo.createTime)}</span>
+                <button 
+                  onClick={() => deleteTodo(todo.id)}
+                  className="delete-btn"
+                >
+                  删除
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul className="todo-list">
-        {todos.map(todo => (
-          <li key={todo.id} className={`todo-item ${todo.completed ? 'completed' : ''}`}>
-            <div className="todo-item-left">
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() => toggleTodo(todo.id)}
-              />
-              <span className="todo-content">{todo.content}</span>
-            </div>
-            <div className="todo-item-right">
-              <span className="todo-time">{formatDate(todo.createTime)}</span>
-              <button 
-                onClick={() => deleteTodo(todo.id)}
-                className="delete-btn"
-              >
-                删除
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
     </div>
   )
 }

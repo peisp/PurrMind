@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import Tode from './Todo/index.jsx'
+import Todo from './Todo/index.jsx'
 
 export default function App () {
   const [enterAction, setEnterAction] = useState({})
@@ -16,7 +16,7 @@ export default function App () {
   }, [])
 
   if (route === 'index' || route === 'addItem') {
-    return <Tode enterAction={enterAction}/>
+    return <Todo enterAction={enterAction}/>
   }
 
   return false
