@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
-import Content from './Content/index.jsx'
+import Sidebar from './components/Sidebar'
+import TodoContent from './components/TodoContent'
 
-export default function App () {
+export default function App() {
   const [enterAction, setEnterAction] = useState({})
   const [route, setRoute] = useState('')
+  const [todos, setTodos] = useState([])
+  const [currentFilter, setCurrentFilter] = useState('all')
 
   useEffect(() => {
     window.utools.onPluginEnter((action) => {
@@ -16,7 +19,22 @@ export default function App () {
   }, [])
 
   if (route === 'index' || route === 'addItem') {
-    return <Content enterAction={enterAction}/>
+    return (
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar 
+          todos={todos}
+          currentFilter={currentFilter}
+          onFilterChange={setCurrentFilter}
+        />
+        <main className="flex-1 overflow-auto">
+          <TodoContent 
+            enterAction={enterAction}
+            onTodosChange={setTodos}
+            currentFilter={currentFilter}
+          />
+        </main>
+      </div>
+    )
   }
 
   return false
