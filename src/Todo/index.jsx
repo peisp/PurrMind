@@ -9,6 +9,7 @@ const Index = ({ enterAction }) => {
   useEffect(() => {
     const loadTodos = async () => {
       const items = window.utools.dbStorage.getItem('todos') || []
+      items.sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
       setTodos(items)
     }
     loadTodos()
@@ -28,8 +29,10 @@ const Index = ({ enterAction }) => {
         // 直接从数据库获取最新数据
         const currentTodos = window.utools.dbStorage.getItem('todos') || []
         const updatedTodos = [...currentTodos, newItem]
+        updatedTodos.sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
         window.utools.dbStorage.setItem('todos', updatedTodos)
         setTodos(updatedTodos)
+        window.utools.showNotification(`添加【${content}】成功`)
       }
     }
   }, [enterAction])
@@ -45,9 +48,11 @@ const Index = ({ enterAction }) => {
     // 直接从数据库获取最新数据
     const currentTodos = window.utools.dbStorage.getItem('todos') || []
     const updatedTodos = [...currentTodos, newItem]
+    updatedTodos.sort((a, b) => new Date(b.createTime) - new Date(a.createTime))
     window.utools.dbStorage.setItem('todos', updatedTodos)
     setTodos(updatedTodos)
     setNewTodo('')
+    window.utools.showNotification(`添加【${newItem.content}】成功`)
   }
 
   const toggleTodo = (id) => {
@@ -90,6 +95,7 @@ const Index = ({ enterAction }) => {
               onChange={() => toggleTodo(todo.id)}
             />
             <span className="todo-content">{todo.content}</span>
+            <span className="todo-content">{todo.createTime}</span>
             <button onClick={() => deleteTodo(todo.id)}>删除</button>
           </li>
         ))}
