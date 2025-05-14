@@ -9,6 +9,7 @@
   "features": [
     {
       "code": "index",
+      "explain": "喵咚咚",
       "cmds": ["喵咚咚", "todo", "list", "待办", "待办事项"]
     },
     {

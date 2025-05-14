@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import CustomInput from '../CustomInput';
+import PrimaryButton from '../PrimaryButton';
 
 const TodoContent = ({ enterAction, onTodosChange, currentFilter }) => {
   const [newTodo, setNewTodo] = useState('');
@@ -121,28 +123,15 @@ const TodoContent = ({ enterAction, onTodosChange, currentFilter }) => {
       </h1>
       
       <div className="flex gap-3 mb-8">
-        <input
-          type="text"
+        <CustomInput
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
           placeholder="输入新的待办事项..."
           onKeyUp={handleKeyPress}
-          className="flex-1 px-4 py-3 border border-gray-200 dark:border-gray-700/50 rounded-xl
-                   focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent
-                   bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-                   placeholder:text-gray-400 dark:placeholder:text-gray-500
-                   shadow-soft dark:shadow-none transition-shadow duration-300
-                   hover:shadow-lg"
         />
-        <button
-          onClick={addTodo}
-          className="px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl
-                   hover:shadow-lg hover:opacity-90 active:opacity-80
-                   transition-all duration-300 focus:outline-none focus:ring-2 
-                   focus:ring-primary-400 focus:ring-offset-2 font-medium"
-        >
+        <PrimaryButton onClick={addTodo}>
           添加
-        </button>
+        </PrimaryButton>
       </div>
 
       <div className="space-y-4">

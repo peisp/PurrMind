@@ -1,4 +1,6 @@
 import React, { useMemo } from 'react';
+import StatCard from '../StatCard';
+import FilterButton from '../FilterButton';
 
 const Sidebar = ({ todos = [], onFilterChange, currentFilter = 'all' }) => {
   const stats = useMemo(() => {
@@ -25,21 +27,23 @@ const Sidebar = ({ todos = [], onFilterChange, currentFilter = 'all' }) => {
     { id: 'today', label: '今日创建', icon: '📅' }
   ];
 
+  const statCards = [
+    { key: 'total', label: '总任务', color: 'gray' },
+    { key: 'completed', label: '已完成', color: 'green' },
+    { key: 'pending', label: '待完成', color: 'yellow' },
+    { key: 'today', label: '今日新增', color: 'blue' }
+  ];
+
   return (
     <aside className="w-64 h-full dark:border-gray-700 p-2 flex flex-col">
       <div className="grid grid-cols-2 gap-3">
-        {Object.entries(stats).map(([key, value]) => (
-          <div key={key} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm">
-            <span className="text-sm text-gray-600 dark:text-gray-400 block">
-              {key === 'total' && '总任务'}
-              {key === 'completed' && '已完成'}
-              {key === 'pending' && '待完成'}
-              {key === 'today' && '今日新增'}
-            </span>
-            <span className="text-xl font-semibold text-gray-900 dark:text-white">
-              {value}
-            </span>
-          </div>
+        {statCards.map(({ key, label, color }) => (
+          <StatCard
+            key={key}
+            label={label}
+            value={stats[key]}
+            color={color}
+          />
         ))}
       </div>
 
@@ -49,24 +53,16 @@ const Sidebar = ({ todos = [], onFilterChange, currentFilter = 'all' }) => {
         </h3>
         <div className="space-y-2">
           {filters.map(filter => (
-            <button
+            <FilterButton
               key={filter.id}
+              icon={filter.icon}
+              label={filter.label}
+              count={stats[filter.id === 'all' ? 'total' : 
+                         filter.id === 'pending' ? 'pending' :
+                         filter.id === 'completed' ? 'completed' : 'today']}
+              active={currentFilter === filter.id}
               onClick={() => onFilterChange?.(filter.id)}
-              className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors
-                ${currentFilter === filter.id
-                  ? 'bg-primary bg-opacity-10 text-primary'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
-                }`}
-            >
-              <span className="text-xl mr-2">{filter.icon}</span>
-              <span className="flex-1">{filter.label}</span>
-              <span className="text-sm bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded-full">
-                {filter.id === 'all' && stats.total}
-                {filter.id === 'pending' && stats.pending}
-                {filter.id === 'completed' && stats.completed}
-                {filter.id === 'today' && stats.today}
-              </span>
-            </button>
+            />
           ))}
         </div>
       </div>
