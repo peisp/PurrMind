@@ -1,15 +1,19 @@
-import React from 'react';
+import React from 'react'
+import { Card, CardContent } from '@/components/ui/card'
 
-const StatCard = ({ label, value, color = 'primary' }) => (
-  <div className={`bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm 
-    hover:shadow-md transition-shadow duration-300 border border-gray-100 dark:border-gray-700`}>
-    <span className="text-sm text-gray-600 dark:text-gray-400 block">
-      {label}
-    </span>
-    <span className={`text-xl font-semibold text-${color}-600 dark:text-${color}-400`}>
-      {value}
-    </span>
-  </div>
-);
+function StatCard ({ label, value, color, onClick }) {
+  return (
+    <Card className="transition-shadow hover:shadow-md"
+          onClick={onClick}
+    >
+      <CardContent className="p-4">
+        <div className="text-sm text-muted-foreground">{label}</div>
+        <div className={`text-xl font-semibold ${color}`}>
+          {value}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
-export default StatCard; 
+export default StatCard
