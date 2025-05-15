@@ -4,6 +4,14 @@ import PrimaryButton from '../PrimaryButton';
 
 const TodoContent = ({ enterAction, onTodosChange, currentFilter }) => {
   const [newTodo, setNewTodo] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState('default');
+
+  const groups = [
+    { id: 'default', name: '默认分组', icon: '📁' },
+    { id: 'work', name: '工作', icon: '💼' },
+    { id: 'personal', name: '个人', icon: '🏠' },
+    { id: 'shopping', name: '购物', icon: '🛒' }
+  ];
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
@@ -47,14 +55,15 @@ const TodoContent = ({ enterAction, onTodosChange, currentFilter }) => {
           id: Date.now(),
           content,
           completed: false,
-          createTime: new Date().toISOString()
+          createTime: new Date().toISOString(),
+          group: selectedGroup
         };
         const currentTodos = window.utools.dbStorage.getItem('todos') || [];
         saveTodos([...currentTodos, newItem]);
         showNotification(content);
       }
     }
-  }, [enterAction, saveTodos]);
+  }, [enterAction, saveTodos, selectedGroup]);
 
   const addTodo = useCallback(() => {
     if (!newTodo?.trim()) return;
@@ -63,14 +72,15 @@ const TodoContent = ({ enterAction, onTodosChange, currentFilter }) => {
       id: Date.now(),
       content: newTodo.trim(),
       completed: false,
-      createTime: new Date().toISOString()
+      createTime: new Date().toISOString(),
+      group: selectedGroup
     };
     
     const currentTodos = window.utools.dbStorage.getItem('todos') || [];
     saveTodos([...currentTodos, newItem]);
     setNewTodo('');
     showNotification(newItem.content);
-  }, [newTodo, saveTodos]);
+  }, [newTodo, saveTodos, selectedGroup]);
 
   const toggleTodo = useCallback((id) => {
     const currentTodos = window.utools.dbStorage.getItem('todos') || [];
@@ -98,6 +108,11 @@ const TodoContent = ({ enterAction, onTodosChange, currentFilter }) => {
 
   const todos = window.utools.dbStorage.getItem('todos') || [];
   const filteredTodos = todos.filter(todo => {
+    if (currentFilter?.startsWith('group_')) {
+      const groupId = currentFilter.replace('group_', '');
+      return todo.group === groupId;
+    }
+
     switch (currentFilter) {
       case 'completed':
         return todo.completed;
@@ -123,6 +138,24 @@ const TodoContent = ({ enterAction, onTodosChange, currentFilter }) => {
       </h1>
       
       <div className="flex gap-3 mb-8">
+        <div className="relative">
+          <select
+            value={selectedGroup}
+            onChange={(e) => setSelectedGroup(e.target.value)}
+            className="appearance-none pl-9 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 
+                     dark:border-gray-700/50 rounded-xl text-gray-900 dark:text-white
+                     focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
+          >
+            {groups.map(group => (
+              <option key={group.id} value={group.id}>
+                {group.icon} {group.name}
+              </option>
+            ))}
+          </select>
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            {groups.find(g => g.id === selectedGroup)?.icon}
+          </div>
+        </div>
         <CustomInput
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
@@ -162,10 +195,16 @@ const TodoContent = ({ enterAction, onTodosChange, currentFilter }) => {
                   </div>
                 )}
               </div>
-              <span className={`flex-1 text-gray-900 dark:text-white transition-all duration-300
-                            ${todo.completed ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
-                {todo.content}
-              </span>
+              <div className="flex flex-col">
+                <span className={`text-gray-900 dark:text-white transition-all duration-300
+                              ${todo.completed ? 'line-through text-gray-400 dark:text-gray-500' : ''}`}>
+                  {todo.content}
+                </span>
+                <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                  <span>{groups.find(g => g.id === todo.group)?.icon}</span>
+                  <span>{groups.find(g => g.id === todo.group)?.name}</span>
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-6">
               <span className="text-sm text-gray-400 dark:text-gray-500">
