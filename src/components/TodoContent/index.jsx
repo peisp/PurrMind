@@ -142,7 +142,7 @@ const TodoContent = ({ enterAction, onTodosChange, currentFilter }) => {
           <select
             value={selectedGroup}
             onChange={(e) => setSelectedGroup(e.target.value)}
-            className="appearance-none pl-9 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 
+            className="appearance-none pl-9 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 
                      dark:border-gray-700/50 rounded-xl text-gray-900 dark:text-white
                      focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
           >

@@ -20,7 +20,7 @@ export default function App() {
 
   if (route === 'index' || route === 'addItem') {
     return (
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden border-t border-gray-300 dark:border-gray-700/50">
         <Sidebar 
           todos={todos}
           currentFilter={currentFilter}

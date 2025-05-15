@@ -74,7 +74,7 @@ const Sidebar = ({ todos = [], onFilterChange, currentFilter = 'all' }) => {
   ], [todos]);
 
   return (
-    <aside className="w-72 h-full border-r border-gray-200 dark:border-gray-700/50 p-6 flex flex-col animate-slide-in">
+    <aside className="w-72 h-full py-1 px-2 flex flex-col animate-slide-in border-r border-gray-300 dark:border-gray-700/50">
 
       <div className="space-y-6">
           <div className="grid grid-cols-2 gap-3">
@@ -93,12 +93,6 @@ const Sidebar = ({ todos = [], onFilterChange, currentFilter = 'all' }) => {
             ))}
           </div>
         </div>
-      </div>
-
-      <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700/50">
-        <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-          版本 1.0.0
-        </p>
       </div>
     </aside>
   );

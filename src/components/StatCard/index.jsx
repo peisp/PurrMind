@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 function StatCard ({ label, value, color, onClick }) {
   return (
-    <Card className="transition-shadow hover:shadow-md"
+    <Card className="transition-shadow hover:shadow-md rounded-xl"
           onClick={onClick}
     >
       <CardContent className="p-4">
