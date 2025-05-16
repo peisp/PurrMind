@@ -26,25 +26,37 @@
 }
 
 @media (prefers-color-scheme: light) {
-  /*body {*/
-  /*  @apply bg-gray-100;*/
-  /*}*/
-  /*::-webkit-scrollbar-track-piece {*/
-  /*  @apply bg-gray-100;*/
-  /*}*/
-  /*::-webkit-scrollbar-thumb {*/
-  /*  @apply border-gray-100;*/
-  /*}*/
+
+  body {
+    @apply bg-gray-100;
+  }
+  ::-webkit-scrollbar-track-piece {
+    @apply bg-gray-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply border-gray-100;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
-  /*body {*/
-  /*  @apply bg-gray-800 text-white;*/
-  /*}*/
-  /*::-webkit-scrollbar-track-piece {*/
-  /*  @apply bg-gray-800;*/
-  /*}*/
-  /*::-webkit-scrollbar-thumb {*/
-  /*  @apply bg-gray-600 border-gray-800;*/
-  /*}*/
+  body {
+    @apply bg-gray-800 text-white;
+  }
+  ::-webkit-scrollbar-track-piece {
+    @apply bg-gray-800;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 border-gray-800;
+  }
 }
+
+/*---break---*/
+
+/*@layer base {*/
+/*  * {*/
+/*    @apply border-border;*/
+/*  }*/
+/*  body {*/
+/*    @apply bg-background text-foreground;*/
+/*  }*/
+/*}*/
