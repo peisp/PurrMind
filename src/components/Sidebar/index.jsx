@@ -33,8 +33,13 @@ const Sidebar = ({todos = [], onFilterChange, currentFilter = 'all'}) => {
             <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-3">
                     {stats.map(stat => (
-                        <StatCard label={stat.label} value={stat.value} color={stat.gradient}
-                                  onClick={() => onFilterChange(stat.id)}/>
+                        <StatCard 
+                            key={stat.id}
+                            label={stat.label} 
+                            value={stat.value} 
+                            color={stat.gradient}
+                            onClick={() => onFilterChange(stat.id)}
+                        />
                     ))}
                 </div>
 
@@ -44,8 +49,13 @@ const Sidebar = ({todos = [], onFilterChange, currentFilter = 'all'}) => {
                     </h3>
                     <div className=" grid-cols-2 gap-3">
                         {groups.map(group => (
-                            <StatCard label={group.label} value={group.value} color={group.gradient}
-                                      onClick={() => onFilterChange(group.id)}/>
+                            <StatCard 
+                                key={group.id}
+                                label={group.label} 
+                                value={group.value} 
+                                color={group.gradient}
+                                onClick={() => onFilterChange(group.id)}
+                            />
                         ))}
                     </div>
                 </div>
