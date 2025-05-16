@@ -29,9 +29,7 @@ const Sidebar = ({todos = [], onFilterChange, currentFilter = 'all'}) => {
     ], [todos]);
 
     return (
-        <aside
-            className="w-72 h-full py-1 px-2 flex flex-col animate-slide-in border-r border-gray-300 dark:border-gray-700/50">
-
+        <div className="w-72 h-full py-1 px-2 flex flex-col border-r border-gray-300 dark:border-gray-700/50">
             <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-3">
                     {stats.map(stat => (
@@ -52,7 +50,7 @@ const Sidebar = ({todos = [], onFilterChange, currentFilter = 'all'}) => {
                     </div>
                 </div>
             </div>
-        </aside>
+        </div>
     );
 };
 
