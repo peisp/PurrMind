@@ -28,13 +28,13 @@
 @media (prefers-color-scheme: light) {
 
   body {
-    @apply bg-gray-100;
+    @apply bg-white;
   }
   ::-webkit-scrollbar-track-piece {
-    @apply bg-gray-100;
+    @apply bg-white;
   }
   ::-webkit-scrollbar-thumb {
-    @apply border-gray-100;
+    @apply bg-white;
   }
 }
 
