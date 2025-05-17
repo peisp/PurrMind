@@ -199,8 +199,8 @@ export function NavMyList ({
                       onCategoryChange(category.id)
                     }}
                   >
-                    <div className="flex items-center gap-2">
-                      <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0">
                         <Icon
                           className={cn(
                             'h-4 w-4',
@@ -208,7 +208,7 @@ export function NavMyList ({
                           )}
                         />
                       </div>
-                      <span>
+                      <span className="truncate">
                         {category.name}
                       </span>
                     </div>
