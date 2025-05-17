@@ -155,21 +155,26 @@ export function NavMyList({
               <SidebarMenuItem key={category.id}>
                 <div className="flex items-center justify-between w-full">
                   <SidebarMenuButton
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="flex-1 justify-between mx-2"
+                    variant={isActive ? "default" : "ghost"}
+                    className={cn(
+                      "flex-1 justify-between mx-2",
+                      isActive && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+                    )}
                     onClick={() => onCategoryChange(category.id)}
                   >
                     <div className="flex items-center gap-2">
                       <Icon className={cn(
                         "h-4 w-4",
                         getColorClass(category.color),
-                        isActive && "text-primary"
+                        isActive ? "text-primary-foreground" : ""
                       )} />
-                      <span>{category.name}</span>
+                      <span className={isActive ? "text-primary-foreground" : ""}>
+                        {category.name}
+                      </span>
                     </div>
                     <span className={cn(
                       "rounded-full px-2 py-0.5 text-xs",
-                      isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                      isActive ? "bg-primary-foreground text-primary" : "bg-muted text-muted-foreground"
                     )}>
                       {count}
                     </span>
