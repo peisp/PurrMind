@@ -166,7 +166,7 @@ export function NavMyList({
                       <Icon className={cn(
                         "h-4 w-4",
                         getColorClass(category.color),
-                        isActive ? "text-primary-foreground" : ""
+                        isActive && category.color === "default" && "text-primary-foreground"
                       )} />
                       <span className={isActive ? "text-primary-foreground" : ""}>
                         {category.name}

@@ -90,6 +90,8 @@ export default function App() {
   }
 
   const handleCategoryChange = (category) => {
+    // 如果点击的是当前选中的分类，不做任何操作
+    if (category === currentCategory) return
     setCurrentCategory(category)
     setCurrentFilter(null) // 切换到 NavMyList 时，清除过滤器选择
   }
