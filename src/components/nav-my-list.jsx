@@ -95,7 +95,8 @@ export function NavMyList({
   }
 
   const getCategoryCount = (categoryId) => {
-    return todos.filter(todo => todo.categoryId === categoryId).length
+    const count = todos.filter(todo => todo.categoryId === categoryId).length
+    return count > 99 ? "99+" : count
   }
 
   const getColorClass = (color) => {

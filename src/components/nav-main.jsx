@@ -45,28 +45,35 @@ export function NavMain({ onFilterChange, currentFilter }) {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
+    let count = 0
     switch (filter) {
       case "today":
-        return todos.filter(todo => {
+        count = todos.filter(todo => {
           const todoDate = new Date(todo.dueDate)
           todoDate.setHours(0, 0, 0, 0)
           return !todo.completed && todoDate.getTime() === today.getTime()
         }).length
+        break
       case "planned":
-        return todos.filter(todo => {
+        count = todos.filter(todo => {
           const todoDate = new Date(todo.dueDate)
           todoDate.setHours(0, 0, 0, 0)
           return !todo.completed && todoDate.getTime() > today.getTime()
         }).length
+        break
       case "all":
-        return todos.filter(todo => !todo.completed).length
+        count = todos.filter(todo => !todo.completed).length
+        break
       case "starred":
-        return todos.filter(todo => !todo.completed && todo.starred).length
+        count = todos.filter(todo => !todo.completed && todo.starred).length
+        break
       case "completed":
-        return todos.filter(todo => todo.completed).length
+        count = todos.filter(todo => todo.completed).length
+        break
       default:
-        return 0
+        count = 0
     }
+    return count > 99 ? "99+" : count
   }
 
   const handleClick = (filter) => {
