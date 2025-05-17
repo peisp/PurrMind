@@ -278,8 +278,8 @@ export function NavMyList ({
             <div className="space-y-2">
               <Label>图标</Label>
               <IconPicker
-                selectedIcon={selectedIcon}
-                onIconSelect={setSelectedIcon}
+                value={selectedIcon}
+                onChange={setSelectedIcon}
               />
             </div>
           </div>
