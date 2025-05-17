@@ -172,13 +172,17 @@ export function NavMyList ({
             const isHovered = hoveredItem === category.id
             const isDropdownOpen = openDropdownId === category.id
             const showMoreIcon = isHovered || isDropdownOpen
-            const showCount = !showMoreIcon
+            const showCount = !isHovered && !isDropdownOpen
 
             return (
               <SidebarMenuItem
                 key={category.id}
                 onMouseEnter={() => setHoveredItem(category.id)}
-                onMouseLeave={() => setHoveredItem(null)}
+                onMouseLeave={() => {
+                  if (openDropdownId !== category.id) {
+                    setHoveredItem(null)
+                  }
+                }}
               >
                 <div className="flex items-center justify-between w-full">
                   <SidebarMenuButton
