@@ -108,16 +108,12 @@ export function IconPicker({ value, onChange }) {
           <span>选择图标</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="start">
-        <div className="flex flex-col gap-4 p-4">
-          <div className="flex items-center gap-2">
-            <SelectedIcon className={cn("h-6 w-6", getColorClass(selectedColor))} />
-            <span className="text-sm font-medium">当前选择</span>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+      <PopoverContent className="w-[400px] p-0" align="start">
+        <div className="flex flex-col p-2">
+          <div className="gap-1">
             <div className="space-y-2">
               <label className="text-sm font-medium">颜色</label>
-              <div className="grid grid-cols-4 gap-2">
+              <div>
                 {colors.map(({ name, value }) => (
                   <Button
                     key={value}
@@ -125,8 +121,7 @@ export function IconPicker({ value, onChange }) {
                     size="icon"
                     className={cn(
                       "h-8 w-8",
-                      selectedColor === value && "border-primary",
-                      value === "default" && "bg-background",
+                      value === "default" && "text-primary-foreground",
                       value === "red" && "bg-red-500",
                       value === "orange" && "bg-orange-500",
                       value === "yellow" && "bg-yellow-500",
@@ -146,7 +141,7 @@ export function IconPicker({ value, onChange }) {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">图标</label>
-              <div className="grid grid-cols-4 gap-2 max-h-[200px] overflow-y-auto">
+              <div className="grid grid-cols-12 gap-2">
                 {icons.map(({ name, icon }) => {
                   const Icon = Icons[icon]
                   return (
