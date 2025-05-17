@@ -113,15 +113,15 @@ export function IconPicker({ value, onChange }) {
           <div className="gap-1">
             <div className="space-y-2">
               <label className="text-sm font-medium">颜色</label>
-              <div>
+              <div className="flex flex-wrap gap-2">
                 {colors.map(({ name, value }) => (
-                  <Button
+                  <div
                     key={value}
-                    variant="outline"
-                    size="icon"
+                    role="button"
+                    tabIndex={0}
                     className={cn(
-                      "h-8 w-8",
-                      value === "default" && "text-primary-foreground",
+                      "h-8 w-8 rounded-md border border-input cursor-pointer hover:ring-2 hover:ring-offset-2 hover:ring-primary transition-all",
+                      value === "default" && "text-foreground",
                       value === "red" && "bg-red-500",
                       value === "orange" && "bg-orange-500",
                       value === "yellow" && "bg-yellow-500",
@@ -131,11 +131,16 @@ export function IconPicker({ value, onChange }) {
                       value === "pink" && "bg-pink-500"
                     )}
                     onClick={() => handleColorSelect(value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleColorSelect(value)
+                      }
+                    }}
                   >
                     {selectedColor === value && (
                       <span className="sr-only">{name}</span>
                     )}
-                  </Button>
+                  </div>
                 ))}
               </div>
             </div>
