@@ -157,17 +157,23 @@ export function NavMyList({
                   <SidebarMenuButton
                     variant={isActive ? "default" : "ghost"}
                     className={cn(
-                      "flex-1 justify-between mx-2",
+                      "flex-1 justify-between mx-2 h-10",
                       isActive && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
                     )}
                     onClick={() => onCategoryChange(category.id)}
                   >
                     <div className="flex items-center gap-2">
-                      <Icon className={cn(
-                        "h-4 w-4",
-                        getColorClass(category.color),
-                        isActive && category.color === "default" && "text-primary-foreground"
-                      )} />
+                      <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
+                        <Icon
+                          className={cn(
+                            "h-5 w-5",
+                            getColorClass(category.color)
+                            // isActive && category.color === "default" && "text-primary-foreground"
+                          )}
+                        />
+                      </div>
+
+
                       <span className={isActive ? "text-primary-foreground" : ""}>
                         {category.name}
                       </span>
