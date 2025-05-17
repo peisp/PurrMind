@@ -97,7 +97,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
         return (
           <Button
             key={item.filter}
-            variant={isActive ? "secondary" : "ghost"}
+            variant={isActive ? "default" : "ghost"}
             className={cn(
               "justify-between",
               isActive && "font-medium"
@@ -107,13 +107,15 @@ export function NavMain({ onFilterChange, currentFilter }) {
             <div className="flex items-center gap-2">
               <Icon className={cn(
                 "h-4 w-4",
-                isActive && "text-primary"
+                isActive ? "text-primary-foreground" : "text-muted-foreground"
               )} />
-              <span>{item.title}</span>
+              <span className={isActive ? "text-primary-foreground" : ""}>
+                {item.title}
+              </span>
             </div>
             <span className={cn(
               "rounded-full px-2 py-0.5 text-xs",
-              isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              isActive ? "bg-primary-foreground text-primary" : "bg-muted text-muted-foreground"
             )}>
               {count}
             </span>
