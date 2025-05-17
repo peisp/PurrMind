@@ -199,7 +199,7 @@ export function NavMyList ({
                       <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
                         <Icon
                           className={cn(
-                            'h-5 w-5',
+                            'h-4 w-4',
                             getColorClass(category.color)
                           )}
                         />
