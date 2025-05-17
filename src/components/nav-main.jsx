@@ -75,7 +75,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
   }
 
   return (
-    <div className="space-y-2">
+    <div>
       {items.map((item) => {
         const Icon = item.icon
         const isActive = currentFilter === item.filter
@@ -86,7 +86,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
             key={item.filter}
             variant={isActive ? "secondary" : "ghost"}
             className={cn(
-              "w-full justify-between",
+              "justify-between",
               isActive && "font-medium"
             )}
             onClick={() => handleClick(item.filter)}

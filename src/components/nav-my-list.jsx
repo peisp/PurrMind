@@ -1,3 +1,4 @@
+"use client";
 import {
   ArrowUpRight,
   Link,
@@ -6,6 +7,7 @@ import {
   FolderIcon,
   StarOff,
   Trash2,
+  MoreVertical,
 } from "lucide-react"
 
 import {
@@ -18,6 +20,7 @@ import {
 import {
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuAction,
   SidebarMenuButton,
@@ -31,8 +34,9 @@ import { getAllCategories, getTodosByCategory, deleteCategory, addCategory } fro
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { IconPicker } from "./ui/icon-picker"
+import { IconPicker } from "@/components/ui/icon-picker"
 import * as Icons from "lucide-react"
+import { getAllTodos } from "@/db/todo"
 
 export function NavMyList({
   onCategoryChange,
@@ -40,63 +44,76 @@ export function NavMyList({
 }) {
   const { isMobile } = useSidebar()
   const [categories, setCategories] = useState([])
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [todos, setTodos] = useState([])
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
   const [selectedIcon, setSelectedIcon] = useState({ icon: "FolderIcon", color: "default" })
 
   useEffect(() => {
     loadCategories()
+    loadTodos()
+    window.addEventListener('storage', handleStorageChange)
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+    }
   }, [])
+
+  const handleStorageChange = (e) => {
+    if (e.key === 'todos' || e.key === 'categories') {
+      loadCategories()
+      loadTodos()
+    }
+  }
 
   const loadCategories = () => {
     const allCategories = getAllCategories()
     setCategories(allCategories)
   }
 
+  const loadTodos = () => {
+    const allTodos = getAllTodos()
+    setTodos(allTodos)
+  }
+
   const handleAddCategory = () => {
     if (newCategoryName.trim()) {
-      const newCategory = addCategory({
-        name: newCategoryName.trim(),
+      addCategory({
+        name: newCategoryName,
         icon: selectedIcon.icon,
         color: selectedIcon.color
       })
-      setCategories([...categories, newCategory])
       setNewCategoryName("")
       setSelectedIcon({ icon: "FolderIcon", color: "default" })
-      setIsAddDialogOpen(false)
+      setIsDialogOpen(false)
+      loadCategories()
     }
   }
 
-  const handleDeleteCategory = (categoryId) => {
-    deleteCategory(categoryId)
+  const handleDeleteCategory = (id) => {
+    deleteCategory(id)
     loadCategories()
-    if (currentCategory === categoryId) {
-      onCategoryChange(null)
-    }
   }
 
   const getCategoryCount = (categoryId) => {
-    return getTodosByCategory(categoryId).length
+    return todos.filter(todo => todo.categoryId === categoryId).length
   }
 
-  const getIconColor = (color) => {
+  const getColorClass = (color) => {
     switch (color) {
       case "red":
         return "text-red-500"
-      case "orange":
-        return "text-orange-500"
-      case "yellow":
-        return "text-yellow-500"
-      case "green":
-        return "text-green-500"
       case "blue":
         return "text-blue-500"
+      case "green":
+        return "text-green-500"
+      case "yellow":
+        return "text-yellow-500"
       case "purple":
         return "text-purple-500"
       case "pink":
         return "text-pink-500"
       default:
-        return "text-foreground"
+        return "text-gray-500"
     }
   }
 
@@ -107,95 +124,96 @@ export function NavMyList({
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <div className="flex items-center justify-between px-2">
-        <SidebarGroupLabel>我的列表</SidebarGroupLabel>
+        <SidebarGroupLabel className="pl-0">我的列表</SidebarGroupLabel>
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6"
-          onClick={() => setIsAddDialogOpen(true)}
+          className="h-8"
+          onClick={() => setIsDialogOpen(true)}
         >
-          <Plus className="h-4 w-4" />
+          <Plus/>
         </Button>
       </div>
-      <SidebarMenu>
-        {categories.map((category) => {
-          const Icon = getIconComponent(category.icon)
-          const count = getCategoryCount(category.id)
-          return (
-            <SidebarMenuItem key={category.id}>
-              <SidebarMenuButton
-                className={cn(
-                  "w-full justify-between",
-                  currentCategory === category.id && "bg-muted"
-                )}
-                onClick={() => onCategoryChange(category.id)}
-              >
-                <div className="flex items-center gap-2">
-                  <Icon className={cn("h-4 w-4", getIconColor(category.color))} />
-                  <span>{category.name}</span>
-                </div>
-                {count > 0 && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                    {count}
-                  </span>
-                )}
-              </SidebarMenuButton>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuAction showOnHover>
-                    <MoreHorizontal className="h-4 w-4" />
-                    <span className="sr-only">更多</span>
-                  </SidebarMenuAction>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-56 rounded-lg"
-                  side={isMobile ? "bottom" : "right"}
-                  align={isMobile ? "end" : "start"}
-                >
-                  <DropdownMenuItem
-                    className="text-destructive"
-                    onClick={() => handleDeleteCategory(category.id)}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <span>删除分类</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarMenuItem>
-          )
-        })}
-      </SidebarMenu>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {categories.map((category) => {
+            const Icon = getIconComponent(category.icon)
+            const count = getCategoryCount(category.id)
+            const isActive = currentCategory === category.id
 
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+            return (
+              <SidebarMenuItem key={category.id}>
+                <div className="flex items-center justify-between w-full">
+                  <SidebarMenuButton
+                    variant={isActive ? "secondary" : "ghost"}
+                    className="flex-1 justify-between mx-2"
+                    onClick={() => onCategoryChange(category.id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Icon className={cn(
+                        "h-4 w-4",
+                        getColorClass(category.color),
+                        isActive && "text-primary"
+                      )} />
+                      <span>{category.name}</span>
+                    </div>
+                    <span className={cn(
+                      "rounded-full px-2 py-0.5 text-xs",
+                      isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    )}>
+                      {count}
+                    </span>
+                  </SidebarMenuButton>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuAction className="opacity-0 group-hover/menu-item:opacity-100">
+                        <MoreVertical className="h-4 w-4" />
+                      </SidebarMenuAction>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => handleDeleteCategory(category.id)}
+                      >
+                        删除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </SidebarMenuItem>
+            )
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>新建列表</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
               <Label htmlFor="name">名称</Label>
               <Input
                 id="name"
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="输入列表名称"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddCategory()
-                  }
-                }}
               />
             </div>
-            <div className="grid gap-2">
-              <Label>图标和颜色</Label>
-              <IconPicker value={selectedIcon} onChange={setSelectedIcon} />
+            <div className="space-y-2">
+              <Label>图标</Label>
+              <IconPicker
+                selectedIcon={selectedIcon}
+                onIconSelect={setSelectedIcon}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               取消
             </Button>
-            <Button onClick={handleAddCategory} disabled={!newCategoryName.trim()}>
+            <Button onClick={handleAddCategory}>
               添加
             </Button>
           </DialogFooter>
