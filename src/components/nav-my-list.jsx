@@ -50,6 +50,7 @@ export function NavMyList ({
   const [selectedIcon, setSelectedIcon] = useState({ icon: 'FolderIcon', color: 'default' })
   const [hoveredItem, setHoveredItem] = useState(null)
   const [openDropdownId, setOpenDropdownId] = useState(null)
+  const [isClosing, setIsClosing] = useState(false)
 
   useEffect(() => {
     loadCategories()
@@ -139,7 +140,14 @@ export function NavMyList ({
   }
 
   const handleDropdownOpenChange = (open, categoryId) => {
-    setOpenDropdownId(open ? categoryId : null)
+    if (!open) {
+      setOpenDropdownId(null)
+      if (hoveredItem !== categoryId) {
+        setHoveredItem(null)
+      }
+    } else {
+      setOpenDropdownId(categoryId)
+    }
   }
 
   return (
@@ -177,7 +185,7 @@ export function NavMyList ({
                     variant={isActive ? 'default' : 'ghost'}
                     className={cn(
                       'flex-1 justify-between mx-2 h-10',
-                      isActive && 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground'
+                      isActive && 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground'
                     )}
                     onClick={(e) => {
                       if (isActive) {
@@ -201,7 +209,7 @@ export function NavMyList ({
                       </span>
                     </div>
                     <div className="relative w-10 flex items-center justify-center">
-                      {showCount ? (
+                      {showCount && (
                         <span
                           className={cn(
                             'rounded-full px-2 py-0.5 text-xs'
@@ -209,7 +217,8 @@ export function NavMyList ({
                         >
                           {count}
                         </span>
-                      ) : (
+                      )}
+                      {showMoreIcon && (
                         <DropdownMenu
                           open={isDropdownOpen}
                           onOpenChange={(open) => handleDropdownOpenChange(open, category.id)}
