@@ -114,8 +114,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
               </span>
             </div>
             <span className={cn(
-              "rounded-full px-2 py-0.5 text-xs",
-              isActive ? "bg-primary-foreground text-primary" : "bg-muted text-muted-foreground"
+              "rounded-full px-2 py-0.5 text-xs"
             )}>
               {count}
             </span>
