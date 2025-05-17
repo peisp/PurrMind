@@ -5,52 +5,16 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { getAllTodos, toggleTodoStatus, deleteTodo } from "@/db/todo"
 import { getAllCategories } from "@/db/todo"
 
-export function TodoList({ currentFilter, currentCategory }) {
-  const [todos, setTodos] = useState([])
+export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
   const [categories, setCategories] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState({ title: '', description: '' })
 
   useEffect(() => {
-    loadTodos()
     loadCategories()
-  }, [currentFilter, currentCategory])
-
-  const loadTodos = () => {
-    let filteredTodos = getAllTodos()
-
-    // 按分类过滤
-    if (currentCategory) {
-      filteredTodos = filteredTodos.filter(todo => todo.categoryId === currentCategory)
-    }
-
-    // 按过滤器过滤
-    switch (currentFilter) {
-      case "today":
-        const today = new Date().toISOString().split("T")[0]
-        filteredTodos = filteredTodos.filter(todo => {
-          const todoDate = new Date(todo.createdAt).toISOString().split("T")[0]
-          return todoDate === today
-        })
-        break
-      case "planned":
-        filteredTodos = filteredTodos.filter(todo => !todo.completed)
-        break
-      case "starred":
-        filteredTodos = filteredTodos.filter(todo => todo.starred)
-        break
-      case "completed":
-        filteredTodos = filteredTodos.filter(todo => todo.completed)
-        break
-      default:
-        break
-    }
-
-    setTodos(filteredTodos)
-  }
+  }, [])
 
   const loadCategories = () => {
     const allCategories = getAllCategories()
@@ -72,16 +36,6 @@ export function TodoList({ currentFilter, currentCategory }) {
 
   const handleCancel = () => {
     setEditingId(null)
-  }
-
-  const handleToggleStatus = (id) => {
-    toggleTodoStatus(id)
-    loadTodos()
-  }
-
-  const handleDelete = (id) => {
-    deleteTodo(id)
-    loadTodos()
   }
 
   const getCategoryName = (categoryId) => {
@@ -127,7 +81,7 @@ export function TodoList({ currentFilter, currentCategory }) {
             <div className="flex items-start gap-4">
               <Checkbox
                 checked={todo.completed}
-                onCheckedChange={() => handleToggleStatus(todo.id)}
+                onCheckedChange={() => onToggleStatus(todo.id)}
                 className="mt-1"
               />
               <div className="flex-1">
@@ -154,7 +108,7 @@ export function TodoList({ currentFilter, currentCategory }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(todo.id)}
+                  onClick={() => onDelete(todo.id)}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

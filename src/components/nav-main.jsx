@@ -1,100 +1,112 @@
 "use client";
-import { cn } from "@/lib/utils"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { getAllTodos } from '@/db/todo'
+import { cn } from "@/lib/utils"
+import { getAllTodos } from "@/db/todo"
+import {
+  CalendarIcon,
+  ClockIcon,
+  ListIcon,
+  StarIcon,
+  CheckCircleIcon,
+} from "lucide-react"
 
-export function NavMain({ items, onFilterChange, currentFilter }) {
-  const handleClick = (item) => {
-    let filter = 'all'
-    switch (item.title) {
-      case '今天':
-        filter = 'today'
-        break
-      case '计划':
-        filter = 'planned'
-        break
-      case '全部':
-        filter = 'all'
-        break
-      case '收藏':
-        filter = 'starred'
-        break
-      case '已完成':
-        filter = 'completed'
-        break
-      default:
-        filter = 'all'
+const items = [
+  { title: "今天", icon: ClockIcon, filter: "today", explain: "只统计今天到期的未完成任务", },
+  { title: "计划", icon: CalendarIcon, filter: "planned", explain: "只统计未来到期的未完成任务", },
+  { title: "全部", icon: ListIcon, filter: "all", explain: "只统计未完成的任务", },
+  { title: "收藏", icon: StarIcon, filter: "starred", explain: "只统计未完成且已收藏的任务", },
+  { title: "已完成", icon: CheckCircleIcon, filter: "completed", explain: "统计所有已完成的任务", }
+]
+
+export function NavMain({ onFilterChange, currentFilter }) {
+  const [todos, setTodos] = useState([])
+
+  useEffect(() => {
+    loadTodos()
+    window.addEventListener('storage', handleStorageChange)
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
     }
-    onFilterChange(filter)
+  }, [])
+
+  const handleStorageChange = (e) => {
+    if (e.key === 'todos') {
+      loadTodos()
+    }
   }
 
-  const getCount = (title) => {
-    const todos = getAllTodos()
-    switch (title) {
-      case '今天':
-        const today = new Date().toISOString().split('T')[0]
-        return todos.filter(todo => todo.createdAt.startsWith(today)).length
-      case '计划':
+  const loadTodos = () => {
+    const allTodos = getAllTodos()
+    setTodos(allTodos)
+  }
+
+  const getCount = (filter) => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    switch (filter) {
+      case "today":
+        return todos.filter(todo => {
+          const todoDate = new Date(todo.dueDate)
+          todoDate.setHours(0, 0, 0, 0)
+          return !todo.completed && todoDate.getTime() === today.getTime()
+        }).length
+      case "planned":
+        return todos.filter(todo => {
+          const todoDate = new Date(todo.dueDate)
+          todoDate.setHours(0, 0, 0, 0)
+          return !todo.completed && todoDate.getTime() > today.getTime()
+        }).length
+      case "all":
         return todos.filter(todo => !todo.completed).length
-      case '全部':
-        return todos.length
-      case '收藏':
-        return todos.filter(todo => todo.starred).length
-      case '已完成':
+      case "starred":
+        return todos.filter(todo => !todo.completed && todo.starred).length
+      case "completed":
         return todos.filter(todo => todo.completed).length
       default:
         return 0
     }
   }
 
+  const handleClick = (filter) => {
+    console.log('Filter clicked:', filter)
+    onFilterChange(filter)
+  }
+
   return (
-    <div className="flex flex-col gap-1 p-2">
+    <div className="space-y-2">
       {items.map((item) => {
-        const filter = getFilterFromTitle(item.title)
-        const isActive = currentFilter === filter
-        const count = getCount(item.title)
+        const Icon = item.icon
+        const isActive = currentFilter === item.filter
+        const count = getCount(item.filter)
+
         return (
           <Button
-            key={item.title}
+            key={item.filter}
             variant={isActive ? "secondary" : "ghost"}
             className={cn(
-              "w-full justify-between gap-2",
+              "w-full justify-between",
               isActive && "font-medium"
             )}
-            onClick={() => handleClick(item)}
+            onClick={() => handleClick(item.filter)}
           >
             <div className="flex items-center gap-2">
-              <item.icon className={cn("h-4 w-4", isActive && "text-primary")} />
-              {item.title}
+              <Icon className={cn(
+                "h-4 w-4",
+                isActive && "text-primary"
+              )} />
+              <span>{item.title}</span>
             </div>
-            {count > 0 && (
-              <span className={cn(
-                "rounded-full px-2 py-0.5 text-xs",
-                isActive ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-              )}>
-                {count}
-              </span>
-            )}
+            <span className={cn(
+              "rounded-full px-2 py-0.5 text-xs",
+              isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            )}>
+              {count}
+            </span>
           </Button>
         )
       })}
     </div>
   )
-}
-
-function getFilterFromTitle(title) {
-  switch (title) {
-    case '今天':
-      return 'today'
-    case '计划':
-      return 'planned'
-    case '全部':
-      return 'all'
-    case '收藏':
-      return 'starred'
-    case '已完成':
-      return 'completed'
-    default:
-      return 'all'
-  }
 }

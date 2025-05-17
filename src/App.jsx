@@ -9,8 +9,8 @@ export default function App() {
   const [enterAction, setEnterAction] = useState({})
   const [route, setRoute] = useState('')
   const [todos, setTodos] = useState([])
-  const [currentFilter, setCurrentFilter] = useState('all')
-  const [currentCategory, setCurrentCategory] = useState('all')
+  const [currentFilter, setCurrentFilter] = useState(null)
+  const [currentCategory, setCurrentCategory] = useState(null)
 
   useEffect(() => {
     // 初始化数据库
@@ -57,20 +57,42 @@ export default function App() {
   }
 
   const handleFilterChange = (filter) => {
+    console.log('Filter changed to:', filter)
     setCurrentFilter(filter)
+    setCurrentCategory(null) // 切换到 NavMain 时，清除分类选择
   }
 
   const handleCategoryChange = (category) => {
     setCurrentCategory(category)
+    setCurrentFilter(null) // 切换到 NavMyList 时，清除过滤器选择
   }
 
   const filteredTodos = todos.filter(todo => {
-    if (currentFilter === 'completed') return todo.completed
-    if (currentFilter === 'active') return !todo.completed
-    return true
-  }).filter(todo => {
-    if (currentCategory === 'all') return true
-    return todo.category === currentCategory
+    // 如果选择了分类，只按分类过滤
+    if (currentCategory !== null) {
+      return todo.categoryId === currentCategory
+    }
+
+    // 否则按 NavMain 的过滤器过滤
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todoDate = new Date(todo.dueDate)
+    todoDate.setHours(0, 0, 0, 0)
+
+    switch (currentFilter) {
+      case 'today':
+        return !todo.completed && todoDate.getTime() === today.getTime()
+      case 'planned':
+        return !todo.completed && todoDate.getTime() > today.getTime()
+      case 'starred':
+        return !todo.completed && todo.starred
+      case 'completed':
+        return todo.completed
+      case 'all':
+        return !todo.completed
+      default:
+        return true // 当没有选择任何过滤器时，显示所有任务
+    }
   })
 
   if (route === 'index' || route === 'addItem') {

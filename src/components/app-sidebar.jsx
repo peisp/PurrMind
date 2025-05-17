@@ -41,7 +41,6 @@ export function AppSidebar({
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
         <NavMain 
-          items={data.navMain} 
           onFilterChange={onFilterChange}
           currentFilter={currentFilter}
         />
