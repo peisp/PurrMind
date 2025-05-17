@@ -9,7 +9,7 @@ export default function App() {
   const [enterAction, setEnterAction] = useState({})
   const [route, setRoute] = useState('')
   const [todos, setTodos] = useState([])
-  const [currentFilter, setCurrentFilter] = useState(null)
+  const [currentFilter, setCurrentFilter] = useState('all')
   const [currentCategory, setCurrentCategory] = useState(null)
 
   useEffect(() => {
