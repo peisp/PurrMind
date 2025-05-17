@@ -25,11 +25,11 @@ export function TodoForm({ onAdd }) {
     e.preventDefault()
     if (!title.trim()) return
 
-    const newTodo = addTodo({
+    const newTodo = {
       title: title.trim(),
       description: description.trim(),
       categoryId
-    })
+    }
 
     setTitle('')
     setDescription('')
