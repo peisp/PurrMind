@@ -23,11 +23,11 @@ const data = {
     { id: "starred", title: "收藏", icon: StarsIcon },
     { id: "completed", title: "已完成", icon: CircleCheckBig },
   ],
-  myList: [
-    { name: "提醒事项", emoji: "⏰" },
-    { name: "工作任务", emoji: "💼" },
-    { name: "生活任务", emoji: "💪" },
-  ],
+  // myList: [
+  //   { name: "提醒事项", emoji: "⏰" },
+  //   { name: "工作任务", emoji: "💼" },
+  //   { name: "生活任务", emoji: "💪" },
+  // ],
 }
 
 export function AppSidebar({
@@ -47,8 +47,7 @@ export function AppSidebar({
         />
       </SidebarHeader>
       <SidebarContent>
-        <NavMyList 
-          lists={data.myList} 
+        <NavMyList
           onCategoryChange={onCategoryChange}
           currentCategory={currentCategory}
         />

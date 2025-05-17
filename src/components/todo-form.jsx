@@ -4,66 +4,70 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { addTodo } from '@/db/todo'
 import { getAllCategories } from '@/db/todo'
 
 export function TodoForm({ onAdd }) {
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    category: 'default'
-  })
-  const [categories, setCategories] = useState(['default'])
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [categoryId, setCategoryId] = useState(null)
+  const [categories, setCategories] = useState([])
 
   useEffect(() => {
-    const allCategories = getAllCategories()
-    const filteredCategories = allCategories.filter(category => category !== 'default')
-    setCategories(['default', ...filteredCategories])
+    const loadCategories = () => {
+      const allCategories = getAllCategories()
+      setCategories(allCategories)
+    }
+    loadCategories()
   }, [])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!form.title.trim()) return
+    if (!title.trim()) return
 
-    onAdd(form)
-    setForm({
-      title: '',
-      description: '',
-      category: 'default'
+    const newTodo = addTodo({
+      title: title.trim(),
+      description: description.trim(),
+      categoryId
     })
+
+    setTitle('')
+    setDescription('')
+    setCategoryId(null)
+    onAdd(newTodo)
   }
 
   return (
     <Card className="p-4">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          placeholder="输入待办事项标题"
-          required
-        />
-        <Textarea
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-          placeholder="输入待办事项描述（可选）"
-        />
-        <div className="flex items-center gap-4">
-          <Select
-            value={form.category}
-            onValueChange={(value) => setForm({ ...form, category: value })}
-          >
-            <SelectTrigger className="w-[180px]">
+        <div className="space-y-2">
+          <Input
+            placeholder="添加新任务..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <Textarea
+            placeholder="添加描述（可选）"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <Select value={categoryId} onValueChange={setCategoryId}>
+            <SelectTrigger>
               <SelectValue placeholder="选择分类" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value={null}>无分类</SelectItem>
               {categories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category === 'default' ? '默认分类' : category}
+                <SelectItem key={category.id} value={category.id}>
+                  {category.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <Button type="submit">添加</Button>
         </div>
+        <Button type="submit" className="w-full">
+          添加任务
+        </Button>
       </form>
     </Card>
   )
