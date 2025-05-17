@@ -113,11 +113,13 @@ export function NavMain({ onFilterChange, currentFilter }) {
                 {item.title}
               </span>
             </div>
-            <span className={cn(
-              "rounded-full px-2 py-0.5 text-xs"
-            )}>
-              {count}
-            </span>
+            {item.filter !== "completed" && (
+              <span className={cn(
+                "rounded-full px-2 py-0.5 text-xs"
+              )}>
+                {count}
+              </span>
+            )}
           </Button>
         )
       })}
