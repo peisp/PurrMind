@@ -82,6 +82,8 @@ export const addCategory = (category) => {
   const newCategory = {
     id: Date.now().toString(),
     name: category.name,
+    icon: category.icon,
+    color: category.color || "default",
     createdAt: new Date().toISOString()
   }
   categories.push(newCategory)

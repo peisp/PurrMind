@@ -31,6 +31,8 @@ import { getAllCategories, getTodosByCategory, deleteCategory, addCategory } fro
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { IconPicker } from "./ui/icon-picker"
+import * as Icons from "lucide-react"
 
 export function NavMyList({
   onCategoryChange,
@@ -40,6 +42,7 @@ export function NavMyList({
   const [categories, setCategories] = useState([])
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState("")
+  const [selectedIcon, setSelectedIcon] = useState({ icon: "FolderIcon", color: "default" })
 
   useEffect(() => {
     loadCategories()
@@ -53,10 +56,13 @@ export function NavMyList({
   const handleAddCategory = () => {
     if (newCategoryName.trim()) {
       const newCategory = addCategory({
-        name: newCategoryName.trim()
+        name: newCategoryName.trim(),
+        icon: selectedIcon.icon,
+        color: selectedIcon.color
       })
       setCategories([...categories, newCategory])
       setNewCategoryName("")
+      setSelectedIcon({ icon: "FolderIcon", color: "default" })
       setIsAddDialogOpen(false)
     }
   }
@@ -71,6 +77,31 @@ export function NavMyList({
 
   const getCategoryCount = (categoryId) => {
     return getTodosByCategory(categoryId).length
+  }
+
+  const getIconColor = (color) => {
+    switch (color) {
+      case "red":
+        return "text-red-500"
+      case "orange":
+        return "text-orange-500"
+      case "yellow":
+        return "text-yellow-500"
+      case "green":
+        return "text-green-500"
+      case "blue":
+        return "text-blue-500"
+      case "purple":
+        return "text-purple-500"
+      case "pink":
+        return "text-pink-500"
+      default:
+        return "text-foreground"
+    }
+  }
+
+  const getIconComponent = (iconName) => {
+    return Icons[iconName] || FolderIcon
   }
 
   return (
@@ -88,6 +119,7 @@ export function NavMyList({
       </div>
       <SidebarMenu>
         {categories.map((category) => {
+          const Icon = getIconComponent(category.icon)
           const count = getCategoryCount(category.id)
           return (
             <SidebarMenuItem key={category.id}>
@@ -99,7 +131,7 @@ export function NavMyList({
                 onClick={() => onCategoryChange(category.id)}
               >
                 <div className="flex items-center gap-2">
-                  <FolderIcon className="h-4 w-4" />
+                  <Icon className={cn("h-4 w-4", getIconColor(category.color))} />
                   <span>{category.name}</span>
                 </div>
                 {count > 0 && (
@@ -135,26 +167,37 @@ export function NavMyList({
       </SidebarMenu>
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>添加新分类</DialogTitle>
+            <DialogTitle>新建列表</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">分类名称</Label>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">名称</Label>
               <Input
                 id="name"
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="输入分类名称"
+                placeholder="输入列表名称"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleAddCategory()
+                  }
+                }}
               />
+            </div>
+            <div className="grid gap-2">
+              <Label>图标和颜色</Label>
+              <IconPicker value={selectedIcon} onChange={setSelectedIcon} />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               取消
             </Button>
-            <Button onClick={handleAddCategory}>添加</Button>
+            <Button onClick={handleAddCategory} disabled={!newCategoryName.trim()}>
+              添加
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
