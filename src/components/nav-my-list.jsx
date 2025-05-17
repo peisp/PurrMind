@@ -53,8 +53,10 @@ export function NavMyList({
     loadCategories()
     loadTodos()
     window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('todo-updated', handleTodoUpdated)
     return () => {
       window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('todo-updated', handleTodoUpdated)
     }
   }, [])
 
@@ -63,6 +65,11 @@ export function NavMyList({
       loadCategories()
       loadTodos()
     }
+  }
+
+  const handleTodoUpdated = () => {
+    loadCategories()
+    loadTodos()
   }
 
   const loadCategories = () => {
@@ -86,12 +93,14 @@ export function NavMyList({
       setSelectedIcon({ icon: "FolderIcon", color: "default" })
       setIsDialogOpen(false)
       loadCategories()
+      window.dispatchEvent(new Event('todo-updated'))
     }
   }
 
   const handleDeleteCategory = (id) => {
     deleteCategory(id)
     loadCategories()
+    window.dispatchEvent(new Event('todo-updated'))
   }
 
   const getCategoryCount = (categoryId) => {

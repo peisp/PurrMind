@@ -25,8 +25,10 @@ export function NavMain({ onFilterChange, currentFilter }) {
   useEffect(() => {
     loadTodos()
     window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('todo-updated', handleTodoUpdated)
     return () => {
       window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('todo-updated', handleTodoUpdated)
     }
   }, [])
 
@@ -34,6 +36,10 @@ export function NavMain({ onFilterChange, currentFilter }) {
     if (e.key === 'todos') {
       loadTodos()
     }
+  }
+
+  const handleTodoUpdated = () => {
+    loadTodos()
   }
 
   const loadTodos = () => {
@@ -82,7 +88,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
   }
 
   return (
-    <div>
+    <div className="space-y-2">
       {items.map((item) => {
         const Icon = item.icon
         const isActive = currentFilter === item.filter
@@ -93,7 +99,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
             key={item.filter}
             variant={isActive ? "secondary" : "ghost"}
             className={cn(
-              "justify-between",
+              "w-full justify-between",
               isActive && "font-medium"
             )}
             onClick={() => handleClick(item.filter)}

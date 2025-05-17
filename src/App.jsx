@@ -18,6 +18,10 @@ export default function App() {
     // 加载待办事项
     loadTodos()
 
+    // 添加事件监听器
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('todo-updated', handleTodoUpdated)
+
     window.utools.onPluginEnter((action) => {
       setRoute(action.code)
       setEnterAction(action)
@@ -25,7 +29,22 @@ export default function App() {
     window.utools.onPluginOut((isKill) => {
       setRoute('')
     })
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('todo-updated', handleTodoUpdated)
+    }
   }, [])
+
+  const handleStorageChange = (e) => {
+    if (e.key === 'todos') {
+      loadTodos()
+    }
+  }
+
+  const handleTodoUpdated = () => {
+    loadTodos()
+  }
 
   const loadTodos = () => {
     const allTodos = getAllTodos()
@@ -35,24 +54,32 @@ export default function App() {
   const handleAddTodo = (todo) => {
     const newTodo = addTodo(todo)
     setTodos([...todos, newTodo])
+    // 触发自定义事件
+    window.dispatchEvent(new Event('todo-updated'))
   }
 
   const handleUpdateTodo = (id, updates) => {
     const updatedTodo = updateTodo(id, updates)
     if (updatedTodo) {
       setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo))
+      // 触发自定义事件
+      window.dispatchEvent(new Event('todo-updated'))
     }
   }
 
   const handleDeleteTodo = (id) => {
     deleteTodo(id)
     setTodos(todos.filter(todo => todo.id !== id))
+    // 触发自定义事件
+    window.dispatchEvent(new Event('todo-updated'))
   }
 
   const handleToggleStatus = (id) => {
     const updatedTodo = toggleTodoStatus(id)
     if (updatedTodo) {
       setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo))
+      // 触发自定义事件
+      window.dispatchEvent(new Event('todo-updated'))
     }
   }
 
