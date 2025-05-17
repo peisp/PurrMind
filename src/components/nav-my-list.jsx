@@ -99,7 +99,11 @@ export function NavMyList ({
     }
   }
 
-  const handleDeleteCategory = (id) => {
+  const handleDeleteCategory = (id, e) => {
+    if (e) {
+      e.stopPropagation()
+      e.preventDefault()
+    }
     deleteCategory(id)
     loadCategories()
     setOpenDropdownId(null)
@@ -178,7 +182,7 @@ export function NavMyList ({
                     onClick={(e) => {
                       if (isActive) {
                         e.preventDefault()
-                        return
+                        return false;
                       }
                       onCategoryChange(category.id)
                     }}
@@ -192,53 +196,52 @@ export function NavMyList ({
                           )}
                         />
                       </div>
-                      <span className={isActive ? 'text-primary-foreground' : ''}>
+                      <span>
                         {category.name}
                       </span>
                     </div>
                     <div className="relative w-10 flex items-center justify-center">
-                      {showCount && (
+                      {showCount ? (
                         <span
                           className={cn(
-                            'rounded-full px-2 py-0.5 text-xs',
-                            isActive ? 'bg-primary-foreground text-primary' : 'bg-muted text-muted-foreground'
+                            'rounded-full px-2 py-0.5 text-xs'
                           )}
                         >
                           {count}
                         </span>
+                      ) : (
+                        <DropdownMenu
+                          open={isDropdownOpen}
+                          onOpenChange={(open) => handleDropdownOpenChange(open, category.id)}
+                        >
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={
+                              "h-6 w-6 p-0 bg-transparent hover:bg-transparent focus:outline-none"
+                              }
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                e.preventDefault()
+                              }}
+                            >
+                              <MoreHorizontal className={cn(
+                                'h-4 w-4',
+                                isActive ? "text-white":"text-black"
+                              )}/>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={(e) => handleDeleteCategory(category.id, e)}
+                            >
+                              删除
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
-
-                      <div className="absolute inset-0">
-                        {showMoreIcon && (
-                          <DropdownMenu
-                            open={isDropdownOpen}
-                            onOpenChange={(open) => handleDropdownOpenChange(open, category.id)}
-                          >
-                            <DropdownMenuTrigger asChild>
-                              <div
-                                className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <MoreHorizontal className={cn(
-                                  'h-4 w-4',
-                                  isActive ? 'text-primary-foreground' : ''
-                                )}/>
-                              </div>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleDeleteCategory(category.id)
-                                }}
-                              >
-                                删除
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-                      </div>
                     </div>
                   </SidebarMenuButton>
                 </div>
