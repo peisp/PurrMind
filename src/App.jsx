@@ -25,7 +25,8 @@ export default function App() {
     loadTodos()
     // 加载分类
     loadCategories()
-
+    // 处理输入数据
+    handleEnterAction()
     // 添加事件监听器
     window.addEventListener('storage', handleStorageChange)
     window.addEventListener('todo-updated', handleTodoUpdated)
@@ -43,6 +44,19 @@ export default function App() {
       window.removeEventListener('todo-updated', handleTodoUpdated)
     }
   }, [])
+
+  const handleEnterAction = () => {
+    if (enterAction?.type === 'over' && enterAction?.payload) {
+      addTodo({
+        title: enterAction.payload.trim(),
+        description: '',
+        dueDate: null,
+        completed: false,
+        starred: false,
+        categoryId: null
+      })
+    }
+  }
 
   const handleStorageChange = (e) => {
     if (e.key === 'todos' || e.key === 'categories') {
