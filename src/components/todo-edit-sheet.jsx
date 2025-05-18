@@ -29,15 +29,15 @@ import { cn } from "@/lib/utils"
 
 const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) => {
   return (
-    <div className="relative">
+    <div className="space-y-1">
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={cn("pr-16", className)}
+        className={className}
       />
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+      <div className="text-xs text-muted-foreground text-right">
         {value.length}/{maxLength}
       </div>
     </div>
@@ -46,15 +46,15 @@ const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) =>
 
 const LimitedTextarea = ({ value, onChange, maxLength, placeholder, className }) => {
   return (
-    <div className="relative">
+    <div className="space-y-1">
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={cn("pr-16", className)}
+        className={className}
       />
-      <div className="absolute right-2 bottom-2 text-xs text-muted-foreground pointer-events-none">
+      <div className="text-xs text-muted-foreground text-right">
         {value.length}/{maxLength}
       </div>
     </div>
@@ -147,11 +147,11 @@ export function TodoEditSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent>
+      <SheetContent className="p-3 flex flex-col">
         <SheetHeader className="pb-2">
           <SheetTitle>编辑待办事项</SheetTitle>
         </SheetHeader>
-        <div className="space-y-3 py-2">
+        <div className="flex-1 space-y-3 overflow-y-auto">
           <div className="space-y-1.5">
             <label className="text-sm font-medium">标题</label>
             <LimitedInput
@@ -375,7 +375,7 @@ export function TodoEditSheet({
             创建于 {todo?.createdAt ? format(new Date(todo.createdAt), "yyyy-MM-dd HH:mm", { locale: zhCN }) : ''}
           </div>
         </div>
-        <SheetFooter className="flex justify-between pt-2">
+        <SheetFooter className="flex justify-between pt-2 mt-2">
           <Button 
             variant="destructive" 
             onClick={onDelete}
