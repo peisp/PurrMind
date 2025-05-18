@@ -75,7 +75,10 @@ export default function App() {
     window.dispatchEvent(new Event('todo-updated'))
   }
 
-  const handleToggleStatus = (id) => {
+  const handleToggleStatus = (id, e) => {
+    if (e) {
+      e.stopPropagation()
+    }
     const updatedTodo = toggleTodoStatus(id)
     if (updatedTodo) {
       setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo))

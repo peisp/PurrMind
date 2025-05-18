@@ -78,33 +78,40 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
             className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
             onClick={() => handleEdit(todo)}
           >
-            <div className="flex items-start gap-4">
+            <div className="flex items-center gap-4">
               <Checkbox
                 checked={todo.completed}
-                onCheckedChange={(e) => {
-                  e.stopPropagation()
+                onCheckedChange={(checked) => {
                   onToggleStatus(todo.id)
                 }}
-                className="mt-1"
+                onClick={(e) => e.stopPropagation()}
+                className="shrink-0"
               />
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <h3 className={`text-lg font-medium ${todo.completed ? 'line-through text-muted-foreground' : ''}`}>
                   {todo.title}
                 </h3>
-                {todo.description && (
-                  <p className={`mt-1 text-sm text-muted-foreground ${todo.completed ? 'line-through' : ''}`}>
-                    {todo.description}
-                  </p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  {getCategoryName(todo.categoryId)}
-                </p>
+                <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="shrink-0">{getCategoryName(todo.categoryId)}</span>
+                  {todo.description && (
+                    <>
+                      <span className="shrink-0">•</span>
+                      <span className="truncate min-w-0">{todo.description}</span>
+                    </>
+                  )}
+                  {todo.completed && (
+                    <>
+                      <span className="shrink-0">•</span>
+                      <span className="shrink-0">完成于 {new Date(todo.completedAt).toLocaleString()}</span>
+                    </>
+                  )}
+                </div>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "h-8 w-8",
+                  "h-8 w-8 shrink-0",
                   todo.starred && "text-yellow-500 hover:text-yellow-500"
                 )}
                 onClick={(e) => handleStar(e, todo)}
