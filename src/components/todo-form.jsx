@@ -1,74 +1,35 @@
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Card } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { addTodo } from '@/db/todo'
-import { getAllCategories } from '@/db/todo'
+import { Plus } from 'lucide-react'
 
 export function TodoForm({ onAdd }) {
   const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [categoryId, setCategoryId] = useState(null)
-  const [categories, setCategories] = useState([])
-
-  useEffect(() => {
-    const loadCategories = () => {
-      const allCategories = getAllCategories()
-      setCategories(allCategories)
-    }
-    loadCategories()
-  }, [])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!title.trim()) return
-
-    const newTodo = {
-      title: title.trim(),
-      description: description.trim(),
-      categoryId
+    if (title.trim()) {
+      onAdd({
+        title: title.trim(),
+        description: '',
+        dueDate: new Date().toISOString(),
+        completed: false,
+        starred: false
+      })
+      setTitle('')
     }
-
-    setTitle('')
-    setDescription('')
-    setCategoryId(null)
-    onAdd(newTodo)
   }
 
   return (
-    <Card className="p-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Input
-            placeholder="添加新任务..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <Textarea
-            placeholder="添加描述（可选）"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger>
-              <SelectValue placeholder="选择分类" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={null}>无分类</SelectItem>
-              {categories.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button type="submit" className="w-full">
-          添加任务
-        </Button>
-      </form>
-    </Card>
+    <form onSubmit={handleSubmit} className="w-full">
+      <div className="relative">
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="添加任务..."
+          className="h-12 text-lg pl-10"
+        />
+        <Plus className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+      </div>
+    </form>
   )
 } 

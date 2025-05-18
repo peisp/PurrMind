@@ -8,11 +8,11 @@ import {
   ClockIcon,
   ListIcon,
   StarIcon,
-  CheckCircleIcon,
-} from "lucide-react"
+  CheckCircleIcon, SunMedium, Sun,
+} from 'lucide-react'
 
 const items = [
-  { title: "今天", icon: ClockIcon, filter: "today", explain: "只统计今天到期的未完成任务", },
+  { title: "今天", icon: Sun, filter: "today", explain: "只统计今天到期的未完成任务", },
   { title: "计划", icon: CalendarIcon, filter: "planned", explain: "只统计未来到期的未完成任务", },
   { title: "全部", icon: ListIcon, filter: "all", explain: "只统计未完成的任务", },
   { title: "收藏", icon: StarIcon, filter: "starred", explain: "只统计未完成且已收藏的任务", },

@@ -1,7 +1,7 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,6 +13,7 @@ import {
   SheetTitle,
   SheetFooter,
 } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 
 export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
   const [categories, setCategories] = useState([])
@@ -49,6 +50,11 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
     setIsSheetOpen(false)
   }
 
+  const handleStar = (e, todo) => {
+    e.stopPropagation()
+    onUpdate(todo.id, { ...todo, starred: !todo.starred })
+  }
+
   const getCategoryName = (categoryId) => {
     if (!categoryId) return "无分类"
     const category = categories.find(cat => cat.id === categoryId)
@@ -65,13 +71,20 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-2">
         {todos.map((todo) => (
-          <Card key={todo.id} className="p-4">
+          <Card 
+            key={todo.id} 
+            className="p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+            onClick={() => handleEdit(todo)}
+          >
             <div className="flex items-start gap-4">
               <Checkbox
                 checked={todo.completed}
-                onCheckedChange={() => onToggleStatus(todo.id)}
+                onCheckedChange={(e) => {
+                  e.stopPropagation()
+                  onToggleStatus(todo.id)
+                }}
                 className="mt-1"
               />
               <div className="flex-1">
@@ -87,22 +100,20 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
                   {getCategoryName(todo.categoryId)}
                 </p>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleEdit(todo)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(todo.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "h-8 w-8",
+                  todo.starred && "text-yellow-500 hover:text-yellow-500"
+                )}
+                onClick={(e) => handleStar(e, todo)}
+              >
+                <Star className={cn(
+                  "h-4 w-4",
+                  todo.starred ? "fill-yellow-500" : "fill-none"
+                )} />
+              </Button>
             </div>
           </Card>
         ))}
@@ -130,14 +141,28 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
                 placeholder="输入描述"
               />
             </div>
+            <div className="text-xs text-muted-foreground">
+              创建于 {new Date(editingId ? todos.find(t => t.id === editingId)?.createdAt : '').toLocaleString()}
+            </div>
           </div>
-          <SheetFooter>
-            <Button variant="outline" onClick={handleCancel}>
-              取消
+          <SheetFooter className="flex justify-between">
+            <Button 
+              variant="destructive" 
+              onClick={() => {
+                onDelete(editingId)
+                setIsSheetOpen(false)
+              }}
+            >
+              删除
             </Button>
-            <Button onClick={() => handleSave(editingId)}>
-              保存
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={handleCancel}>
+                取消
+              </Button>
+              <Button onClick={() => handleSave(editingId)}>
+                保存
+              </Button>
+            </div>
           </SheetFooter>
         </SheetContent>
       </Sheet>
