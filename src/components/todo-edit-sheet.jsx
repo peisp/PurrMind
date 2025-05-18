@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils"
 
 const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) => {
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
@@ -46,13 +46,13 @@ const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) =>
 
 const LimitedTextarea = ({ value, onChange, maxLength, placeholder, className }) => {
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={cn("focus-visible:ring-0 focus-visible:ring-offset-0", className)}
+        className={cn("focus-visible:ring-0 focus-visible:ring-offset-0 resize-none", className)}
       />
       <div className="text-xs text-muted-foreground text-right">
         {value.length}/{maxLength}
@@ -170,12 +170,12 @@ export function TodoEditSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="p-3 flex flex-col">
+      <SheetContent className="p-2 flex flex-col">
         <SheetHeader>
           <SheetTitle>编辑待办事项</SheetTitle>
         </SheetHeader>
-        <div className="flex-1 space-y-1.5 overflow-y-auto">
-          <div className="space-y-1">
+        <div className="flex-1 space-y-1 overflow-y-auto">
+          <div className="space-y-0.5">
             <label className="text-sm font-medium">标题</label>
             <LimitedInput
               value={editForm.title}
@@ -184,7 +184,7 @@ export function TodoEditSheet({
               placeholder="输入标题"
             />
           </div>
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <label className="text-sm font-medium">描述</label>
             <LimitedTextarea
               value={editForm.description}
@@ -193,13 +193,13 @@ export function TodoEditSheet({
               placeholder="输入描述"
             />
           </div>
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <label className="text-sm font-medium">分类</label>
             <Select 
               value={editForm.categoryId || "none"} 
               onValueChange={(value) => setEditForm({ ...editForm, categoryId: value === "none" ? null : value })}
             >
-              <SelectTrigger>
+              <SelectTrigger className="focus-visible:ring-0 focus-visible:ring-offset-0">
                 <SelectValue placeholder="选择分类" />
               </SelectTrigger>
               <SelectContent>
@@ -212,7 +212,7 @@ export function TodoEditSheet({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <label className="text-sm font-medium">截止时间</label>
             <div className="flex gap-2">
               <Popover>
@@ -220,7 +220,7 @@ export function TodoEditSheet({
                   <Button
                     variant="outline"
                     className={cn(
-                      "flex-1 justify-start text-left font-normal",
+                      "flex-1 justify-start text-left font-normal focus-visible:ring-0 focus-visible:ring-offset-0",
                       !editForm.dueDate && "text-muted-foreground"
                     )}
                   >
@@ -266,7 +266,7 @@ export function TodoEditSheet({
                   value={editForm.dueDate ? format(editForm.dueDate, "HH") : ""}
                   onChange={(e) => handleTimeChange('hour', e.target.value)}
                   onKeyDown={(e) => handleTimeKeyDown('hour', e)}
-                  className="w-[50px] h-9 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="时"
                 />
                 <span className="text-muted-foreground">:</span>
@@ -277,13 +277,13 @@ export function TodoEditSheet({
                   value={editForm.dueDate ? format(editForm.dueDate, "mm") : ""}
                   onChange={(e) => handleTimeChange('minute', e.target.value)}
                   onKeyDown={(e) => handleTimeKeyDown('minute', e)}
-                  className="w-[50px] h-9 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="分"
                 />
               </div>
             </div>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <label className="text-sm font-medium">提醒时间</label>
             {!showCustomTimePicker ? (
               <Select
@@ -297,7 +297,7 @@ export function TodoEditSheet({
                   setEditForm({ ...editForm, reminderTime: selectedDate })
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="focus-visible:ring-0 focus-visible:ring-offset-0">
                   <SelectValue placeholder="选择提醒时间">
                     {editForm.reminderTime && format(editForm.reminderTime, "yyyy-MM-dd HH:mm")}
                   </SelectValue>
@@ -321,7 +321,7 @@ export function TodoEditSheet({
                       <Button
                         variant="outline"
                         className={cn(
-                          "flex-1 justify-start text-left font-normal",
+                          "flex-1 justify-start text-left font-normal focus-visible:ring-0 focus-visible:ring-offset-0",
                           !editForm.reminderTime && "text-muted-foreground"
                         )}
                       >
@@ -384,7 +384,7 @@ export function TodoEditSheet({
                           setEditForm({ ...editForm, reminderTime: newDate })
                         }
                       }}
-                      className="w-[50px] h-9 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
                       placeholder="时"
                     />
                     <span className="text-muted-foreground">:</span>
@@ -412,14 +412,14 @@ export function TodoEditSheet({
                           setEditForm({ ...editForm, reminderTime: newDate })
                         }
                       }}
-                      className="w-[50px] h-9 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
                       placeholder="分"
                     />
                   </div>
                 </div>
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full focus-visible:ring-0 focus-visible:ring-offset-0"
                   onClick={() => {
                     setShowCustomTimePicker(false)
                     setEditForm({ ...editForm, reminderTime: null })
@@ -438,14 +438,22 @@ export function TodoEditSheet({
           <Button 
             variant="destructive" 
             onClick={onDelete}
+            className="focus-visible:ring-0 focus-visible:ring-offset-0"
           >
             删除
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onCancel}>
+            <Button 
+              variant="outline" 
+              onClick={onCancel}
+              className="focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
               取消
             </Button>
-            <Button onClick={handleSave}>
+            <Button 
+              onClick={handleSave}
+              className="focus-visible:ring-0 focus-visible:ring-offset-0"
+            >
               保存
             </Button>
           </div>
