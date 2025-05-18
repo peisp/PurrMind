@@ -6,11 +6,19 @@ import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { getAllCategories } from "@/db/todo"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet"
 
 export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
   const [categories, setCategories] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState({ title: '', description: '' })
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
 
   useEffect(() => {
     loadCategories()
@@ -27,15 +35,18 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
       title: todo.title,
       description: todo.description
     })
+    setIsSheetOpen(true)
   }
 
   const handleSave = (id) => {
     onUpdate(id, editForm)
     setEditingId(null)
+    setIsSheetOpen(false)
   }
 
   const handleCancel = () => {
     setEditingId(null)
+    setIsSheetOpen(false)
   }
 
   const getCategoryName = (categoryId) => {
@@ -53,31 +64,10 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
   }
 
   return (
-    <div className="space-y-4">
-      {todos.map((todo) => (
-        <Card key={todo.id} className="p-4">
-          {editingId === todo.id ? (
-            <div className="space-y-4">
-              <Input
-                value={editForm.title}
-                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                placeholder="标题"
-              />
-              <Textarea
-                value={editForm.description}
-                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                placeholder="描述"
-              />
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={handleCancel}>
-                  取消
-                </Button>
-                <Button onClick={() => handleSave(todo.id)}>
-                  保存
-                </Button>
-              </div>
-            </div>
-          ) : (
+    <>
+      <div className="space-y-4">
+        {todos.map((todo) => (
+          <Card key={todo.id} className="p-4">
             <div className="flex items-start gap-4">
               <Checkbox
                 checked={todo.completed}
@@ -114,9 +104,43 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
                 </Button>
               </div>
             </div>
-          )}
-        </Card>
-      ))}
-    </div>
+          </Card>
+        ))}
+      </div>
+
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>编辑待办事项</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">标题</label>
+              <Input
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                placeholder="输入标题"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">描述</label>
+              <Textarea
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                placeholder="输入描述"
+              />
+            </div>
+          </div>
+          <SheetFooter>
+            <Button variant="outline" onClick={handleCancel}>
+              取消
+            </Button>
+            <Button onClick={() => handleSave(editingId)}>
+              保存
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    </>
   )
 } 
