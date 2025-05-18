@@ -22,10 +22,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CalendarIcon, Clock } from "lucide-react"
+import { CalendarIcon, Clock, Tag } from "lucide-react"
 import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
 import { cn } from "@/lib/utils"
+import * as Icons from "lucide-react"
 
 const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) => {
   return (
@@ -168,6 +169,29 @@ export function TodoEditSheet({
     }
   }
 
+  const getIconComponent = (iconName) => {
+    return Icons[iconName] || Icons.FolderIcon
+  }
+
+  const getColorClass = (color) => {
+    switch (color) {
+      case 'red':
+        return 'text-red-500'
+      case 'blue':
+        return 'text-blue-500'
+      case 'green':
+        return 'text-green-500'
+      case 'yellow':
+        return 'text-yellow-500'
+      case 'purple':
+        return 'text-purple-500'
+      case 'pink':
+        return 'text-pink-500'
+      default:
+        return 'text-gray-500'
+    }
+  }
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="p-2 flex flex-col">
@@ -199,16 +223,55 @@ export function TodoEditSheet({
               value={editForm.categoryId || "none"} 
               onValueChange={(value) => setEditForm({ ...editForm, categoryId: value === "none" ? null : value })}
             >
-              <SelectTrigger className="focus-visible:ring-0 focus-visible:ring-offset-0">
-                <SelectValue placeholder="选择分类" />
+              <SelectTrigger className="focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=closed]:ring-0 data-[state=closed]:ring-offset-0 ring-0 ring-offset-0">
+                <SelectValue placeholder="选择分类">
+                  {editForm.categoryId ? (
+                    <div className="flex items-center gap-2">
+                      <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
+                        {(() => {
+                          const category = categories.find(cat => cat.id === editForm.categoryId)
+                          const Icon = getIconComponent(category?.icon)
+                          return <Icon className={cn('h-4 w-4', getColorClass(category?.color))} />
+                        })()}
+                      </div>
+                      <span>{categories.find(cat => cat.id === editForm.categoryId)?.name || "未知分类"}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
+                        <Icons.FolderIcon className="h-4 w-4 text-gray-500" />
+                      </div>
+                      <span>无分类</span>
+                    </div>
+                  )}
+                </SelectValue>
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">无分类</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
+              <SelectContent className="focus-visible:ring-0 focus-visible:ring-offset-0">
+                <SelectItem value="none" className="focus-visible:ring-0 focus-visible:ring-offset-0">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
+                      <Icons.FolderIcon className="h-4 w-4 text-gray-500" />
+                    </div>
+                    <span>无分类</span>
+                  </div>
+                </SelectItem>
+                {categories.map((category) => {
+                  const Icon = getIconComponent(category.icon)
+                  return (
+                    <SelectItem 
+                      key={category.id} 
+                      value={category.id}
+                      className="focus-visible:ring-0 focus-visible:ring-offset-0"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
+                          <Icon className={cn('h-4 w-4', getColorClass(category.color))} />
+                        </div>
+                        <span>{category.name}</span>
+                      </div>
+                    </SelectItem>
+                  )
+                })}
               </SelectContent>
             </Select>
           </div>
