@@ -10,13 +10,14 @@ import {
   StarIcon,
   CheckCircleIcon, SunMedium, Sun,
 } from 'lucide-react'
+import * as Icons from 'lucide-react'
 
 const items = [
-  { title: "今天", icon: Sun, filter: "today", explain: "只统计今天到期的未完成任务", },
-  { title: "计划", icon: CalendarIcon, filter: "planned", explain: "只统计未来到期的未完成任务", },
-  { title: "全部", icon: ListIcon, filter: "all", explain: "只统计未完成的任务", },
-  { title: "收藏", icon: StarIcon, filter: "starred", explain: "只统计未完成且已收藏的任务", },
-  { title: "已完成", icon: CheckCircleIcon, filter: "completed", explain: "统计所有已完成的任务", }
+  { title: "今天", icon: "Sun", filter: "today", explain: "只统计今天到期的未完成任务", },
+  { title: "计划", icon: "CalendarIcon", filter: "planned", explain: "只统计未来到期的未完成任务", },
+  { title: "全部", icon: "ListIcon", filter: "all", explain: "只统计未完成的任务", },
+  { title: "收藏", icon: "StarIcon", filter: "starred", explain: "只统计未完成且已收藏的任务", },
+  { title: "已完成", icon: "CheckCircleIcon", filter: "completed", explain: "统计所有已完成的任务", }
 ]
 
 export function NavMain({ onFilterChange, currentFilter }) {
@@ -82,14 +83,14 @@ export function NavMain({ onFilterChange, currentFilter }) {
     return count > 99 ? "99+" : count
   }
 
-  const handleClick = (filter, title) => {
-    onFilterChange(filter, title)
+  const handleClick = (filter, title, icon, color) => {
+    onFilterChange(filter, title, icon, color)
   }
 
   return (
     <div className="grid grid-cols-2 gap-2">
       {items.map((item) => {
-        const Icon = item.icon
+        const Icon = Icons[item.icon]
         const isActive = currentFilter === item.filter
         const count = getCount(item.filter)
 
@@ -101,7 +102,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
               "justify-between",
               isActive && "font-medium"
             )}
-            onClick={() => handleClick(item.filter, item.title)}
+            onClick={() => handleClick(item.filter, item.title, item.icon, isActive ? "default" : "default")}
           >
             <div className="flex items-center gap-2">
               <Icon className={cn(

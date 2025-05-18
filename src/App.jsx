@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar.jsx'
 import { AppSidebar } from '@/components/sidebar/app-sidebar.jsx'
-import { initTodoDB, getAllTodos, addTodo, updateTodo, deleteTodo, toggleTodoStatus, getTodosByCategory } from '@/db/todo'
+import { initTodoDB, getAllTodos, addTodo, updateTodo, deleteTodo, toggleTodoStatus, getTodosByCategory, getAllCategories } from '@/db/todo'
 import { TodoList } from '@/components/todo-list'
 import { TodoForm } from '@/components/todo-form'
 import { TodoNotification } from '@/components/todo-notification'
+import * as Icons from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export default function App() {
   const [enterAction, setEnterAction] = useState({})
@@ -13,12 +15,16 @@ export default function App() {
   const [currentFilter, setCurrentFilter] = useState('all')
   const [currentCategory, setCurrentCategory] = useState(null)
   const [currentLabel, setCurrentLabel] = useState('全部')
+  const [currentIcon, setCurrentIcon] = useState({ icon: 'ListIcon', color: 'default' })
+  const [categories, setCategories] = useState([])
 
   useEffect(() => {
     // 初始化数据库
     initTodoDB()
     // 加载待办事项
     loadTodos()
+    // 加载分类
+    loadCategories()
 
     // 添加事件监听器
     window.addEventListener('storage', handleStorageChange)
@@ -39,18 +45,48 @@ export default function App() {
   }, [])
 
   const handleStorageChange = (e) => {
-    if (e.key === 'todos') {
+    if (e.key === 'todos' || e.key === 'categories') {
       loadTodos()
+      loadCategories()
     }
   }
 
   const handleTodoUpdated = () => {
     loadTodos()
+    loadCategories()
   }
 
   const loadTodos = () => {
     const allTodos = getAllTodos()
     setTodos(allTodos)
+  }
+
+  const loadCategories = () => {
+    const allCategories = getAllCategories()
+    setCategories(allCategories)
+  }
+
+  const getIconComponent = (iconName) => {
+    return Icons[iconName] || Icons.ListIcon
+  }
+
+  const getColorClass = (color) => {
+    switch (color) {
+      case 'red':
+        return 'text-red-500'
+      case 'blue':
+        return 'text-blue-500'
+      case 'green':
+        return 'text-green-500'
+      case 'yellow':
+        return 'text-yellow-500'
+      case 'purple':
+        return 'text-purple-500'
+      case 'pink':
+        return 'text-pink-500'
+      default:
+        return 'text-gray-500'
+    }
   }
 
   const handleAddTodo = (todo) => {
@@ -88,11 +124,12 @@ export default function App() {
     }
   }
 
-  const handleFilterChange = (filter, label) => {
+  const handleFilterChange = (filter, label, icon, color) => {
     console.log('Filter changed to:', filter)
     setCurrentFilter(filter)
     setCurrentCategory(null) // 切换到 NavMain 时，清除分类选择
     setCurrentLabel(label) // 更新当前标签
+    setCurrentIcon({ icon, color }) // 更新当前图标
   }
 
   const handleCategoryChange = (category, label) => {
@@ -101,6 +138,12 @@ export default function App() {
     setCurrentCategory(category)
     setCurrentFilter(null) // 切换到 NavMyList 时，清除过滤器选择
     setCurrentLabel(label) // 更新当前标签
+    
+    // 更新图标
+    const categoryData = categories.find(cat => cat.id === category)
+    if (categoryData) {
+      setCurrentIcon({ icon: categoryData.icon, color: categoryData.color })
+    }
   }
 
   const filteredTodos = todos.filter(todo => {
@@ -132,6 +175,7 @@ export default function App() {
   })
 
   if (route === 'index' || route === 'addItem') {
+    const Icon = getIconComponent(currentIcon.icon)
     return (
       <SidebarProvider>
         <div className="grid w-full grid-cols-[auto_1fr]">
@@ -144,8 +188,10 @@ export default function App() {
           <SidebarInset className="flex h-screen min-w-0 flex-col">
             <header className="flex h-14 shrink-0 items-center gap-2 border-b">
               <div className="flex flex-1 items-center gap-2 px-3">
-                {/*<SidebarTrigger />*/}
-                <h1 className="text-lg font-semibold text-primary">{currentLabel}</h1>
+                <div className="flex items-center gap-2">
+                  <Icon className={cn('h-4 w-4', getColorClass(currentIcon.color))} />
+                  <h1 className="text-lg font-semibold text-primary">{currentLabel}</h1>
+                </div>
               </div>
             </header>
             <div className="flex flex-1 flex-col overflow-hidden">
@@ -155,6 +201,7 @@ export default function App() {
                   onUpdate={handleUpdateTodo}
                   onDelete={handleDeleteTodo}
                   onToggleStatus={handleToggleStatus}
+                  categories={categories}
                 />
               </div>
               {currentFilter !== 'completed' && (
