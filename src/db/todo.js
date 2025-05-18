@@ -65,6 +65,11 @@ export const toggleTodoStatus = (id) => {
   if (index !== -1) {
     todos[index].completed = !todos[index].completed
     todos[index].updatedAt = new Date().toISOString()
+    if (todos[index].completed) {
+      todos[index].completedAt = new Date().toISOString()
+    } else {
+      todos[index].completedAt = null
+    }
     db.set(TODO_DB_NAME, todos)
     return todos[index]
   }
