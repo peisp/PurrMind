@@ -40,7 +40,7 @@ export function AppSidebar({
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
-        <NavMain 
+          <NavMain
           onFilterChange={onFilterChange}
           currentFilter={currentFilter}
         />

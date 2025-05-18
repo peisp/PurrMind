@@ -11,6 +11,7 @@ export default function App() {
   const [todos, setTodos] = useState([])
   const [currentFilter, setCurrentFilter] = useState('all')
   const [currentCategory, setCurrentCategory] = useState(null)
+  const [currentLabel, setCurrentLabel] = useState('全部')
 
   useEffect(() => {
     // 初始化数据库
@@ -83,17 +84,19 @@ export default function App() {
     }
   }
 
-  const handleFilterChange = (filter) => {
+  const handleFilterChange = (filter, label) => {
     console.log('Filter changed to:', filter)
     setCurrentFilter(filter)
     setCurrentCategory(null) // 切换到 NavMain 时，清除分类选择
+    setCurrentLabel(label) // 更新当前标签
   }
 
-  const handleCategoryChange = (category) => {
+  const handleCategoryChange = (category, label) => {
     // 如果点击的是当前选中的分类，不做任何操作
     if (category === currentCategory) return
     setCurrentCategory(category)
     setCurrentFilter(null) // 切换到 NavMyList 时，清除过滤器选择
+    setCurrentLabel(label) // 更新当前标签
   }
 
   const filteredTodos = todos.filter(todo => {
@@ -137,7 +140,8 @@ export default function App() {
           <SidebarInset className="flex h-screen min-w-0 flex-col">
             <header className="flex h-14 shrink-0 items-center gap-2 border-b">
               <div className="flex flex-1 items-center gap-2 px-3">
-                <SidebarTrigger />
+                {/*<SidebarTrigger />*/}
+                <h1 className="text-lg font-semibold text-primary">{currentLabel}</h1>
               </div>
             </header>
             <div className="flex flex-1 flex-col gap-4 p-4">

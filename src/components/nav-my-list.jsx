@@ -196,7 +196,7 @@ export function NavMyList ({
                         e.preventDefault()
                         return false;
                       }
-                      onCategoryChange(category.id)
+                      onCategoryChange(category.id, category.name)
                     }}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">

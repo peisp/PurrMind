@@ -82,8 +82,8 @@ export function NavMain({ onFilterChange, currentFilter }) {
     return count > 99 ? "99+" : count
   }
 
-  const handleClick = (filter) => {
-    onFilterChange(filter)
+  const handleClick = (filter, title) => {
+    onFilterChange(filter, title)
   }
 
   return (
@@ -101,7 +101,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
               "justify-between",
               isActive && "font-medium"
             )}
-            onClick={() => handleClick(item.filter)}
+            onClick={() => handleClick(item.filter, item.title)}
           >
             <div className="flex items-center gap-2">
               <Icon className={cn(
