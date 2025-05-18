@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input'
 import { Plus, Sparkles } from 'lucide-react'
 import { getAllCategories } from '@/db/todo'
 import { cn } from '@/lib/utils'
+import { getTaskObjByAi } from '@/components/ai/ai-utools.js'
 
 export function TodoForm ({ onAdd, defaultCategory, defaultStarred }) {
   const [title, setTitle] = useState('')
@@ -12,30 +13,35 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (title.trim()) {
-      if (isAIActive && window.utools) {
+      let todoNew = {
+        title: title.trim(),
+        description: '',
+        dueDate: null,
+        completed: false,
+        starred: defaultStarred || false,
+        categoryId: defaultCategory || null
+      }
+      if (isAIActive) {
         // 设置处理状态为真
         setIsProcessing(true)
-
         try {
-          // 调用 uTools AI API
-          // window.utools.hideMainWindowPasteText(title.trim())
-          console.log('调用AI')
-          // 使用 Promise 和 setTimeout 替代阻塞式的 sleep
-          await new Promise(resolve => setTimeout(resolve, 10000))
+          let tasks = await getTaskObjByAi(null, title.trim())
+          console.log("tasks",tasks)
+          tasks.map(task => {
+            todoNew.title = task.title
+            todoNew.description = task.description
+            todoNew.dueDate = task.dueDate
+            todoNew.reminderTime = task.reminderTime
+            onAdd(todoNew)
+          })
+
         } finally {
           // 完成后设置处理状态为假
           setIsProcessing(false)
         }
+      } else {
+        onAdd(todoNew)
       }
-
-      onAdd({
-        title: title.trim(),
-        description: '',
-        dueDate: new Date().toISOString(),
-        completed: false,
-        starred: defaultStarred || false,
-        categoryId: defaultCategory || null
-      })
       setTitle('')
     }
   }

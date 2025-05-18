@@ -97,8 +97,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.1)
       utools-api-types:
-        specifier: ^6.1.0
-        version: 6.1.0
+        specifier: ^7.1.0
+        version: 7.1.0
       vite:
         specifier: ^6.0.11
         version: 6.3.5(@types/node@22.15.18)(jiti@1.21.7)(yaml@2.7.1)
@@ -2407,8 +2407,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  utools-api-types@6.1.0:
-    resolution: {integrity: sha512-K8/BzAQfW5/xHCmHlj2SlgUNayFSo7hrghx9kkI1mYda9WwELJMu/5hTgIjco/mCrB2fV/w9/112cgSqAJoaeA==}
+  utools-api-types@7.1.0:
+    resolution: {integrity: sha512-TqUbywf/xDPdKGh9O4zIDz/utBy/1B082Hn33Ze1H3hL1x1SRsBCDyaDxZU2i6XOg2204p4cnMrqfyBoPZEvlw==}
 
   version-guard@1.1.3:
     resolution: {integrity: sha512-JwPr6erhX53EWH/HCSzfy1tTFrtPXUe927wdM1jqBBeYp1OM+qPHjWbsvv6pIBduqdgxxS+ScfG7S28pzyr2DQ==}
@@ -5009,7 +5009,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  utools-api-types@6.1.0: {}
+  utools-api-types@7.1.0: {}
 
   version-guard@1.1.3: {}
 
