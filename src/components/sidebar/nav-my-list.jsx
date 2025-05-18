@@ -228,22 +228,18 @@ export function NavMyList ({
                           onOpenChange={(open) => handleDropdownOpenChange(open, category.id)}
                         >
                           <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={
-                              "h-6 w-6 p-0 bg-transparent hover:bg-transparent focus:outline-none"
-                              }
+                            <div
+                              className={cn(
+                                "h-6 w-6 p-0 flex items-center justify-center cursor-pointer hover:bg-accent rounded-sm",
+                                isActive ? "text-white" : "text-black"
+                              )}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 e.preventDefault()
                               }}
                             >
-                              <MoreHorizontal className={cn(
-                                'h-4 w-4',
-                                isActive ? "text-white":"text-black"
-                              )}/>
-                            </Button>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </div>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                             <DropdownMenuItem
