@@ -10,7 +10,23 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
 
   useEffect(() => {
     loadCategories()
+    window.addEventListener('storage', handleStorageChange)
+    window.addEventListener('todo-updated', handleTodoUpdated)
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('todo-updated', handleTodoUpdated)
+    }
   }, [])
+
+  const handleStorageChange = (e) => {
+    if (e.key === 'categories') {
+      loadCategories()
+    }
+  }
+
+  const handleTodoUpdated = () => {
+    loadCategories()
+  }
 
   const loadCategories = () => {
     const allCategories = getAllCategories()

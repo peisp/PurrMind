@@ -92,6 +92,14 @@ export function TodoEditSheet({
     }
   }, [todo])
 
+  // 监听分类变化
+  useEffect(() => {
+    // 如果当前选中的分类不存在于新的分类列表中，则清除分类选择
+    if (editForm.categoryId && !categories.find(cat => cat.id === editForm.categoryId)) {
+      setEditForm(prev => ({ ...prev, categoryId: null }))
+    }
+  }, [categories, editForm.categoryId])
+
   const getReminderTimeOptions = () => {
     const now = new Date()
     const tomorrow = new Date(now)
