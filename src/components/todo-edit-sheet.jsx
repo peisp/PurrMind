@@ -130,29 +130,52 @@ export function TodoEditSheet({
     })
   }
 
-  const getTimeOptions = () => {
-    const times = []
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const time = new Date()
-        time.setHours(hour, minute, 0, 0)
-        times.push({
-          label: format(time, 'HH:mm'),
-          value: time.toISOString()
-        })
-      }
+  const handleTimeChange = (type, value) => {
+    if (!editForm.dueDate) return
+
+    const newDate = new Date(editForm.dueDate)
+    const numValue = parseInt(value) || 0
+
+    if (type === 'hour') {
+      newDate.setHours(Math.min(Math.max(numValue, 0), 23), newDate.getMinutes(), 0, 0)
+    } else {
+      newDate.setMinutes(Math.min(Math.max(numValue, 0), 59), 0, 0)
     }
-    return times
+
+    setEditForm({ ...editForm, dueDate: newDate })
+  }
+
+  const handleTimeKeyDown = (type, e) => {
+    if (!editForm.dueDate) return
+
+    const newDate = new Date(editForm.dueDate)
+    const currentValue = type === 'hour' ? newDate.getHours() : newDate.getMinutes()
+
+    if (e.key === 'ArrowUp') {
+      if (type === 'hour') {
+        newDate.setHours((currentValue + 1) % 24, newDate.getMinutes(), 0, 0)
+      } else {
+        newDate.setMinutes((currentValue + 1) % 60, 0, 0)
+      }
+      setEditForm({ ...editForm, dueDate: newDate })
+    } else if (e.key === 'ArrowDown') {
+      if (type === 'hour') {
+        newDate.setHours((currentValue - 1 + 24) % 24, newDate.getMinutes(), 0, 0)
+      } else {
+        newDate.setMinutes((currentValue - 1 + 60) % 60, 0, 0)
+      }
+      setEditForm({ ...editForm, dueDate: newDate })
+    }
   }
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent className="p-3 flex flex-col">
-        <SheetHeader className="pb-2">
+        <SheetHeader>
           <SheetTitle>编辑待办事项</SheetTitle>
         </SheetHeader>
-        <div className="flex-1 space-y-3 overflow-y-auto">
-          <div className="space-y-1.5">
+        <div className="flex-1 space-y-1.5 overflow-y-auto">
+          <div className="space-y-1">
             <label className="text-sm font-medium">标题</label>
             <LimitedInput
               value={editForm.title}
@@ -161,7 +184,7 @@ export function TodoEditSheet({
               placeholder="输入标题"
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-sm font-medium">描述</label>
             <LimitedTextarea
               value={editForm.description}
@@ -170,7 +193,7 @@ export function TodoEditSheet({
               placeholder="输入描述"
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-sm font-medium">分类</label>
             <Select 
               value={editForm.categoryId || "none"} 
@@ -189,7 +212,7 @@ export function TodoEditSheet({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-sm font-medium">截止时间</label>
             <div className="flex gap-2">
               <Popover>
@@ -235,31 +258,32 @@ export function TodoEditSheet({
                   />
                 </PopoverContent>
               </Popover>
-              <Select
-                value={editForm.dueDate ? format(editForm.dueDate, "HH:mm") : ""}
-                onValueChange={(value) => {
-                  if (editForm.dueDate) {
-                    const [hours, minutes] = value.split(':').map(Number)
-                    const newDate = new Date(editForm.dueDate)
-                    newDate.setHours(hours, minutes, 0, 0)
-                    setEditForm({ ...editForm, dueDate: newDate })
-                  }
-                }}
-              >
-                <SelectTrigger className="w-[110px]">
-                  <SelectValue placeholder="选择时间" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getTimeOptions().map((option) => (
-                    <SelectItem key={option.value} value={option.label}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-1">
+                <Input
+                  type="number"
+                  min="0"
+                  max="23"
+                  value={editForm.dueDate ? format(editForm.dueDate, "HH") : ""}
+                  onChange={(e) => handleTimeChange('hour', e.target.value)}
+                  onKeyDown={(e) => handleTimeKeyDown('hour', e)}
+                  className="w-[50px] h-9 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="时"
+                />
+                <span className="text-muted-foreground">:</span>
+                <Input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={editForm.dueDate ? format(editForm.dueDate, "mm") : ""}
+                  onChange={(e) => handleTimeChange('minute', e.target.value)}
+                  onKeyDown={(e) => handleTimeKeyDown('minute', e)}
+                  className="w-[50px] h-9 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="分"
+                />
+              </div>
             </div>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label className="text-sm font-medium">提醒时间</label>
             {!showCustomTimePicker ? (
               <Select
@@ -290,7 +314,7 @@ export function TodoEditSheet({
                 </SelectContent>
               </Select>
             ) : (
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex gap-2">
                   <Popover>
                     <PopoverTrigger asChild>
@@ -335,28 +359,63 @@ export function TodoEditSheet({
                       />
                     </PopoverContent>
                   </Popover>
-                  <Select
-                    value={editForm.reminderTime ? format(editForm.reminderTime, "HH:mm") : ""}
-                    onValueChange={(value) => {
-                      if (editForm.reminderTime) {
-                        const [hours, minutes] = value.split(':').map(Number)
+                  <div className="flex items-center gap-1">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="23"
+                      value={editForm.reminderTime ? format(editForm.reminderTime, "HH") : ""}
+                      onChange={(e) => {
+                        if (!editForm.reminderTime) return
                         const newDate = new Date(editForm.reminderTime)
-                        newDate.setHours(hours, minutes, 0, 0)
+                        const numValue = parseInt(e.target.value) || 0
+                        newDate.setHours(Math.min(Math.max(numValue, 0), 23), newDate.getMinutes(), 0, 0)
                         setEditForm({ ...editForm, reminderTime: newDate })
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="w-[110px]">
-                      <SelectValue placeholder="选择时间" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getTimeOptions().map((option) => (
-                        <SelectItem key={option.value} value={option.label}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      }}
+                      onKeyDown={(e) => {
+                        if (!editForm.reminderTime) return
+                        const newDate = new Date(editForm.reminderTime)
+                        const currentValue = newDate.getHours()
+                        if (e.key === 'ArrowUp') {
+                          newDate.setHours((currentValue + 1) % 24, newDate.getMinutes(), 0, 0)
+                          setEditForm({ ...editForm, reminderTime: newDate })
+                        } else if (e.key === 'ArrowDown') {
+                          newDate.setHours((currentValue - 1 + 24) % 24, newDate.getMinutes(), 0, 0)
+                          setEditForm({ ...editForm, reminderTime: newDate })
+                        }
+                      }}
+                      className="w-[50px] h-9 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                      placeholder="时"
+                    />
+                    <span className="text-muted-foreground">:</span>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={editForm.reminderTime ? format(editForm.reminderTime, "mm") : ""}
+                      onChange={(e) => {
+                        if (!editForm.reminderTime) return
+                        const newDate = new Date(editForm.reminderTime)
+                        const numValue = parseInt(e.target.value) || 0
+                        newDate.setMinutes(Math.min(Math.max(numValue, 0), 59), 0, 0)
+                        setEditForm({ ...editForm, reminderTime: newDate })
+                      }}
+                      onKeyDown={(e) => {
+                        if (!editForm.reminderTime) return
+                        const newDate = new Date(editForm.reminderTime)
+                        const currentValue = newDate.getMinutes()
+                        if (e.key === 'ArrowUp') {
+                          newDate.setMinutes((currentValue + 1) % 60, 0, 0)
+                          setEditForm({ ...editForm, reminderTime: newDate })
+                        } else if (e.key === 'ArrowDown') {
+                          newDate.setMinutes((currentValue - 1 + 60) % 60, 0, 0)
+                          setEditForm({ ...editForm, reminderTime: newDate })
+                        }
+                      }}
+                      className="w-[50px] h-9 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                      placeholder="分"
+                    />
+                  </div>
                 </div>
                 <Button
                   variant="outline"
