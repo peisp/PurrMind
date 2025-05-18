@@ -147,8 +147,8 @@ export default function App() {
                 <h1 className="text-lg font-semibold text-primary">{currentLabel}</h1>
               </div>
             </header>
-            <div className="flex flex-1 flex-col">
-              <div className="flex-1 overflow-auto p-4">
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-4">
                 <TodoList 
                   todos={filteredTodos}
                   onUpdate={handleUpdateTodo}
@@ -156,7 +156,7 @@ export default function App() {
                   onToggleStatus={handleToggleStatus}
                 />
               </div>
-              <div className="border-t p-4">
+              <div className="shrink-0 border-t p-4">
                 <TodoForm onAdd={handleAddTodo} />
               </div>
             </div>
