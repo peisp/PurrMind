@@ -4,6 +4,7 @@ import { AppSidebar } from '@/components/sidebar/app-sidebar.jsx'
 import { initTodoDB, getAllTodos, addTodo, updateTodo, deleteTodo, toggleTodoStatus, getTodosByCategory } from '@/db/todo'
 import { TodoList } from '@/components/todo-list'
 import { TodoForm } from '@/components/todo-form'
+import { TodoNotification } from '@/components/todo-notification'
 
 export default function App() {
   const [enterAction, setEnterAction] = useState({})
@@ -168,6 +169,7 @@ export default function App() {
             </div>
           </SidebarInset>
         </div>
+        <TodoNotification todos={todos} />
       </SidebarProvider>
     )
   }
