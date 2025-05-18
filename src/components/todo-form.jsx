@@ -9,51 +9,97 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred }) {
   const [title, setTitle] = useState('')
   const [isAIActive, setIsAIActive] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState(null)
+
+  // 创建基础任务对象
+  const createBaseTask = (taskTitle) => ({
+    title: taskTitle.trim(),
+    description: '',
+    dueDate: null,
+    completed: false,
+    starred: defaultStarred || false,
+    categoryId: defaultCategory || null
+  })
+
+  // 处理AI任务创建
+  const handleAITaskCreation = async (taskTitle) => {
+    try {
+      const tasks = await getTaskObjByAi(null, taskTitle)
+      if (!tasks || tasks.length === 0) {
+        throw new Error('AI未能生成有效的任务')
+      }
+      
+      tasks.forEach(task => {
+        const todoNew = {
+          ...createBaseTask(taskTitle),
+          title: task.title,
+          description: task.description,
+          dueDate: task.dueDate,
+          reminderTime: task.reminderTime
+        }
+        onAdd(todoNew)
+      })
+    } catch (err) {
+      setError(err.message || 'AI任务处理失败')
+      throw err
+    }
+  }
+
+  // 处理普通任务创建
+  const handleNormalTaskCreation = (taskTitle) => {
+    const todoNew = createBaseTask(taskTitle)
+    onAdd(todoNew)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (title.trim()) {
-      let todoNew = {
-        title: title.trim(),
-        description: '',
-        dueDate: null,
-        completed: false,
-        starred: defaultStarred || false,
-        categoryId: defaultCategory || null
-      }
-      if (isAIActive) {
-        // 设置处理状态为真
-        setIsProcessing(true)
-        try {
-          let tasks = await getTaskObjByAi(null, title.trim())
-          console.log("tasks",tasks)
-          tasks.map(task => {
-            todoNew.title = task.title
-            todoNew.description = task.description
-            todoNew.dueDate = task.dueDate
-            todoNew.reminderTime = task.reminderTime
-            onAdd(todoNew)
-          })
+    setError(null)
+    
+    // 验证输入
+    if (!title.trim()) {
+      setError('任务标题不能为空')
+      return
+    }
 
-        } finally {
-          // 完成后设置处理状态为假
-          setIsProcessing(false)
-        }
+    // 防止重复提交
+    if (isSubmitting || isProcessing) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      if (isAIActive) {
+        setIsProcessing(true)
+        await handleAITaskCreation(title)
       } else {
-        onAdd(todoNew)
+        handleNormalTaskCreation(title)
       }
       setTitle('')
+    } catch (err) {
+      console.error('任务创建失败:', err)
+    } finally {
+      setIsProcessing(false)
+      setIsSubmitting(false)
     }
   }
 
   const toggleAI = () => {
     setIsAIActive(!isAIActive)
+    setError(null)
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex items-center w-full">
       <div className="relative w-full">
-        {/* 七彩流动边框和光晕 - 添加显示/隐藏的过渡动画 */}
+        {/* 错误提示 */}
+        {error && (
+          <div className="absolute -top-6 left-0 text-sm text-red-500">
+            {error}
+          </div>
+        )}
+        
+        {/* 七彩流动边框和光晕 */}
         <div
           className={cn(
             'absolute inset-0 z-0 rounded-lg pointer-events-none transition-opacity duration-300',
@@ -68,8 +114,6 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred }) {
               before:blur-[15px] before:opacity-80 before:animate-gradient-x animate-pulse
             "
           />
-
-
         </div>
 
         <div className={cn(
@@ -80,21 +124,25 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred }) {
         )}>
           <Input
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value)
+              setError(null)
+            }}
             placeholder="添加任务..."
+            disabled={isSubmitting || isProcessing}
             className={cn(
               'h-12 text-lg pl-10 pr-10 transition-all duration-200 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0',
-              isAIActive && 'bg-background'
+              isAIActive && 'bg-background',
+              (isSubmitting || isProcessing) && 'opacity-70 cursor-not-allowed'
             )}
           />
         </div>
-        {/* 左侧的 Plus 图标 */}
         <Plus className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-20"/>
-        {/* 右侧的 Sparkles 图标 */}
         <Sparkles
           className={cn(
             'absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 cursor-pointer transition-colors duration-200 z-20',
-            isAIActive ? 'text-purple-800' : 'text-muted-foreground'
+            isAIActive ? 'text-purple-800' : 'text-muted-foreground',
+            (isSubmitting || isProcessing) && 'cursor-not-allowed opacity-70'
           )}
           onClick={toggleAI}
         />

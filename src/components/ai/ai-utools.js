@@ -22,7 +22,7 @@ export async function getTaskObjByAi (model, taskMsg) {
         "1. The response must be a JSON array, even if there is only one task.\n" +
         "2. For each task object:\n" +
         "    - title is required, must be a non-empty string, and cannot be null.\n" +
-        "    - description can be a string or null.\n" +
+        "    - description can be a string or null.The user's original question can be output here. \n" +
         "    - dueDate can be a string in ISO 8601 format (e.g., 2025-05-18T13:27:56.713Z) or null.\n" +
         "    - reminderTime can be a string in ISO 8601 format or null.\n" +
         "3.Your response must only contain the JSON—no explanations, comments, or formatting outside the JSON.\n" +
