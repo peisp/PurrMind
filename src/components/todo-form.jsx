@@ -40,7 +40,7 @@ export function TodoForm({ onAdd, defaultCategory, defaultStarred }) {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="添加任务..."
           className={cn(
-            "h-12 text-lg pl-10 pr-10 transition-all duration-200",
+            "h-12 text-lg pl-10 pr-10 transition-all duration-200 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0",
             isAIActive && "border-2 border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.3)]"
           )}
         />
