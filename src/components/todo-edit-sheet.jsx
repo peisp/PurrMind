@@ -35,7 +35,7 @@ const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) =>
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={className}
+        className={cn("focus-visible:ring-0 focus-visible:ring-offset-0", className)}
       />
       <div className="text-xs text-muted-foreground text-right">
         {value.length}/{maxLength}
@@ -52,7 +52,7 @@ const LimitedTextarea = ({ value, onChange, maxLength, placeholder, className })
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={className}
+        className={cn("focus-visible:ring-0 focus-visible:ring-offset-0", className)}
       />
       <div className="text-xs text-muted-foreground text-right">
         {value.length}/{maxLength}
