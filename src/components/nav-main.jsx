@@ -83,7 +83,6 @@ export function NavMain({ onFilterChange, currentFilter }) {
   }
 
   const handleClick = (filter) => {
-    console.log('Filter clicked:', filter)
     onFilterChange(filter)
   }
 
