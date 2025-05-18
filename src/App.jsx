@@ -156,9 +156,15 @@ export default function App() {
                   onToggleStatus={handleToggleStatus}
                 />
               </div>
-              <div className="shrink-0 border-t p-4">
-                <TodoForm onAdd={handleAddTodo} />
-              </div>
+              {currentFilter !== 'completed' && (
+                <div className="shrink-0 border-t p-4">
+                  <TodoForm 
+                    onAdd={handleAddTodo} 
+                    defaultCategory={currentCategory}
+                    defaultStarred={currentFilter === 'starred'}
+                  />
+                </div>
+              )}
             </div>
           </SidebarInset>
         </div>

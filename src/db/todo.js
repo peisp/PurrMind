@@ -28,7 +28,10 @@ export const addTodo = (todo) => {
     completed: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    categoryId: todo.categoryId || null
+    categoryId: todo.categoryId || null,
+    dueDate: todo.dueDate || null,
+    reminderTime: todo.reminderTime || null,
+    starred: todo.starred || false
   }
   todos.push(newTodo)
   db.set(TODO_DB_NAME, todos)

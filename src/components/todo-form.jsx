@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Plus } from 'lucide-react'
+import { getAllCategories } from '@/db/todo'
 
-export function TodoForm({ onAdd }) {
+export function TodoForm({ onAdd, defaultCategory, defaultStarred }) {
   const [title, setTitle] = useState('')
 
   const handleSubmit = (e) => {
@@ -13,7 +14,8 @@ export function TodoForm({ onAdd }) {
         description: '',
         dueDate: new Date().toISOString(),
         completed: false,
-        starred: false
+        starred: defaultStarred || false,
+        categoryId: defaultCategory || null
       })
       setTitle('')
     }
