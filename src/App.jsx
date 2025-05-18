@@ -205,7 +205,7 @@ export default function App() {
                 />
               </div>
               {currentFilter !== 'completed' && (
-                <div className="shrink-0 border-t p-4">
+                <div className="shrink-0 px-4 pb-2 pt-1">
                   <TodoForm 
                     onAdd={handleAddTodo} 
                     defaultCategory={currentCategory}
