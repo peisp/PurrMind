@@ -63,6 +63,7 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
             onStar={handleStar}
             onEdit={handleEdit}
             getCategoryName={getCategoryName}
+            categories={categories}
           />
         ))}
       </div>

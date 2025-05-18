@@ -1,17 +1,19 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Star } from 'lucide-react'
+import { Star, Tag, Calendar, Clock, FileText, AlarmClock, AlarmCheck, CircleCheckBig } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
+import * as Icons from "lucide-react"
 
 export function TodoCard({ 
   todo, 
   onToggleStatus, 
   onStar, 
   onEdit, 
-  getCategoryName 
+  getCategoryName,
+  categories
 }) {
   const formatDate = (date) => {
     if (!date) return ''
@@ -34,6 +36,29 @@ export function TodoCard({
     }
   }
 
+  const getIconComponent = (iconName) => {
+    return Icons[iconName] || Icons.FolderIcon
+  }
+
+  const getColorClass = (color) => {
+    switch (color) {
+      case 'red':
+        return 'text-red-500'
+      case 'blue':
+        return 'text-blue-500'
+      case 'green':
+        return 'text-green-500'
+      case 'yellow':
+        return 'text-yellow-500'
+      case 'purple':
+        return 'text-purple-500'
+      case 'pink':
+        return 'text-pink-500'
+      default:
+        return 'text-gray-500'
+    }
+  }
+
   return (
     <Card 
       className="p-2 cursor-pointer hover:bg-accent/50 transition-colors"
@@ -53,29 +78,52 @@ export function TodoCard({
             {todo.title}
           </h3>
           <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="shrink-0">{getCategoryName(todo.categoryId)}</span>
+            {todo.categoryId && (
+              <>
+                <div className="flex items-center gap-1 shrink-0">
+                  {(() => {
+                    const category = categories.find(cat => cat.id === todo.categoryId)
+                    const Icon = getIconComponent(category?.icon)
+                    return <Icon className={cn('h-3 w-3', getColorClass(category?.color))} />
+                  })()}
+                  <span>{getCategoryName(todo.categoryId)}</span>
+                </div>
+              </>
+            )}
             {todo.description && (
               <>
                 <span className="shrink-0">•</span>
-                <span className="truncate min-w-0 max-w-28">{todo.description}</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <FileText className="h-3 w-3" />
+                  <span className="truncate min-w-0 max-w-28">{todo.description}</span>
+                </div>
               </>
             )}
             {todo.dueDate && (
               <>
                 <span className="shrink-0">•</span>
-                <span className="shrink-0">截止于 {formatDate(todo.dueDate)}</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Calendar className="h-3 w-3" />
+                  <span>{formatDate(todo.dueDate)}</span>
+                </div>
               </>
             )}
             {todo.reminderTime && (
               <>
                 <span className="shrink-0">•</span>
-                <span className="shrink-0">提醒于 {formatDate(todo.reminderTime)}</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <AlarmClock className="h-3 w-3" />
+                  <span>{formatDate(todo.reminderTime)}</span>
+                </div>
               </>
             )}
             {todo.completed && (
               <>
                 <span className="shrink-0">•</span>
-                <span className="shrink-0">完成于 {formatDate(todo.completedAt)}</span>
+                <div className="flex items-center gap-1 shrink-0">
+                  <CircleCheckBig className="h-3 w-3" />
+                  <span>{formatDate(todo.completedAt)}</span>
+                </div>
               </>
             )}
           </div>
