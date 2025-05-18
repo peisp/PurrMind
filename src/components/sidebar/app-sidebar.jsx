@@ -6,8 +6,8 @@ import {
   LucideCalendar1,
   StarsIcon,
 } from 'lucide-react'
-import { NavMyList } from "@/components/nav-my-list.jsx"
-import { NavMain } from "@/components/nav-main"
+import { NavMyList } from "@/components/sidebar/nav-my-list.jsx"
+import { NavMain } from "@/components/sidebar/nav-main"
 import {
   Sidebar,
   SidebarContent,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar.jsx'
-import { AppSidebar } from '@/components/app-sidebar.jsx'
+import { AppSidebar } from '@/components/sidebar/app-sidebar.jsx'
 import { initTodoDB, getAllTodos, addTodo, updateTodo, deleteTodo, toggleTodoStatus, getTodosByCategory } from '@/db/todo'
 import { TodoList } from '@/components/todo-list'
 import { TodoForm } from '@/components/todo-form'
