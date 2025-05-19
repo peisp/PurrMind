@@ -1,10 +1,14 @@
 {
+  "pluginName": "喵咚咚",
+  "description": "喵咚咚是一款待办事项提醒APP，集任务清单管理、日程提醒、todolist于一体。由萌宠猫咪“咚咚”贴心提醒，帮你高效规划时间，提升专注力，打造高效生活必备的时间管理工具！",
   "main": "index.html",
-  "logo": "public/logo.png",
+  "logo": "logo.png",
+  "author": "🍉",
   "development": {
     "main": "http://localhost:5173"
   },
   "$schema": "https://raw.githubusercontent.com/uTools-Labs/utools-api-types/refs/heads/main/resource/utools.schema.json",
+  "platform": ["win32", "darwin", "linux"],
   "features": [
     {
       "code": "index",
