@@ -112,7 +112,7 @@ export function NavMyList ({
   }
 
   const getCategoryCount = (categoryId) => {
-    const count = todos.filter(todo => todo.categoryId === categoryId).length
+    const count = todos.filter(todo => !todo.completed && todo.categoryId === categoryId).length
     return count > 99 ? '99+' : count
   }
 
