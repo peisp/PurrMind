@@ -154,6 +154,8 @@ export function Index({ enterAction }) {
     setCurrentCategory(category)
     setCurrentFilter(null)
     setCurrentLabel(label)
+    // 切换到分类时，重置showCompleted状态
+    setShowCompleted(false)
     
     const categoryData = categories.find(cat => cat.id === category)
     if (categoryData) {
@@ -163,7 +165,7 @@ export function Index({ enterAction }) {
 
   const filteredTodos = todos.filter(todo => {
     if (currentCategory !== null) {
-      return todo.categoryId === currentCategory
+      return (showCompleted || !todo.completed) && todo.categoryId === currentCategory
     }
 
     const today = new Date()
