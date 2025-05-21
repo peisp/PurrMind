@@ -20,5 +20,5 @@ export default function App() {
     return <Index enterAction={enterAction} />
   }
 
-  return null
+  return <Index />
 }
