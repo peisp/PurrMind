@@ -23,6 +23,22 @@ const items = [
 export function NavMain({ onFilterChange, currentFilter }) {
   const [todos, setTodos] = useState([])
 
+  // 获取今天的默认截止时间：如果在18点之前，设置为今天下午6点，否则设置为今天晚上11:59
+  const getDefaultDueDate = () => {
+    const now = new Date()
+    const dueDate = new Date()
+
+    if (now.getHours() < 18) {
+      // 设置为今天 18:00:00.000
+      dueDate.setHours(18, 0, 0, 0)
+    } else {
+      // 设置为今天 23:59:59.999
+      dueDate.setHours(23, 59, 59, 999)
+    }
+
+    return dueDate
+  }
+  
   useEffect(() => {
     loadTodos()
     window.addEventListener('storage', handleStorageChange)
@@ -83,8 +99,10 @@ export function NavMain({ onFilterChange, currentFilter }) {
     return count > 99 ? "99+" : count
   }
 
-  const handleClick = (filter, title, icon, color) => {
-    onFilterChange(filter, title, icon, color)
+  const handleClick = (filter, title, icon, color, defaultDueDate) => {
+    // 如果选择"今天"，设置默认截止时间为今天下午6点
+    const defaultDueDateToUse = filter === 'today' ? getDefaultDueDate() : defaultDueDate
+    onFilterChange(filter, title, icon, color, defaultDueDateToUse)
   }
 
   return (
@@ -102,7 +120,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
               "justify-between",
               isActive && "font-medium"
             )}
-            onClick={() => handleClick(item.filter, item.title, item.icon, isActive ? "default" : "default")}
+            onClick={() => handleClick(item.filter, item.title, item.icon, isActive ? "default" : "default", null)}
           >
             <div className="flex items-center gap-2">
               <Icon className={cn(

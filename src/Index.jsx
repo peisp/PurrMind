@@ -15,6 +15,7 @@ export function Index({ enterAction }) {
   const [currentLabel, setCurrentLabel] = useState('全部')
   const [currentIcon, setCurrentIcon] = useState({ icon: 'ListIcon', color: 'default' })
   const [categories, setCategories] = useState([])
+  const [defaultDueDate, setDefaultDueDate] = useState(null)
 
   useEffect(() => {
     // 初始化数据库
@@ -128,11 +129,12 @@ export function Index({ enterAction }) {
     }
   }
 
-  const handleFilterChange = (filter, label, icon, color) => {
+  const handleFilterChange = (filter, label, icon, color, dueDate) => {
     setCurrentFilter(filter)
     setCurrentCategory(null)
     setCurrentLabel(label)
     setCurrentIcon({ icon, color })
+    setDefaultDueDate(dueDate)
   }
 
   const handleCategoryChange = (category, label) => {
@@ -209,6 +211,7 @@ export function Index({ enterAction }) {
                   onAdd={handleAddTodo} 
                   defaultCategory={currentCategory}
                   defaultStarred={currentFilter === 'starred'}
+                  defaultDueDate={defaultDueDate}
                 />
               </div>
             )}

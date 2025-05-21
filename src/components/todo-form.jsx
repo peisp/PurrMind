@@ -5,7 +5,7 @@ import { getAllCategories } from '@/db/todo'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools.js'
 
-export function TodoForm ({ onAdd, defaultCategory, defaultStarred }) {
+export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDate }) {
   const [title, setTitle] = useState('')
   const [isAIActive, setIsAIActive] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -16,7 +16,7 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred }) {
   const createBaseTask = (taskTitle) => ({
     title: taskTitle.trim(),
     description: '',
-    dueDate: null,
+    dueDate: defaultDueDate || null,
     completed: false,
     starred: defaultStarred || false,
     categoryId: defaultCategory || null
