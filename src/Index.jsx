@@ -7,6 +7,8 @@ import { TodoForm } from '@/components/todo-form.jsx'
 import { TodoNotification } from '@/components/todo-notification.jsx'
 import * as Icons from 'lucide-react'
 import { cn } from '@/lib/utils.js'
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 export function Index({ enterAction }) {
   const [todos, setTodos] = useState([])
@@ -16,6 +18,7 @@ export function Index({ enterAction }) {
   const [currentIcon, setCurrentIcon] = useState({ icon: 'ListIcon', color: 'default' })
   const [categories, setCategories] = useState([])
   const [defaultDueDate, setDefaultDueDate] = useState(null)
+  const [showCompleted, setShowCompleted] = useState(false)
 
   useEffect(() => {
     // 初始化数据库
@@ -130,6 +133,15 @@ export function Index({ enterAction }) {
   }
 
   const handleFilterChange = (filter, label, icon, color, dueDate) => {
+    // 如果从"已完成"过滤器切换到其他过滤器，重置showCompleted状态
+    if (currentFilter === 'completed' && filter !== 'completed') {
+      setShowCompleted(false)
+    }
+    // 如果切换到"已完成"过滤器，强制显示已完成事项
+    if (filter === 'completed') {
+      setShowCompleted(true)
+    }
+    
     setCurrentFilter(filter)
     setCurrentCategory(null)
     setCurrentLabel(label)
@@ -161,17 +173,17 @@ export function Index({ enterAction }) {
 
     switch (currentFilter) {
       case 'today':
-        return !todo.completed && todoDate.getTime() === today.getTime()
+        return (showCompleted || !todo.completed) && todoDate.getTime() === today.getTime()
       case 'planned':
-        return !todo.completed && todoDate.getTime() > today.getTime()
+        return (showCompleted || !todo.completed) && todoDate.getTime() > today.getTime()
       case 'starred':
-        return !todo.completed && todo.starred
+        return (showCompleted || !todo.completed) && todo.starred
       case 'completed':
         return todo.completed
       case 'all':
-        return !todo.completed
+        return showCompleted || !todo.completed
       default:
-        return true
+        return showCompleted || !todo.completed
     }
   })
 
@@ -193,6 +205,39 @@ export function Index({ enterAction }) {
                 <Icon className={cn('h-4 w-4', getColorClass(currentIcon.color))} />
                 <h1 className="text-lg font-semibold text-primary">{currentLabel}</h1>
               </div>
+            </div>
+            <div className="px-3">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8",
+                        showCompleted && "text-primary",
+                        currentFilter === 'completed' && "opacity-50 cursor-not-allowed"
+                      )}
+                      onClick={() => {
+                        if (currentFilter !== 'completed') {
+                          setShowCompleted(!showCompleted)
+                        }
+                      }}
+                      disabled={currentFilter === 'completed'}
+                    >
+                      <Icons.CheckCircle2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {currentFilter === 'completed' 
+                      ? "已完成过滤器下必须显示已完成事项" 
+                      : showCompleted 
+                        ? "隐藏已完成事项" 
+                        : "显示已完成事项"
+                    }
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </header>
           <div className="flex flex-1 flex-col overflow-hidden">
