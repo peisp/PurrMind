@@ -232,7 +232,7 @@ export function TodoEditSheet({
               onValueChange={(value) => setEditForm({ ...editForm, categoryId: value === "none" ? null : value })}
             >
               <SelectTrigger className="focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=closed]:ring-0 data-[state=closed]:ring-offset-0 ring-0 ring-offset-0">
-                <SelectValue placeholder="选择分类">
+                <SelectValue placeholder="选择列表">
                   {editForm.categoryId ? (
                     <div className="flex items-center gap-2">
                       <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
@@ -242,14 +242,14 @@ export function TodoEditSheet({
                           return <Icon className={cn('h-4 w-4', getColorClass(category?.color))} />
                         })()}
                       </div>
-                      <span>{categories.find(cat => cat.id === editForm.categoryId)?.name || "未知分类"}</span>
+                      <span>{categories.find(cat => cat.id === editForm.categoryId)?.name || "未知列表"}</span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
                       <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
                         <Icons.FolderIcon className="h-4 w-4 text-gray-500" />
                       </div>
-                      <span>无分类</span>
+                      <span>无列表</span>
                     </div>
                   )}
                 </SelectValue>
@@ -260,7 +260,7 @@ export function TodoEditSheet({
                     <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
                       <Icons.FolderIcon className="h-4 w-4 text-gray-500" />
                     </div>
-                    <span>无分类</span>
+                    <span>无列表</span>
                   </div>
                 </SelectItem>
                 {categories.map((category) => {
