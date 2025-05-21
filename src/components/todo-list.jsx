@@ -60,6 +60,28 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
     return category ? category.name : "未知分类"
   }
 
+  // 排序函数
+  const sortTodos = (todos) => {
+    return [...todos].sort((a, b) => {
+      // 首先按截止时间排序
+      if (a.dueDate && b.dueDate) {
+        const dateCompare = new Date(b.dueDate) - new Date(a.dueDate)
+        if (dateCompare !== 0) return dateCompare
+      } else if (a.dueDate) return -1
+      else if (b.dueDate) return 1
+
+      // 其次按提醒时间排序
+      if (a.reminderTime && b.reminderTime) {
+        const reminderCompare = new Date(b.reminderTime) - new Date(a.reminderTime)
+        if (reminderCompare !== 0) return reminderCompare
+      } else if (a.reminderTime) return -1
+      else if (b.reminderTime) return 1
+
+      // 最后按创建时间排序
+      return new Date(b.createdAt) - new Date(a.createdAt)
+    })
+  }
+
   if (todos.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -68,10 +90,12 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
     )
   }
 
+  const sortedTodos = sortTodos(todos)
+
   return (
     <>
       <div className="space-y-1">
-        {todos.map((todo) => (
+        {sortedTodos.map((todo) => (
           <TodoCard
             key={todo.id}
             todo={todo}
