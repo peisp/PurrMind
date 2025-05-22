@@ -11,6 +11,7 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
+  const [showAiTip, setShowAiTip] = useState(false)
 
   // 创建基础任务对象
   const createBaseTask = (taskTitle) => ({
@@ -85,6 +86,10 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   }
 
   const toggleAI = () => {
+    if (!isAIActive) {
+      setShowAiTip(true)
+      setTimeout(() => setShowAiTip(false), 2000)
+    }
     setIsAIActive(!isAIActive)
     setError(null)
   }
@@ -92,6 +97,23 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   return (
     <form onSubmit={handleSubmit} className="flex items-center w-full">
       <div className="relative w-full">
+        {/* AI能量提示 */}
+        {showAiTip && (
+          <div
+            className="absolute left-1/2 -translate-x-1/2 -top-14 flex items-center gap-2 px-5 py-2 rounded-xl shadow-lg z-50
+              bg-gradient-to-r from-purple-300 via-pink-300 to-yellow-300 text-white font-semibold text-base
+              animate-fade-in-out"
+            style={{
+              pointerEvents: 'none',
+              opacity: showAiTip ? 1 : 0,
+              transition: 'opacity 0.5s'
+            }}
+          >
+            <Sparkles className="w-5 h-5 text-white drop-shadow" />
+            每次消耗1点 uTools AI能量
+          </div>
+        )}
+        
         {/* 错误提示 */}
         {error && (
           <div className="absolute -top-6 left-0 text-sm text-red-500">
