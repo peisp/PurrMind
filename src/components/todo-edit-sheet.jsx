@@ -92,9 +92,9 @@ export function TodoEditSheet({
     }
   }, [todo])
 
-  // 监听分类变化
+  // 监听列表变化
   useEffect(() => {
-    // 如果当前选中的分类不存在于新的分类列表中，则清除分类选择
+    // 如果当前选中的列表不存在于新的列表列表中，则清除列表选择
     if (editForm.categoryId && !categories.find(cat => cat.id === editForm.categoryId)) {
       setEditForm(prev => ({ ...prev, categoryId: null }))
     }
@@ -226,7 +226,7 @@ export function TodoEditSheet({
             />
           </div>
           <div className="space-y-0.5">
-            <label className="text-sm font-medium">分类</label>
+            <label className="text-sm font-medium">列表</label>
             <Select 
               value={editForm.categoryId || "none"} 
               onValueChange={(value) => setEditForm({ ...editForm, categoryId: value === "none" ? null : value })}
