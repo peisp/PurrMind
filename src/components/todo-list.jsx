@@ -114,45 +114,41 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
 
   return (
     <>
-      <div className="space-y-6 relative">
-        {days.map(day => (
+      <div className="relative">
+        {/* 主时间轴线 */}
+        <div className="absolute left-0.5 top-1.5 bottom-0 w-0.5 bg-gray-200 mt-4" />
+
+        {days.map((day, dayIndex) => (
           <div key={day}>
-            {/* 日期标题 */}
-            <div className="mb-2 text-sm text-gray-500 font-semibold pl-6">
-              {format(new Date(day), 'MM-dd EEE', { locale: zhCN })}
-            </div>
-            {grouped[day].map((todo, idx) => (
-              <div key={todo.id} className="flex items-start relative">
-                {/* 时间轴 */}
-                <div className="flex flex-col items-center mr-3">
-                  {/* 只有第一个才显示圆点 */}
-                  {idx === 0 ? (
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                  ) : (
-                    <div className="w-1.5 h-1.5" /> // 占位，保证对齐
-                  )}
-                  {/* 竖线（不是最后一个才显示） */}
-                  {idx !== grouped[day].length - 1 && (
-                    <div className="w-0.5 flex-1 bg-gray-200" style={{ minHeight: 32 }} />
-                  )}
+            <div className="flex items-start relative">
+              {/* 时间轴节点 */}
+              <div className="flex items-center mr-3 mt-4">
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+              </div>
+
+              {/* 右侧内容区域 */}
+              <div className="flex-1">
+                {/* 日期标题 */}
+                <div className="my-2 text-sm text-gray-500 font-semibold">
+                  {format(new Date(day), 'MM-dd EEE', { locale: zhCN })}
                 </div>
-                {/* 卡片 */}
-                <div className="flex-1">
-                  <TodoCard
-                    todo={todo}
-                    onToggleStatus={onToggleStatus}
-                    onStar={handleStar}
-                    onEdit={handleEdit}
-                    getCategoryName={getCategoryName}
-                    categories={categories}
-                  />
-                </div>
-                {/* 时间文本 */}
-                <div className="absolute left-7 top-0 text-xs text-gray-400 select-none">
-                  {format(new Date(getTimelineTime(todo)), 'HH:mm')}
+
+                {/* 待办事项卡片 */}
+                <div className="space-y-2">
+                  {grouped[day].map((todo) => (
+                    <TodoCard
+                      key={todo.id}
+                      todo={todo}
+                      onToggleStatus={onToggleStatus}
+                      onStar={handleStar}
+                      onEdit={handleEdit}
+                      getCategoryName={getCategoryName}
+                      categories={categories}
+                    />
+                  ))}
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         ))}
       </div>
@@ -170,4 +166,4 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
       />
     </>
   )
-} 
+}
