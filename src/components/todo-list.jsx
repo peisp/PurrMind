@@ -62,7 +62,7 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
     return category ? category.name : "未知分类"
   }
 
-  // 排序函数
+// 排序函数
   const sortTodos = (todos) => {
     return [...todos].sort((a, b) => {
       // 首先按截止时间排序
@@ -79,10 +79,18 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
       } else if (a.reminderTime) return -1
       else if (b.reminderTime) return 1
 
+      // 然后按完成时间排序
+      if (a.completedAt && b.completedAt) {
+        const completedCompare = new Date(b.completedAt) - new Date(a.completedAt)
+        if (completedCompare !== 0) return completedCompare
+      } else if (a.completedAt) return -1
+      else if (b.completedAt) return 1
+
       // 最后按创建时间排序
       return new Date(b.createdAt) - new Date(a.createdAt)
     })
   }
+
 
   const getTimelineTime = (todo) => {
     return todo.dueDate || todo.reminderTime || todo.createdAt
