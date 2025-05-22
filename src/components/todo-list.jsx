@@ -123,13 +123,13 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
             <div className="flex items-start relative">
               {/* 时间轴节点 */}
               <div className="flex items-center mr-3 mt-4">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
               </div>
 
               {/* 右侧内容区域 */}
               <div className="flex-1">
                 {/* 日期标题 */}
-                <div className="my-2 text-sm text-gray-500 font-semibold">
+                <div className="my-2 text-sm text-primary font-semibold">
                   {format(new Date(day), 'MM-dd EEE', { locale: zhCN })}
                 </div>
 
