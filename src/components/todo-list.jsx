@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { getAllCategories } from "@/db/todo"
 import { TodoCard } from './todo-card'
 import { TodoEditSheet } from './todo-edit-sheet'
+import { format } from "date-fns"
+import { zhCN } from "date-fns/locale"
 
 export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
   const [categories, setCategories] = useState([])
@@ -82,6 +84,26 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
     })
   }
 
+  const getTimelineTime = (todo) => {
+    return todo.dueDate || todo.reminderTime || todo.createdAt
+  }
+
+  // 分组
+  const groupTodosByDay = (todos) => {
+    const groups = {}
+    todos.forEach(todo => {
+      const time = getTimelineTime(todo)
+      const day = format(new Date(time), 'yyyy-MM-dd')
+      if (!groups[day]) groups[day] = []
+      groups[day].push(todo)
+    })
+    return groups
+  }
+
+  const sortedTodos = sortTodos(todos)
+  const grouped = groupTodosByDay(sortedTodos)
+  const days = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a))
+
   if (todos.length === 0) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -90,24 +112,50 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
     )
   }
 
-  const sortedTodos = sortTodos(todos)
-
   return (
     <>
-      <div className="space-y-1">
-        {sortedTodos.map((todo) => (
-          <TodoCard
-            key={todo.id}
-            todo={todo}
-            onToggleStatus={onToggleStatus}
-            onStar={handleStar}
-            onEdit={handleEdit}
-            getCategoryName={getCategoryName}
-            categories={categories}
-          />
+      <div className="space-y-6 relative">
+        {days.map(day => (
+          <div key={day}>
+            {/* 日期标题 */}
+            <div className="mb-2 text-sm text-gray-500 font-semibold pl-6">
+              {format(new Date(day), 'MM-dd EEE', { locale: zhCN })}
+            </div>
+            {grouped[day].map((todo, idx) => (
+              <div key={todo.id} className="flex items-start relative">
+                {/* 时间轴 */}
+                <div className="flex flex-col items-center mr-3">
+                  {/* 只有第一个才显示圆点 */}
+                  {idx === 0 ? (
+                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                  ) : (
+                    <div className="w-1.5 h-1.5" /> // 占位，保证对齐
+                  )}
+                  {/* 竖线（不是最后一个才显示） */}
+                  {idx !== grouped[day].length - 1 && (
+                    <div className="w-0.5 flex-1 bg-gray-200" style={{ minHeight: 32 }} />
+                  )}
+                </div>
+                {/* 卡片 */}
+                <div className="flex-1">
+                  <TodoCard
+                    todo={todo}
+                    onToggleStatus={onToggleStatus}
+                    onStar={handleStar}
+                    onEdit={handleEdit}
+                    getCategoryName={getCategoryName}
+                    categories={categories}
+                  />
+                </div>
+                {/* 时间文本 */}
+                <div className="absolute left-7 top-0 text-xs text-gray-400 select-none">
+                  {format(new Date(getTimelineTime(todo)), 'HH:mm')}
+                </div>
+              </div>
+            ))}
+          </div>
         ))}
       </div>
-
       <TodoEditSheet
         isOpen={isSheetOpen}
         onOpenChange={setIsSheetOpen}
