@@ -62,32 +62,35 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
     return category ? category.name : "未知分类"
   }
 
-// 排序函数
   const sortTodos = (todos) => {
     return [...todos].sort((a, b) => {
-      // 首先按截止时间排序
-      if (a.dueDate && b.dueDate) {
-        const dateCompare = new Date(b.dueDate) - new Date(a.dueDate)
-        if (dateCompare !== 0) return dateCompare
-      } else if (a.dueDate) return -1
-      else if (b.dueDate) return 1
+      // 优先按是否完成：未完成的排前面
+      if (a.completedAt && !b.completedAt) return 1
+      if (!a.completedAt && b.completedAt) return -1
 
-      // 其次按提醒时间排序
-      if (a.reminderTime && b.reminderTime) {
-        const reminderCompare = new Date(b.reminderTime) - new Date(a.reminderTime)
-        if (reminderCompare !== 0) return reminderCompare
-      } else if (a.reminderTime) return -1
-      else if (b.reminderTime) return 1
+      const isCompleted = !!a.completedAt && !!b.completedAt
 
-      // 然后按完成时间排序
-      if (a.completedAt && b.completedAt) {
-        const completedCompare = new Date(b.completedAt) - new Date(a.completedAt)
-        if (completedCompare !== 0) return completedCompare
-      } else if (a.completedAt) return -1
-      else if (b.completedAt) return 1
+      if (!isCompleted) {
+        // 对未完成任务：按截止时间升序
+        if (a.dueDate && b.dueDate) {
+          const dateCompare = new Date(a.dueDate) - new Date(b.dueDate)
+          if (dateCompare !== 0) return dateCompare
+        } else if (a.dueDate) return -1
+        else if (b.dueDate) return 1
 
-      // 最后按创建时间排序
-      return new Date(b.createdAt) - new Date(a.createdAt)
+        // 按提醒时间升序
+        if (a.reminderTime && b.reminderTime) {
+          const reminderCompare = new Date(a.reminderTime) - new Date(b.reminderTime)
+          if (reminderCompare !== 0) return reminderCompare
+        } else if (a.reminderTime) return -1
+        else if (b.reminderTime) return 1
+
+        // 按创建时间升序
+        return new Date(a.createdAt) - new Date(b.createdAt)
+      } else {
+        // 对已完成任务：按完成时间降序
+        return new Date(b.completedAt) - new Date(a.completedAt)
+      }
     })
   }
 
