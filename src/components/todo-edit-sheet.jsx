@@ -339,6 +339,7 @@ export function TodoEditSheet({
                   onKeyDown={(e) => handleTimeKeyDown('hour', e)}
                   className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="时"
+                  disabled={!editForm.dueDate}
                 />
                 <span className="text-muted-foreground">:</span>
                 <Input
@@ -350,6 +351,7 @@ export function TodoEditSheet({
                   onKeyDown={(e) => handleTimeKeyDown('minute', e)}
                   className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="分"
+                  disabled={!editForm.dueDate}
                 />
               </div>
             </div>
