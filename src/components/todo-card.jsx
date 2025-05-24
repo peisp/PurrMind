@@ -21,20 +21,30 @@ export function TodoCard({
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const nextWeek = new Date(today)
-    nextWeek.setDate(nextWeek.getDate() + (8 - nextWeek.getDay()))
+    tomorrow.setDate(today.getDate() + 1)
+    const yesterday = new Date(today)
+    yesterday.setDate(today.getDate() - 1)
+    const nextMonday = new Date(today)
+    nextMonday.setDate(today.getDate() + ((8 - today.getDay()) % 7 || 7)) // 下一个周一
 
-    if (d.getTime() === today.getTime()) {
+    const isSameDay = (d1, d2) =>
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+
+    if (isSameDay(d, today)) {
       return `今天 ${format(d, 'HH:mm')}`
-    } else if (d.getTime() === tomorrow.getTime()) {
+    } else if (isSameDay(d, tomorrow)) {
       return `明天 ${format(d, 'HH:mm')}`
-    } else if (d.getTime() === nextWeek.getTime()) {
+    } else if (isSameDay(d, yesterday)) {
+      return `昨天 ${format(d, 'HH:mm')}`
+    } else if (isSameDay(d, nextMonday)) {
       return `下周一 ${format(d, 'HH:mm')}`
     } else {
       return format(d, 'MM月dd日 HH:mm', { locale: zhCN })
     }
   }
+
 
   const getIconComponent = (iconName) => {
     return Icons[iconName] || Icons.FolderIcon
