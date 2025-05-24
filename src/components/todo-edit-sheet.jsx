@@ -36,7 +36,7 @@ const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) =>
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={cn("focus-visible:ring-0 focus-visible:ring-offset-0", className)}
+        className={cn("", className)}
       />
       <div className="text-xs text-muted-foreground text-right">
         {value.length}/{maxLength}
@@ -53,7 +53,7 @@ const LimitedTextarea = ({ value, onChange, maxLength, placeholder, className })
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={cn("focus-visible:ring-0 focus-visible:ring-offset-0 resize-none", className)}
+        className={cn(" resize-none", className)}
       />
       <div className="text-xs text-muted-foreground text-right">
         {value.length}/{maxLength}
@@ -231,7 +231,7 @@ export function TodoEditSheet({
               value={editForm.categoryId || "none"} 
               onValueChange={(value) => setEditForm({ ...editForm, categoryId: value === "none" ? null : value })}
             >
-              <SelectTrigger className="focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=closed]:ring-0 data-[state=closed]:ring-offset-0 ring-0 ring-offset-0">
+              <SelectTrigger className=" data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=closed]:ring-0 data-[state=closed]:ring-offset-0 ring-0 ring-offset-0">
                 <SelectValue placeholder="选择列表">
                   {editForm.categoryId ? (
                     <div className="flex items-center gap-2">
@@ -254,8 +254,8 @@ export function TodoEditSheet({
                   )}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="focus-visible:ring-0 focus-visible:ring-offset-0">
-                <SelectItem value="none" className="focus-visible:ring-0 focus-visible:ring-offset-0">
+              <SelectContent>
+                <SelectItem value="none">
                   <div className="flex items-center gap-2">
                     <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
                       <Icons.FolderIcon className="h-4 w-4 text-gray-500" />
@@ -269,7 +269,6 @@ export function TodoEditSheet({
                     <SelectItem 
                       key={category.id} 
                       value={category.id}
-                      className="focus-visible:ring-0 focus-visible:ring-offset-0"
                     >
                       <div className="flex items-center gap-2">
                         <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
@@ -291,7 +290,7 @@ export function TodoEditSheet({
                   <Button
                     variant="outline"
                     className={cn(
-                      "flex-1 justify-start text-left font-normal focus-visible:ring-0 focus-visible:ring-offset-0",
+                      "flex-1 justify-start text-left font-normal ",
                       !editForm.dueDate && "text-muted-foreground"
                     )}
                   >
@@ -337,7 +336,7 @@ export function TodoEditSheet({
                   value={editForm.dueDate ? format(editForm.dueDate, "HH") : ""}
                   onChange={(e) => handleTimeChange('hour', e.target.value)}
                   onKeyDown={(e) => handleTimeKeyDown('hour', e)}
-                  className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="w-[50px] h-8 px-2 text-center "
                   placeholder="时"
                   disabled={!editForm.dueDate}
                 />
@@ -349,7 +348,7 @@ export function TodoEditSheet({
                   value={editForm.dueDate ? format(editForm.dueDate, "mm") : ""}
                   onChange={(e) => handleTimeChange('minute', e.target.value)}
                   onKeyDown={(e) => handleTimeKeyDown('minute', e)}
-                  className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="w-[50px] h-8 px-2 text-center "
                   placeholder="分"
                   disabled={!editForm.dueDate}
                 />
@@ -370,7 +369,7 @@ export function TodoEditSheet({
                   setEditForm({ ...editForm, reminderTime: selectedDate })
                 }}
               >
-                <SelectTrigger className="focus-visible:ring-0 focus-visible:ring-offset-0">
+                <SelectTrigger>
                   <SelectValue placeholder="选择提醒时间">
                     {editForm.reminderTime && format(editForm.reminderTime, "yyyy-MM-dd HH:mm")}
                   </SelectValue>
@@ -394,7 +393,7 @@ export function TodoEditSheet({
                       <Button
                         variant="outline"
                         className={cn(
-                          "flex-1 justify-start text-left font-normal focus-visible:ring-0 focus-visible:ring-offset-0",
+                          "flex-1 justify-start text-left font-normal ",
                           !editForm.reminderTime && "text-muted-foreground"
                         )}
                       >
@@ -457,7 +456,7 @@ export function TodoEditSheet({
                           setEditForm({ ...editForm, reminderTime: newDate })
                         }
                       }}
-                      className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="w-[50px] h-8 px-2 text-center "
                       placeholder="时"
                     />
                     <span className="text-muted-foreground">:</span>
@@ -485,14 +484,14 @@ export function TodoEditSheet({
                           setEditForm({ ...editForm, reminderTime: newDate })
                         }
                       }}
-                      className="w-[50px] h-8 px-2 text-center focus-visible:ring-0 focus-visible:ring-offset-0"
+                      className="w-[50px] h-8 px-2 text-center "
                       placeholder="分"
                     />
                   </div>
                 </div>
                 <Button
                   variant="outline"
-                  className="w-full focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="w-full "
                   onClick={() => {
                     setShowCustomTimePicker(false)
                     setEditForm({ ...editForm, reminderTime: null })
@@ -511,7 +510,6 @@ export function TodoEditSheet({
           <Button 
             variant="destructive" 
             onClick={onDelete}
-            className="focus-visible:ring-0 focus-visible:ring-offset-0"
           >
             删除
           </Button>
@@ -519,13 +517,11 @@ export function TodoEditSheet({
             <Button 
               variant="outline" 
               onClick={onCancel}
-              className="focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               取消
             </Button>
             <Button 
               onClick={handleSave}
-              className="focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               保存
             </Button>

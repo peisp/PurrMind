@@ -153,7 +153,7 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
             placeholder="添加任务..."
             disabled={isSubmitting || isProcessing}
             className={cn(
-              'h-12 text-lg pl-10 pr-10 transition-all duration-200 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0',
+              'h-12 text-lg pl-10 pr-10 transition-all duration-200 focus:ring-0 ',
               isAIActive && 'bg-background',
               (isSubmitting || isProcessing) && 'opacity-70 cursor-not-allowed'
             )}

@@ -75,4 +75,12 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  button:focus-visible {
+    @apply !ring-0 !ring-offset-0 !outline-none;
+  }
+
 }
