@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Plus, Sparkles } from 'lucide-react'
-import { getAllCategories } from '@/db/todo'
 import { cn } from '@/lib/utils'
-import { getTaskObjByAi } from '@/components/ai/ai-utools.js'
+import { getTaskObjByAi } from '@/components/ai/ai-utools'
 
 export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDate }) {
   const [title, setTitle] = useState('')

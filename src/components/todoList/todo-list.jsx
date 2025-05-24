@@ -3,7 +3,7 @@ import { getAllCategories } from "@/db/todo"
 import { TodoCard } from './todo-card'
 import { TodoEditSheet } from './todo-edit-sheet'
 import { format } from "date-fns"
-import { zhCN } from "date-fns/locale"
+import { DayLabel } from '@/components/todoList/day-label'
 
 export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
   const [categories, setCategories] = useState([])
@@ -139,11 +139,7 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus }) {
 
               {/* 右侧内容区域 */}
               <div className="flex-1">
-                {/* 日期标题 */}
-                <div className="my-2 text-sm text-primary font-semibold">
-                  {format(new Date(day), 'MM-dd EEE', { locale: zhCN })}
-                </div>
-
+                <DayLabel date={day} />
                 {/* 待办事项卡片 */}
                 <div className="space-y-2">
                   {grouped[day].map((todo) => (
