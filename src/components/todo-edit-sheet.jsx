@@ -22,7 +22,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { CalendarIcon, Clock, Tag } from "lucide-react"
+import { CalendarIcon, Clock, Tag, AlertCircle } from "lucide-react"
 import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
 import { cn } from "@/lib/utils"
@@ -78,7 +78,8 @@ export function TodoEditSheet({
     dueDate: null,
     reminderTime: null
   })
-  const [showCustomTimePicker, setShowCustomTimePicker] = useState(false)
+
+  const [timeValidationError, setTimeValidationError] = useState('')
 
   useEffect(() => {
     if (todo) {
@@ -99,6 +100,19 @@ export function TodoEditSheet({
       setEditForm(prev => ({ ...prev, categoryId: null }))
     }
   }, [categories, editForm.categoryId])
+
+  // 校验提醒时间是否在截止时间之前
+  useEffect(() => {
+    if (editForm.dueDate && editForm.reminderTime) {
+      if (editForm.reminderTime >= editForm.dueDate) {
+        setTimeValidationError('提醒时间必须在截止时间之前')
+      } else {
+        setTimeValidationError('')
+      }
+    } else {
+      setTimeValidationError('')
+    }
+  }, [editForm.dueDate, editForm.reminderTime])
 
   const getReminderTimeOptions = () => {
     const now = new Date()
@@ -122,6 +136,11 @@ export function TodoEditSheet({
   }
 
   const handleSave = () => {
+    // 如果有时间校验错误，不允许保存
+    if (timeValidationError) {
+      return
+    }
+
     let dueDate = editForm.dueDate
     if (dueDate) {
       const hours = dueDate.getHours()
@@ -139,10 +158,11 @@ export function TodoEditSheet({
     })
   }
 
-  const handleTimeChange = (type, value) => {
-    if (!editForm.dueDate) return
+  const handleTimeChange = (type, value, isReminder = false) => {
+    const targetDate = isReminder ? editForm.reminderTime : editForm.dueDate
+    if (!targetDate) return
 
-    const newDate = new Date(editForm.dueDate)
+    const newDate = new Date(targetDate)
     const numValue = parseInt(value) || 0
 
     if (type === 'hour') {
@@ -151,13 +171,18 @@ export function TodoEditSheet({
       newDate.setMinutes(Math.min(Math.max(numValue, 0), 59), 0, 0)
     }
 
-    setEditForm({ ...editForm, dueDate: newDate })
+    if (isReminder) {
+      setEditForm({ ...editForm, reminderTime: newDate })
+    } else {
+      setEditForm({ ...editForm, dueDate: newDate })
+    }
   }
 
-  const handleTimeKeyDown = (type, e) => {
-    if (!editForm.dueDate) return
+  const handleTimeKeyDown = (type, e, isReminder = false) => {
+    const targetDate = isReminder ? editForm.reminderTime : editForm.dueDate
+    if (!targetDate) return
 
-    const newDate = new Date(editForm.dueDate)
+    const newDate = new Date(targetDate)
     const currentValue = type === 'hour' ? newDate.getHours() : newDate.getMinutes()
 
     if (e.key === 'ArrowUp') {
@@ -166,14 +191,22 @@ export function TodoEditSheet({
       } else {
         newDate.setMinutes((currentValue + 1) % 60, 0, 0)
       }
-      setEditForm({ ...editForm, dueDate: newDate })
+      if (isReminder) {
+        setEditForm({ ...editForm, reminderTime: newDate })
+      } else {
+        setEditForm({ ...editForm, dueDate: newDate })
+      }
     } else if (e.key === 'ArrowDown') {
       if (type === 'hour') {
         newDate.setHours((currentValue - 1 + 24) % 24, newDate.getMinutes(), 0, 0)
       } else {
         newDate.setMinutes((currentValue - 1 + 60) % 60, 0, 0)
       }
-      setEditForm({ ...editForm, dueDate: newDate })
+      if (isReminder) {
+        setEditForm({ ...editForm, reminderTime: newDate })
+      } else {
+        setEditForm({ ...editForm, dueDate: newDate })
+      }
     }
   }
 
@@ -357,12 +390,15 @@ export function TodoEditSheet({
           </div>
           <div className="space-y-0.5">
             <label className="text-sm font-medium">提醒时间</label>
-            {!showCustomTimePicker ? (
+            {!editForm.reminderTime ? (
               <Select
-                value={editForm.reminderTime ? format(editForm.reminderTime, "yyyy-MM-dd HH:mm") : ""}
+                value=""
                 onValueChange={(value) => {
                   if (value === "custom") {
-                    setShowCustomTimePicker(true)
+                    // 设置默认时间为当前时间+1小时
+                    const defaultTime = new Date()
+                    defaultTime.setHours(defaultTime.getHours() + 1, 0, 0, 0)
+                    setEditForm({ ...editForm, reminderTime: defaultTime })
                     return
                   }
                   const selectedDate = new Date(value)
@@ -370,9 +406,7 @@ export function TodoEditSheet({
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="选择提醒时间">
-                    {editForm.reminderTime && format(editForm.reminderTime, "yyyy-MM-dd HH:mm")}
-                  </SelectValue>
+                  <SelectValue placeholder="选择提醒时间" />
                 </SelectTrigger>
                 <SelectContent>
                   {getReminderTimeOptions().map((option) => (
@@ -437,27 +471,11 @@ export function TodoEditSheet({
                       min="0"
                       max="23"
                       value={editForm.reminderTime ? format(editForm.reminderTime, "HH") : ""}
-                      onChange={(e) => {
-                        if (!editForm.reminderTime) return
-                        const newDate = new Date(editForm.reminderTime)
-                        const numValue = parseInt(e.target.value) || 0
-                        newDate.setHours(Math.min(Math.max(numValue, 0), 23), newDate.getMinutes(), 0, 0)
-                        setEditForm({ ...editForm, reminderTime: newDate })
-                      }}
-                      onKeyDown={(e) => {
-                        if (!editForm.reminderTime) return
-                        const newDate = new Date(editForm.reminderTime)
-                        const currentValue = newDate.getHours()
-                        if (e.key === 'ArrowUp') {
-                          newDate.setHours((currentValue + 1) % 24, newDate.getMinutes(), 0, 0)
-                          setEditForm({ ...editForm, reminderTime: newDate })
-                        } else if (e.key === 'ArrowDown') {
-                          newDate.setHours((currentValue - 1 + 24) % 24, newDate.getMinutes(), 0, 0)
-                          setEditForm({ ...editForm, reminderTime: newDate })
-                        }
-                      }}
+                      onChange={(e) => handleTimeChange('hour', e.target.value, true)}
+                      onKeyDown={(e) => handleTimeKeyDown('hour', e, true)}
                       className="w-[50px] h-8 px-2 text-center "
                       placeholder="时"
+                      disabled={!editForm.reminderTime}
                     />
                     <span className="text-muted-foreground">:</span>
                     <Input
@@ -465,27 +483,11 @@ export function TodoEditSheet({
                       min="0"
                       max="59"
                       value={editForm.reminderTime ? format(editForm.reminderTime, "mm") : ""}
-                      onChange={(e) => {
-                        if (!editForm.reminderTime) return
-                        const newDate = new Date(editForm.reminderTime)
-                        const numValue = parseInt(e.target.value) || 0
-                        newDate.setMinutes(Math.min(Math.max(numValue, 0), 59), 0, 0)
-                        setEditForm({ ...editForm, reminderTime: newDate })
-                      }}
-                      onKeyDown={(e) => {
-                        if (!editForm.reminderTime) return
-                        const newDate = new Date(editForm.reminderTime)
-                        const currentValue = newDate.getMinutes()
-                        if (e.key === 'ArrowUp') {
-                          newDate.setMinutes((currentValue + 1) % 60, 0, 0)
-                          setEditForm({ ...editForm, reminderTime: newDate })
-                        } else if (e.key === 'ArrowDown') {
-                          newDate.setMinutes((currentValue - 1 + 60) % 60, 0, 0)
-                          setEditForm({ ...editForm, reminderTime: newDate })
-                        }
-                      }}
+                      onChange={(e) => handleTimeChange('minute', e.target.value, true)}
+                      onKeyDown={(e) => handleTimeKeyDown('minute', e, true)}
                       className="w-[50px] h-8 px-2 text-center "
                       placeholder="分"
+                      disabled={!editForm.reminderTime}
                     />
                   </div>
                 </div>
@@ -493,12 +495,17 @@ export function TodoEditSheet({
                   variant="outline"
                   className="w-full "
                   onClick={() => {
-                    setShowCustomTimePicker(false)
                     setEditForm({ ...editForm, reminderTime: null })
                   }}
                 >
-                  返回预设时间
+                  清除提醒时间
                 </Button>
+              </div>
+            )}
+            {timeValidationError && (
+              <div className="flex items-center gap-1 text-sm text-red-500">
+                <AlertCircle className="h-4 w-4" />
+                <span>{timeValidationError}</span>
               </div>
             )}
           </div>
@@ -522,6 +529,7 @@ export function TodoEditSheet({
             </Button>
             <Button 
               onClick={handleSave}
+              disabled={!!timeValidationError}
             >
               保存
             </Button>
@@ -530,4 +538,4 @@ export function TodoEditSheet({
       </SheetContent>
     </Sheet>
   )
-} 
+}
