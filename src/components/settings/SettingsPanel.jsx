@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Input } from '@/components/ui/input'
+import { Info } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export function SettingsPanel({ open, onOpenChange }) {
   const [settings, setSettings] = useState({
@@ -105,8 +104,18 @@ export function SettingsPanel({ open, onOpenChange }) {
 
             {aiModels.length > 0 && (
               <>
-                <div className="col-span-1">
+                <div className="col-span-1 flex items-center justify-between">
                   <Label>默认AI模型</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="text-muted-foreground cursor-help ml-auto">
+                        <Info className="w-4 h-4" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[300px]">
+                      AI能量由uTools统一管理，自定义模型即将到来
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
                 <div className="col-span-3">
                   <Select
@@ -120,7 +129,7 @@ export function SettingsPanel({ open, onOpenChange }) {
                       {aiModels.map(model => (
                         <SelectItem key={model.id} value={model.id}>
                           <div className="flex items-center gap-2">
-                            {model.icon && <img src={model.icon} alt="" className="w-4 h-4 object-contain" onError={(e) => e.target.style.display = 'none'} />}
+                            {model.icon && <img src={model.icon} alt="" className="w-5 h-5 object-contain" onError={(e) => e.target.style.display = 'none'} />}
                             <span>{model.label} (消耗: {model.cost}点)</span>
                           </div>
                         </SelectItem>
