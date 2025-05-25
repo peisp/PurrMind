@@ -243,7 +243,7 @@ export function Index({ enterAction }) {
             </div>
           </header>
           <div className="flex flex-1 flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto px-3">
               <TodoList 
                 todos={filteredTodos}
                 onUpdate={handleUpdateTodo}
@@ -253,7 +253,7 @@ export function Index({ enterAction }) {
               />
             </div>
             {currentFilter !== 'completed' && (
-              <div className="shrink-0 px-4 pb-2 pt-1">
+              <div className="shrink-0 px-3 pb-2 pt-1 border-t">
                 <TodoForm 
                   onAdd={handleAddTodo} 
                   defaultCategory={currentCategory}
