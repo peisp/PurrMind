@@ -1,6 +1,11 @@
+const getDefaultAIModel = () => {
+  const settings = window.utools?.dbStorage?.getItem('purrmind_settings')
+  return settings?.aiSetting?.model || 'deepseek-v3'
+}
 
-
-export async function getTaskObjByAi (model, taskMsg) {
+export async function getTaskObjByAi (taskMsg) {
+  const model = getDefaultAIModel()
+  console.log("use model:", model)
   const messages = [
     {
       role: "user",

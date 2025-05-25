@@ -1,14 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Plus, Sparkles } from 'lucide-react'
-import * as Icons from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
-
-const getDefaultAIModel = () => {
-  const settings = window.utools?.dbStorage?.getItem('purrmind_settings')
-  return settings?.aiSetting?.model || 'gpt-3.5-turbo'
-}
 
 export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDate }) {
   const [title, setTitle] = useState('')
@@ -17,24 +11,6 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [showAiTip, setShowAiTip] = useState(false)
-  const [aiSetting, setAiSetting] = useState({
-    model: 'gpt-3.5-turbo',
-    icon: 'sparkles',
-    cost: 1
-  })
-
-  useEffect(() => {
-    try {
-      const savedSettings = window.utools?.dbStorage?.getItem('purrmind_settings') || {}
-      setAiSetting({
-        model: savedSettings.aiSetting?.model || 'gpt-3.5-turbo',
-        icon: savedSettings.aiSetting?.icon || 'sparkles',
-        cost: savedSettings.aiSetting?.cost || 1
-      })
-    } catch (err) {
-      console.error('获取设置失败:', err)
-    }
-  }, [])
 
   // 创建基础任务对象
   const createBaseTask = (taskTitle) => ({
@@ -49,8 +25,7 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   // 处理AI任务创建
   const handleAITaskCreation = async (taskTitle) => {
     try {
-      const model = getDefaultAIModel()
-      const tasks = await getTaskObjByAi(model, taskTitle)
+      const tasks = await getTaskObjByAi(taskTitle)
       if (!tasks || tasks.length === 0) {
         throw new Error('AI未能生成有效的任务')
       }
@@ -119,28 +94,26 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center w-full">
+    <form onSubmit={handleSubmit} className="flex items-center w-fulls">
       <div className="relative w-full">
         {/* AI能量提示 */}
-        {showAiTip && (
-          <div
-            className="absolute left-1/2 -translate-x-1/2 -top-14 flex items-center gap-2 px-5 py-2 rounded-xl shadow-lg z-50
-              bg-gradient-to-r from-purple-300 via-pink-300 to-yellow-300 text-white font-semibold text-base
-              animate-fade-in-out"
-            style={{
-              pointerEvents: 'none',
-              opacity: showAiTip ? 1 : 0,
-              transition: 'opacity 0.5s'
-            }}
-          >
-            {aiSetting?.icon ? (
-              <img src={aiSetting.icon} className="w-5 h-5 text-white drop-shadow" alt="AI Icon" />
-            ) : (
-              <Sparkles className="w-5 h-5 text-white drop-shadow" />
-            )}
-            每次消耗{aiSetting?.cost || 1}点 uTools AI能量
-          </div>
-        )}
+        {/*{showAiTip && (*/}
+        {/*  <div*/}
+        {/*    className="absolute left-1/2 -translate-x-1/2 -top-14 flex items-center gap-2 px-5 py-2 rounded-xl shadow-lg z-50*/}
+        {/*      bg-gradient-to-r from-purple-300 via-pink-300 to-yellow-300 text-white font-semibold text-base*/}
+        {/*      animate-fade-in-out"*/}
+        {/*    style={{*/}
+        {/*      pointerEvents: 'none',*/}
+        {/*      opacity: showAiTip ? 1 : 0,*/}
+        {/*      transition: 'opacity 0.5s'*/}
+        {/*    }}*/}
+        {/*  >*/}
+        {/*    */}
+        {/*    <Sparkles className="w-5 h-5 text-white drop-shadow" />*/}
+        {/*    */}
+        {/*    每次消耗 1 点 uTools AI能量*/}
+        {/*  </div>*/}
+        {/*)}*/}
 
         {/* 错误提示 */}
         {error && (

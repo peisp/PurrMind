@@ -66,42 +66,42 @@ export function SettingsPanel({ open, onOpenChange }) {
         
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-4 gap-4 items-center">
-            <div className="col-span-1">
-            <Label htmlFor="dark-mode">深色模式</Label>
-            </div>
-            <div className="col-span-3">
-              <Switch
-                id="dark-mode"
-                checked={settings.darkMode}
-                onCheckedChange={(val) => handleChange('darkMode', val)}
-                className="justify-self-end"
-              />
-            </div>
+            {/*<div className="col-span-1">*/}
+            {/*<Label htmlFor="dark-mode">深色模式</Label>*/}
+            {/*</div>*/}
+            {/*<div className="col-span-3">*/}
+            {/*  <Switch*/}
+            {/*    id="dark-mode"*/}
+            {/*    checked={settings.darkMode}*/}
+            {/*    onCheckedChange={(val) => handleChange('darkMode', val)}*/}
+            {/*    className="justify-self-end"*/}
+            {/*  />*/}
+            {/*</div>*/}
 
-            <div className="col-span-1">
-              <Label htmlFor="notifications">通知提醒</Label>
-            </div>
-            <div className="col-span-3">
-              <Switch
-                id="notifications"
-                checked={settings.notifications}
-                onCheckedChange={(val) => handleChange('notifications', val)}
-                className="justify-self-end"
-              />
-            </div>
+            {/*<div className="col-span-1">*/}
+            {/*  <Label htmlFor="notifications">通知提醒</Label>*/}
+            {/*</div>*/}
+            {/*<div className="col-span-3">*/}
+            {/*  <Switch*/}
+            {/*    id="notifications"*/}
+            {/*    checked={settings.notifications}*/}
+            {/*    onCheckedChange={(val) => handleChange('notifications', val)}*/}
+            {/*    className="justify-self-end"*/}
+            {/*  />*/}
+            {/*</div>*/}
 
-            <div className="col-span-1">
-              <Label htmlFor="default-time">默认截止时间</Label>
-            </div>
-            <div className="col-span-3">
-              <Input
-                id="default-time"
-                type="time"
-                value={settings.defaultDueTime}
-                onChange={(e) => handleChange('defaultDueTime', e.target.value)}
-                className="w-full"
-              />
-            </div>
+            {/*<div className="col-span-1">*/}
+            {/*  <Label htmlFor="default-time">默认截止时间</Label>*/}
+            {/*</div>*/}
+            {/*<div className="col-span-3">*/}
+            {/*  <Input*/}
+            {/*    id="default-time"*/}
+            {/*    type="time"*/}
+            {/*    value={settings.defaultDueTime}*/}
+            {/*    onChange={(e) => handleChange('defaultDueTime', e.target.value)}*/}
+            {/*    className="w-full"*/}
+            {/*  />*/}
+            {/*</div>*/}
 
             {aiModels.length > 0 && (
               <>
