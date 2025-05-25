@@ -3,7 +3,7 @@ const getDefaultAIModel = () => {
   return settings?.aiSetting?.model || 'deepseek-v3'
 }
 
-export async function getTaskObjByAi (taskMsg) {
+export async function getTaskObjByAi (taskMsg, onChunk) {
   const model = getDefaultAIModel()
   console.log("use model:", model)
   const messages = [
@@ -45,10 +45,20 @@ export async function getTaskObjByAi (taskMsg) {
     },
   ];
 
-  const result = await utools.ai({ messages, model});
-  console.log("result",result)
+  let fullContent = '';
+  const result = await utools.ai({ messages, model }, (chunk) => {
+    // console.log('chunk:', chunk);
+    if (chunk.content) {
+      fullContent += chunk.content;
+      if (typeof onChunk === 'function') {
+        onChunk(chunk);
+      }
+    }
+  });
+  
+  // console.log("full content:", fullContent);
   // 用正则提取 ```json 和 ``` 之间的内容
-  let match = result.content?.match(/```json\s*([\s\S]*?)```/);
+  let match = fullContent.match(/```json\s*([\s\S]*?)```/);
 
   if (match) {
     let jsonString = match[1]; // 获取json字符串
@@ -61,5 +71,3 @@ export async function getTaskObjByAi (taskMsg) {
     console.log("没有找到JSON内容");
   }
 }
-
-

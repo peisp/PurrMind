@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Input } from '@/components/ui/input'
 import { Plus, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
+import { Input } from '@/components/ui/input'
 
 export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDate }) {
   const [title, setTitle] = useState('')
@@ -11,6 +11,19 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [showAiTip, setShowAiTip] = useState(false)
+  const [streamContent, setStreamContent] = useState('')
+  
+  useEffect(() => {
+    if (isProcessing && streamContent) {
+      const scrollContainer = document.querySelector('.stream-container')
+      if (scrollContainer) {
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollHeight,
+          behavior: 'smooth'
+        })
+      }
+    }
+  }, [streamContent, isProcessing])
 
   // 创建基础任务对象
   const createBaseTask = (taskTitle) => ({
@@ -25,9 +38,19 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   // 处理AI任务创建
   const handleAITaskCreation = async (taskTitle) => {
     try {
-      const tasks = await getTaskObjByAi(taskTitle)
+      let fullContent = '';
+      setTitle(' '); // 清空输入框
+      const tasks = await new Promise((resolve, reject) => {
+        getTaskObjByAi(taskTitle, (chunk) => {
+          if (chunk.content) {
+            fullContent += chunk.content;
+            setStreamContent(fullContent);
+          }
+        }).then(resolve).catch(reject);
+      });
+
       if (!tasks || tasks.length === 0) {
-        throw new Error('AI未能生成有效的任务')
+        throw new Error('AI未能生成有效的任务');
       }
 
       tasks.forEach(task => {
@@ -37,9 +60,9 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
           description: task.description,
           dueDate: task.dueDate,
           reminderTime: task.reminderTime
-        }
-        onAdd(todoNew)
-      })
+        };
+        onAdd(todoNew);
+      });
     } catch (err) {
       setError(err.message || 'AI任务处理失败')
       throw err
@@ -125,7 +148,7 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
         {/* 七彩流动边框和光晕 */}
         <div
           className={cn(
-            'absolute inset-0 z-0 rounded-lg pointer-events-none transition-opacity duration-300',
+            'absolute inset-0 z-30 rounded-lg pointer-events-none transition-opacity duration-300',
             (isAIActive && isProcessing) ? 'opacity-100' : 'opacity-0'
           )}
         >
@@ -145,20 +168,30 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
             ? 'bg-gradient-to-r from-red-300 via-yellow-300 via-green-300 via-blue-300 via-indigo-300 via-purple-300 to-red-300 animate-gradient-x'
             : 'bg-transparent'
         )}>
-          <Input
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value)
-              setError(null)
-            }}
-            placeholder="添加任务..."
-            disabled={isSubmitting || isProcessing}
-            className={cn(
-              'h-12 text-lg pl-10 pr-10 transition-all duration-200 focus:ring-0 ',
-              isAIActive && 'bg-background',
-              (isSubmitting || isProcessing) && 'opacity-70 cursor-not-allowed'
-            )}
-          />
+            <div className="relative">
+              <Input
+                value={title}
+                onChange={(e) => {
+                  if (!isProcessing) {
+                    setTitle(e.target.value);
+                    setError(null);
+                  }
+                }}
+                placeholder="添加任务..."
+                disabled={isSubmitting || isProcessing}
+                className={cn(
+                  'h-12 text-lg pl-10 pr-10 transition-all duration-200 focus:ring-0',
+                  isAIActive && 'bg-background',
+                  (isSubmitting || isProcessing) && 'opacity-70 cursor-not-allowed',
+                  isProcessing && 'animate-pulse'
+                )}
+              />
+              {isProcessing && (
+                <div className="absolute inset-0 overflow-y-auto scroll-smooth px-3 py-2 stream-container z-20 [&::-webkit-scrollbar]:hidden">
+                  <pre className="text-sm whitespace-pre-wrap text-gray-500">{streamContent}</pre>
+                </div>
+              )}
+            </div>
         </div>
         <Plus className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-20"/>
         <Sparkles
