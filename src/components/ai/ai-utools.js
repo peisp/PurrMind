@@ -48,7 +48,7 @@ export async function getTaskObjByAi (taskMsg, onChunk) {
   let fullContent = '';
   const result = await utools.ai({ messages, model }, (chunk) => {
     // console.log('chunk:', chunk);
-    if (chunk.content) {
+    if (chunk.content || chunk.reasoning_content) {
       fullContent += chunk.content;
       if (typeof onChunk === 'function') {
         onChunk(chunk);
@@ -56,7 +56,7 @@ export async function getTaskObjByAi (taskMsg, onChunk) {
     }
   });
   
-  // console.log("full content:", fullContent);
+  console.log("full content:", fullContent);
   // 用正则提取 ```json 和 ``` 之间的内容
   let match = fullContent.match(/```json\s*([\s\S]*?)```/);
 

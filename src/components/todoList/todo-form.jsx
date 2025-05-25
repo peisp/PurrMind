@@ -39,11 +39,11 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   const handleAITaskCreation = async (taskTitle) => {
     try {
       let fullContent = '';
-      setTitle(' '); // 清空输入框
+      setTitle(' '); // 清空输入框,空字符替换placeholder
       const tasks = await new Promise((resolve, reject) => {
         getTaskObjByAi(taskTitle, (chunk) => {
-          if (chunk.content) {
-            fullContent += chunk.content;
+          if (chunk.content || chunk.reasoning_content) {
+            fullContent += chunk.reasoning_content ? chunk.reasoning_content : chunk.content;
             setStreamContent(fullContent);
           }
         }).then(resolve).catch(reject);
@@ -187,7 +187,7 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
                 )}
               />
               {isProcessing && (
-                <div className="absolute inset-0 overflow-y-auto scroll-smooth px-3 py-2 stream-container z-20 [&::-webkit-scrollbar]:hidden">
+                <div className="absolute inset-0 overflow-y-auto scroll-smooth pl-10 pr-20 py-4 stream-container z-20 [&::-webkit-scrollbar]:hidden">
                   <pre className="text-sm whitespace-pre-wrap text-gray-500">{streamContent}</pre>
                 </div>
               )}
