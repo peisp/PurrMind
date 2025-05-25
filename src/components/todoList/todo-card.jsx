@@ -50,6 +50,16 @@ export function TodoCard({
     return Icons[iconName] || Icons.FolderIcon
   }
 
+  const getTimeStatus = (time) => {
+    if (!time || todo.completed) return 'default'
+    const now = new Date()
+    const target = new Date(time)
+    const diff = target - now
+    if (diff < 0) return 'red' // 已过期
+    if (diff < 2 * 60 * 60 * 1000) return 'yellow' // 2小时内
+    return 'default'
+  }
+
   const getColorClass = (color) => {
     switch (color) {
       case 'red':
@@ -113,8 +123,8 @@ export function TodoCard({
               <>
                 <span className="shrink-0">•</span>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Calendar className="h-3 w-3" />
-                  <span>{formatDate(todo.dueDate)}</span>
+                  <Calendar className={cn('h-3 w-3', getColorClass(getTimeStatus(todo.dueDate)))} />
+                  <span className={cn(getColorClass(getTimeStatus(todo.dueDate)))}>{formatDate(todo.dueDate)}</span>
                 </div>
               </>
             )}
@@ -122,8 +132,8 @@ export function TodoCard({
               <>
                 <span className="shrink-0">•</span>
                 <div className="flex items-center gap-1 shrink-0">
-                  <AlarmClock className="h-3 w-3" />
-                  <span>{formatDate(todo.reminderTime)}</span>
+                  <AlarmClock className={cn('h-3 w-3', getColorClass(getTimeStatus(todo.reminderTime)))} />
+                  <span className={cn(getColorClass(getTimeStatus(todo.reminderTime)))}>{formatDate(todo.reminderTime)}</span>
                 </div>
               </>
             )}
@@ -155,4 +165,4 @@ export function TodoCard({
       </div>
     </Card>
   )
-} 
+}
