@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Plus, Sparkles } from 'lucide-react'
+import * as Icons from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
 
 const getDefaultAIModel = () => {
   const settings = window.utools?.dbStorage?.getItem('purrmind_settings')
-  return settings?.aiModel || 'gpt-3.5-turbo'
+  return settings?.aiSetting?.model || 'gpt-3.5-turbo'
 }
 
 export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDate }) {
@@ -16,6 +17,24 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [showAiTip, setShowAiTip] = useState(false)
+  const [aiSetting, setAiSetting] = useState({
+    model: 'gpt-3.5-turbo',
+    icon: 'sparkles',
+    cost: 1
+  })
+
+  useEffect(() => {
+    try {
+      const savedSettings = window.utools?.dbStorage?.getItem('purrmind_settings') || {}
+      setAiSetting({
+        model: savedSettings.aiSetting?.model || 'gpt-3.5-turbo',
+        icon: savedSettings.aiSetting?.icon || 'sparkles',
+        cost: savedSettings.aiSetting?.cost || 1
+      })
+    } catch (err) {
+      console.error('获取设置失败:', err)
+    }
+  }, [])
 
   // 创建基础任务对象
   const createBaseTask = (taskTitle) => ({
@@ -35,7 +54,7 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
       if (!tasks || tasks.length === 0) {
         throw new Error('AI未能生成有效的任务')
       }
-      
+
       tasks.forEach(task => {
         const todoNew = {
           ...createBaseTask(taskTitle),
@@ -61,7 +80,7 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
-    
+
     // 验证输入
     if (!title.trim()) {
       setError('任务标题不能为空')
@@ -114,18 +133,22 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
               transition: 'opacity 0.5s'
             }}
           >
-            <Sparkles className="w-5 h-5 text-white drop-shadow" />
-            每次消耗1点 uTools AI能量
+            {aiSetting?.icon ? (
+              <img src={aiSetting.icon} className="w-5 h-5 text-white drop-shadow" alt="AI Icon" />
+            ) : (
+              <Sparkles className="w-5 h-5 text-white drop-shadow" />
+            )}
+            每次消耗{aiSetting?.cost || 1}点 uTools AI能量
           </div>
         )}
-        
+
         {/* 错误提示 */}
         {error && (
           <div className="absolute -top-6 left-0 text-sm text-red-500">
             {error}
           </div>
         )}
-        
+
         {/* 七彩流动边框和光晕 */}
         <div
           className={cn(

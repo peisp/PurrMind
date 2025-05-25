@@ -11,7 +11,11 @@ export function SettingsPanel({ open, onOpenChange }) {
     darkMode: false,
     notifications: true,
     defaultDueTime: '18:00',
-    aiModel: 'gpt-3.5-turbo'
+    aiSetting: {
+      model: 'gpt-3.5-turbo',
+      icon: 'sparkles',
+      cost: 1
+    }
   })
   const [aiModels, setAiModels] = useState([])
 
@@ -26,9 +30,28 @@ export function SettingsPanel({ open, onOpenChange }) {
         .catch(err => console.error('获取AI模型失败:', err))
     }
   }, [])
-  console.log("aiModels",aiModels)
+
   const handleChange = (key, value) => {
-    const newSettings = { ...settings, [key]: value }
+    let newSettings = { ...settings }
+    console.log("key:",key)
+    if (key === 'aiModel') {
+      const selectedModel = aiModels.find(model => model.id === value)
+      if (selectedModel) {
+        newSettings = {
+          ...newSettings,
+          aiSetting: {
+            model: value,
+            icon: selectedModel.icon || 'sparkles',
+            cost: selectedModel.cost || 1
+          }
+        }
+      } else {
+        newSettings = { ...newSettings, [key]: value }
+      }
+    } else {
+      newSettings = { ...newSettings, [key]: value }
+    }
+
     setSettings(newSettings)
     // 保存设置
     window.utools.dbStorage.setItem('purrmind_settings', newSettings)
@@ -87,7 +110,7 @@ export function SettingsPanel({ open, onOpenChange }) {
                 </div>
                 <div className="col-span-3">
                   <Select
-                    value={settings.aiModel}
+                    value={settings.aiSetting.model}
                     onValueChange={(val) => handleChange('aiModel', val)}
                   >
                     <SelectTrigger className="w-full">
@@ -97,7 +120,7 @@ export function SettingsPanel({ open, onOpenChange }) {
                       {aiModels.map(model => (
                         <SelectItem key={model.id} value={model.id}>
                           <div className="flex items-center gap-2">
-                            <img src={model.icon} alt="" className="w-4 h-4 object-contain" onError={(e) => e.target.style.display = 'none'} />
+                            {model.icon && <img src={model.icon} alt="" className="w-4 h-4 object-contain" onError={(e) => e.target.style.display = 'none'} />}
                             <span>{model.label} (消耗: {model.cost}点)</span>
                           </div>
                         </SelectItem>
