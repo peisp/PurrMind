@@ -4,6 +4,11 @@ import { Plus, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
 
+const getDefaultAIModel = () => {
+  const settings = window.utools?.dbStorage?.getItem('purrmind_settings')
+  return settings?.aiModel || 'gpt-3.5-turbo'
+}
+
 export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDate }) {
   const [title, setTitle] = useState('')
   const [isAIActive, setIsAIActive] = useState(false)
@@ -25,7 +30,8 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   // 处理AI任务创建
   const handleAITaskCreation = async (taskTitle) => {
     try {
-      const tasks = await getTaskObjByAi(null, taskTitle)
+      const model = getDefaultAIModel()
+      const tasks = await getTaskObjByAi(model, taskTitle)
       if (!tasks || tasks.length === 0) {
         throw new Error('AI未能生成有效的任务')
       }

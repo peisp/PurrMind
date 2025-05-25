@@ -79,7 +79,12 @@
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible,
-  button:focus-visible {
+  button:focus-visible,
+  [role="combobox"]:focus-visible {
+    @apply !ring-0 !ring-offset-0 !outline-none;
+  }
+
+  [role="combobox"]:focus {
     @apply !ring-0 !ring-offset-0 !outline-none;
   }
 
