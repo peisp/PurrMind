@@ -1,6 +1,9 @@
 # PurrMind - uTools 待办事项管理插件
 
-![PurrMind Logo](public/logo.png)
+<div align="center">
+  <img src="public/logo.png" alt="PurrMind Logo" />
+</div>
+
 
 PurrMind 是一款基于 uTools 平台的智能待办事项管理插件，提供高效的任务管理和 AI 智能解析功能。
 
