@@ -94,7 +94,7 @@ export function TodoCard({
           className="shrink-0"
         />
         <div className="flex-1 min-w-0">
-          <h3 className={`text-base font-medium ${todo.completed ? 'line-through text-muted-foreground' : ''}`}>
+          <h3 className={`text-base font-medium line-clamp-1 ${todo.completed ? 'line-through text-muted-foreground' : ''}`}>
             {todo.title}
           </h3>
           <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
