@@ -22,7 +22,7 @@ export function AppSidebar({
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   return (
-    <Sidebar className="border-r-0" {...props}>
+    <Sidebar className="border-t" {...props}>
       <SidebarHeader>
           <NavMain
           onFilterChange={onFilterChange}

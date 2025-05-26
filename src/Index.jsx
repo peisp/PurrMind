@@ -192,7 +192,7 @@ export function Index({ enterAction }) {
   const Icon = getIconComponent(currentIcon.icon)
   
   return (
-    <SidebarProvider>
+    <SidebarProvider className="border-t">
       <div className="grid w-full grid-cols-[auto_1fr]">
         <AppSidebar 
           onFilterChange={handleFilterChange}
