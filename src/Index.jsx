@@ -200,7 +200,7 @@ export function Index({ enterAction }) {
           currentFilter={currentFilter}
           currentCategory={currentCategory}
         />
-        <SidebarInset className="flex h-screen min-w-0 flex-col">
+        <SidebarInset className="flex h-[calc(100vh-1px)] min-w-0 flex-col">
           <header className="flex h-14 shrink-0 items-center gap-2 border-b">
             <div className="flex flex-1 items-center gap-2 px-3">
               <div className="flex items-center gap-2">
@@ -268,4 +268,4 @@ export function Index({ enterAction }) {
       <TodoNotification todos={todos} />
     </SidebarProvider>
   )
-} 
+}
