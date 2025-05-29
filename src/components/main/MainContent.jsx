@@ -18,7 +18,9 @@ export function MainContent({
   handleUpdateTodo,
   handleDeleteTodo,
   handleToggleStatus,
-  setShowCompleted
+  setShowCompleted,
+  viewMode,
+  setViewMode
 }) {
   const Icon = Icons[currentIcon.icon] || Icons.ListIcon
 
@@ -50,7 +52,7 @@ export function MainContent({
             <h1 className="text-lg font-semibold text-primary">{currentLabel}</h1>
           </div>
         </div>
-        <div className="px-3">
+        <div className="px-3 flex gap-1">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -81,17 +83,38 @@ export function MainContent({
                 }
               </TooltipContent>
             </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    console.log('Current viewMode:', viewMode);
+                    const newViewMode = viewMode === 'timeline' ? 'calendar' : 'timeline';
+                    console.log('Setting viewMode to:', newViewMode);
+                    setViewMode(newViewMode);
+                  }}
+                >
+                  <Icons.Calendar className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                切换到日历视图
+              </TooltipContent>
+            </Tooltip>
           </TooltipProvider>
         </div>
       </header>
       <div className="flex flex-1 flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto px-3">
+        <div className="flex-1 overflow-y-auto">
           <TodoList 
             todos={todos}
             onUpdate={handleUpdateTodo}
             onDelete={handleDeleteTodo}
             onToggleStatus={handleToggleStatus}
             categories={categories}
+            viewMode={viewMode}
           />
         </div>
         {currentFilter !== 'completed' && (

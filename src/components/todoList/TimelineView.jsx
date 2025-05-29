@@ -1,0 +1,87 @@
+import { format } from 'date-fns'
+import { DayLabel } from './day-label'
+import { TodoCard } from './todo-card'
+
+export function TimelineView({ todos, onToggleStatus, onStar, onEdit, getCategoryName, categories }) {
+  const sortTodos = (todos) => {
+    return [...todos].sort((a, b) => {
+      if (a.completedAt && !b.completedAt) return 1
+      if (!a.completedAt && b.completedAt) return -1
+
+      const isCompleted = !!a.completedAt && !!b.completedAt
+
+      if (!isCompleted) {
+        if (a.dueDate && b.dueDate) {
+          const dateCompare = new Date(a.dueDate) - new Date(b.dueDate)
+          if (dateCompare !== 0) return dateCompare
+        } else if (a.dueDate) return -1
+        else if (b.dueDate) return 1
+
+        if (a.reminderTime && b.reminderTime) {
+          const reminderCompare = new Date(a.reminderTime) - new Date(b.reminderTime)
+          if (reminderCompare !== 0) return reminderCompare
+        } else if (a.reminderTime) return -1
+        else if (b.reminderTime) return 1
+
+        return new Date(a.createdAt) - new Date(b.createdAt)
+      } else {
+        return new Date(b.completedAt) - new Date(a.completedAt)
+      }
+    })
+  }
+
+  const getTimelineTime = (todo) => {
+    return todo.dueDate || todo.reminderTime || todo.createdAt
+  }
+
+  const groupTodosByDay = (todos) => {
+    const groups = {}
+    todos.forEach(todo => {
+      const time = getTimelineTime(todo)
+      const day = format(new Date(time), 'yyyy-MM-dd')
+      if (!groups[day]) groups[day] = []
+      groups[day].push(todo)
+    })
+    return groups
+  }
+
+  const sortedTodos = sortTodos(todos)
+  const grouped = groupTodosByDay(sortedTodos)
+  const days = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a))
+
+  return (
+    <div className="relative mx-3">
+      {/* 主时间轴线 */}
+      <div className="absolute left-0.5 top-1.5 bottom-0 w-0.5 bg-gray-200 mt-4" />
+
+      {days.map((day, dayIndex) => (
+        <div key={day}>
+          <div className="flex items-start relative">
+            {/* 时间轴节点 */}
+            <div className="flex items-center mr-3 mt-4">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+            </div>
+            {/* 右侧内容区域 */}
+            <div className="flex-1">
+              <DayLabel date={day} />
+              {/* 待办事项卡片 */}
+              <div className="space-y-2">
+                {grouped[day].map((todo) => (
+                  <TodoCard
+                    key={todo.id}
+                    todo={todo}
+                    onToggleStatus={onToggleStatus}
+                    onStar={onStar}
+                    onEdit={onEdit}
+                    getCategoryName={getCategoryName}
+                    categories={categories}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}

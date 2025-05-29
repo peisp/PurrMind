@@ -2,9 +2,18 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar.jsx'
 import { AppSidebar } from '@/components/sidebar/app-sidebar.jsx'
 import { TodoNotification } from '@/components/todoList/todo-notification.jsx'
 import { MainContent } from '@/components/main/MainContent.jsx'
+import { useState } from 'react'
 import { useTodoManagement } from '@/hooks/useTodoManagement.js'
 
+import { useEffect } from 'react'
+
 export function Index({ enterAction }) {
+  const [viewMode, setViewMode] = useState('timeline')
+  const [forceUpdate, setForceUpdate] = useState(0)
+
+  useEffect(() => {
+    setForceUpdate(prev => prev + 1)
+  }, [viewMode])
   const {
     todos,
     categories,
@@ -47,6 +56,9 @@ export function Index({ enterAction }) {
             handleDeleteTodo={handleDeleteTodo}
             handleToggleStatus={handleToggleStatus}
             setShowCompleted={setShowCompleted}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            key={viewMode} // 添加key强制重新渲染
           />
         </SidebarInset>
       </div>
