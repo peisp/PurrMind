@@ -1,14 +1,9 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { 
   format, 
   startOfMonth, 
   endOfMonth, 
   eachDayOfInterval, 
-  addMonths, 
-  subMonths, 
   isSameDay, 
   startOfWeek, 
   endOfWeek,
@@ -16,18 +11,12 @@ import {
 } from 'date-fns'
 import { cn } from '@/lib/utils'
 
-export function CalendarView({ todos, onToggleStatus, onStar, onEdit, getCategoryName, categories }) {
-  const [currentDate, setCurrentDate] = useState(new Date())
+export function CalendarView({ 
+  todos, 
+  onEdit, 
+  currentDate 
+}) {
   const [selectedDate, setSelectedDate] = useState(null)
-
-  const handlePrevMonth = () => setCurrentDate(subMonths(currentDate, 1))
-  const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1))
-  
-  const handleToday = () => {
-    const today = new Date()
-    setCurrentDate(today)
-    setSelectedDate(today)
-  }
 
   // 获取日历视图的日期范围（从当月的第一个周日到最后一周的周六）
   const monthStart = startOfMonth(currentDate)
@@ -83,25 +72,6 @@ export function CalendarView({ todos, onToggleStatus, onStar, onEdit, getCategor
 
   return (
     <div className="h-full flex flex-col">
-      {/* 顶部导航栏 */}
-      <div className="px-3 flex justify-between items-center border-b">
-        
-        <span className="text-lg font-medium">
-          {format(currentDate, 'yyyy年MM月')}
-        </span>
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" onClick={handlePrevMonth}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" onClick={handleToday}>
-            今天
-          </Button>
-          <Button variant="ghost" size="icon" onClick={handleNextMonth}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      
       {/* 星期标题行 */}
       <div className="grid grid-cols-7 text-center text-sm font-medium">
         {['周日', '周一', '周二', '周三', '周四', '周五', '周六'].map((day, index) => (
@@ -110,7 +80,6 @@ export function CalendarView({ todos, onToggleStatus, onStar, onEdit, getCategor
             className={cn(
               "border-r border-b border-gray-200",
               (index === 0 || index === 6) && "text-gray-500 bg-gray-100"  // 周六日红色+深灰背景
-              // index === 6 && "text-blue-500 bg-gray-100"   // 周六蓝色+深灰背景
             )}
           >
             {day}

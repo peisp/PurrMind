@@ -7,7 +7,14 @@ import { DayLabel } from '@/components/todoList/day-label'
 import { CalendarView } from './CalendarView'
 import { TimelineView } from './TimelineView'
 
-export function TodoList({ todos, onUpdate, onDelete, onToggleStatus, viewMode = 'timeline' }) {
+export function TodoList({ 
+  todos, 
+  onUpdate, 
+  onDelete, 
+  onToggleStatus, 
+  viewMode = 'timeline',
+  calendarCurrentDate 
+}) {
   console.log('TodoList received viewMode:', viewMode);
   const [categories, setCategories] = useState([])
   const [editingId, setEditingId] = useState(null)
@@ -75,13 +82,10 @@ export function TodoList({ todos, onUpdate, onDelete, onToggleStatus, viewMode =
 
   if (viewMode === 'calendar') {
     return (
-      <CalendarView
+      <CalendarView 
         todos={todos}
-        onToggleStatus={onToggleStatus}
-        onStar={handleStar}
         onEdit={handleEdit}
-        getCategoryName={getCategoryName}
-        categories={categories}
+        currentDate={calendarCurrentDate}
       />
     )
   }
