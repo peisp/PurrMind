@@ -140,7 +140,7 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
 
         {/* 错误提示 */}
         {error && (
-          <div className="absolute -bottom-7 left-0 flex items-center text-sm text-red-600 bg-red-50 px-3 py-1.5 rounded-lg shadow">
+          <div className="absolute -top-8 left-0.5 flex items-center text-sm text-red-600 bg-red-50 px-3 py-1.5 rounded-lg shadow">
             <AlertCircle className="w-4 h-4 mr-1.5" />
             {error}
           </div>
