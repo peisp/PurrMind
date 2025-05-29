@@ -509,18 +509,18 @@ export function TodoEditSheet({
               </div>
             )}
           </div>
-          <div className="text-xs text-muted-foreground">
+        </div>
+        <SheetFooter className="flex items-center justify-between pt-2 mt-2">
+          <div className="flex-1 text-xs text-muted-foreground">
             创建于 {todo?.createdAt ? format(new Date(todo.createdAt), "yyyy-MM-dd HH:mm", { locale: zhCN }) : ''}
           </div>
-        </div>
-        <SheetFooter className="flex justify-between pt-2 mt-2">
-          <Button 
-            variant="destructive" 
-            onClick={onDelete}
-          >
-            删除
-          </Button>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="destructive" 
+              onClick={onDelete}
+            >
+              删除
+            </Button>
             <Button 
               variant="outline" 
               onClick={onCancel}
