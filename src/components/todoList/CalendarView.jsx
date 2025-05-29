@@ -87,9 +87,10 @@ export function CalendarView({
         ))}
       </div>
       
-      {/* 日期网格 */}
-      <div className="grid grid-cols-7 auto-rows-fr overflow-hidden flex-1">
-        {days.map(day => {
+      {/* 日期网格 - 添加自定义选择器移除最后一行下边框 */}
+      <div className="grid grid-cols-7 auto-rows-fr overflow-hidden flex-1 
+        [&>:nth-last-child(-n+7)]:border-b-0">
+        {days.map((day, index) => {
           const dayOfWeek = day.getDay()
           const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
           const isCurrentMonth = isSameMonth(day, currentDate)
@@ -103,8 +104,7 @@ export function CalendarView({
                 selectedDate && isSameDay(day, selectedDate) 
                   ? "bg-blue-100 border border-blue-300" 
                   : "hover:bg-gray-100",
-                !isCurrentMonth && "opacity-50", // 非当前月日期半透明
-                day.getTime() === end.getTime() && "border-b-0" // 最后一行去掉下边框
+                !isCurrentMonth && "opacity-50" // 非当前月日期半透明
               )}
               onClick={() => setSelectedDate(day)}
             >
