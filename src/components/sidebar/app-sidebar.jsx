@@ -24,7 +24,7 @@ export function AppSidebar({
   const [settingsOpen, setSettingsOpen] = useState(false)
   return (
     <Sidebar 
-      className="shadow-lg rounded-r-xl border-0 bg-gradient-to-b from-background to-accent/20 transition-all duration-300"
+      className="shadow-lg border-0 bg-gradient-to-b from-background to-accent/20 transition-all duration-300"
       {...props}
     >
       <SidebarHeader className="p-3">
@@ -39,7 +39,7 @@ export function AppSidebar({
           currentCategory={currentCategory}
         />
       </SidebarContent>
-      <SidebarFooter className="p-3">
+      <SidebarFooter className="p-3 pb-0">
         <Button
           variant="ghost"
           size="icon"
