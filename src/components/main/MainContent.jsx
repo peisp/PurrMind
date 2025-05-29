@@ -116,11 +116,15 @@ export function MainContent ({
                       setViewMode(newViewMode)
                     }}
                   >
-                    <Icons.Calendar className="h-4 w-4"/>
+                    {viewMode === 'timeline' ? (
+                      <Icons.Calendar className="h-4 w-4"/>
+                    ) : (
+                      <Icons.Clock className="h-4 w-4"/>
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="top" align="center">
-                  切换到日历视图
+                  {viewMode === 'timeline' ? '切换到日历视图' : '切换到时间轴视图'}
                 </TooltipContent>
               </Tooltip>
             </div>
