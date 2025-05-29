@@ -81,70 +81,69 @@ export function TodoCard({
 
   return (
     <Card 
-      className="p-2 cursor-pointer hover:bg-accent/50 transition-colors"
+      className="p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-accent/30"
       onClick={() => onEdit(todo)}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-start gap-3">
         <Checkbox
           checked={todo.completed}
           onCheckedChange={(checked) => {
             onToggleStatus(todo.id)
           }}
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0"
+          className="shrink-0 mt-1"
         />
         <div className="flex-1 min-w-0">
-          <h3 className={`text-base font-medium line-clamp-1 ${todo.completed ? 'line-through text-muted-foreground' : ''}`}>
+          <h3 className={`text-base font-medium line-clamp-1 ${todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
             {todo.title}
           </h3>
-          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+          
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {todo.categoryId && (
-              <>
-                <div className="flex items-center gap-1 shrink-0">
-                  {(() => {
-                    const category = categories.find(cat => cat.id === todo.categoryId)
-                    const Icon = getIconComponent(category?.icon)
-                    return <Icon className={cn('h-3 w-3', getColorClass(category?.color))} />
-                  })()}
-                  <span>{getCategoryName(todo.categoryId)}</span>
-                </div>
-              </>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-accent text-xs">
+                {(() => {
+                  const category = categories.find(cat => cat.id === todo.categoryId)
+                  const Icon = getIconComponent(category?.icon)
+                  return <Icon className={cn('h-3.5 w-3.5', getColorClass(category?.color))} />
+                })()}
+                <span>{getCategoryName(todo.categoryId)}</span>
+              </div>
             )}
+            
             {todo.description && (
-              <>
-                <span className="shrink-0">•</span>
-                <div className="flex items-center gap-1 shrink-0">
-                  <FileText className="h-3 w-3" />
-                  <span className="truncate min-w-0 max-w-28">{todo.description}</span>
-                </div>
-              </>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-accent text-xs">
+                <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="max-w-[140px] truncate">{todo.description}</span>
+              </div>
             )}
+            
             {todo.dueDate && (
-              <>
-                <span className="shrink-0">•</span>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Calendar className={cn('h-3 w-3', getColorClass(getTimeStatus(todo.dueDate)))} />
-                  <span className={cn(getColorClass(getTimeStatus(todo.dueDate)))}>{formatDate(todo.dueDate)}</span>
-                </div>
-              </>
+              <div className={cn(
+                "flex items-center gap-1 px-2 py-1 rounded-md text-xs",
+                getTimeStatus(todo.dueDate) === 'red' ? 'bg-red-100 text-red-700' :
+                getTimeStatus(todo.dueDate) === 'yellow' ? 'bg-yellow-100 text-yellow-700' : 'bg-accent'
+              )}>
+                <Calendar className="h-3.5 w-3.5" />
+                <span>{formatDate(todo.dueDate)}</span>
+              </div>
             )}
+            
             {todo.reminderTime && (
-              <>
-                <span className="shrink-0">•</span>
-                <div className="flex items-center gap-1 shrink-0">
-                  <AlarmClock className={cn('h-3 w-3', getColorClass(getTimeStatus(todo.reminderTime)))} />
-                  <span className={cn(getColorClass(getTimeStatus(todo.reminderTime)))}>{formatDate(todo.reminderTime)}</span>
-                </div>
-              </>
+              <div className={cn(
+                "flex items-center gap-1 px-2 py-1 rounded-md text-xs",
+                getTimeStatus(todo.reminderTime) === 'red' ? 'bg-red-100 text-red-700' :
+                getTimeStatus(todo.reminderTime) === 'yellow' ? 'bg-yellow-100 text-yellow-700' : 'bg-accent'
+              )}>
+                <AlarmClock className="h-3.5 w-3.5" />
+                <span>{formatDate(todo.reminderTime)}</span>
+              </div>
             )}
+            
             {todo.completed && (
-              <>
-                <span className="shrink-0">•</span>
-                <div className="flex items-center gap-1 shrink-0">
-                  <CircleCheckBig className="h-3 w-3" />
-                  <span>{formatDate(todo.completedAt)}</span>
-                </div>
-              </>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-green-100 text-green-700 text-xs">
+                <CircleCheckBig className="h-3.5 w-3.5" />
+                <span>{formatDate(todo.completedAt)}</span>
+              </div>
             )}
           </div>
         </div>
@@ -152,14 +151,15 @@ export function TodoCard({
           variant="ghost"
           size="icon"
           className={cn(
-            "h-7 w-7 shrink-0",
-            todo.starred && "text-yellow-500 hover:text-yellow-500"
+            "h-8 w-8 shrink-0 mt-0.5 transition-all",
+            todo.starred ? "text-yellow-500 hover:text-yellow-600" : "text-muted-foreground hover:text-foreground"
           )}
           onClick={(e) => onStar(e, todo)}
         >
           <Star className={cn(
-            "h-4 w-4",
-            todo.starred ? "fill-yellow-500" : "fill-none"
+            "h-4 w-4 transition-transform",
+            todo.starred ? "fill-yellow-500" : "fill-none",
+            todo.starred ? "" : "hover:scale-110"
           )} />
         </Button>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Sparkles } from 'lucide-react'
+import { Plus, Sparkles, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
 import { Input } from '@/components/ui/input'
@@ -117,91 +117,79 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center w-fulls">
+    <form onSubmit={handleSubmit} className="flex items-center w-full">
       <div className="relative w-full">
         {/* AI能量提示 */}
-        {/*{showAiTip && (*/}
-        {/*  <div*/}
-        {/*    className="absolute left-1/2 -translate-x-1/2 -top-14 flex items-center gap-2 px-5 py-2 rounded-xl shadow-lg z-50*/}
-        {/*      bg-gradient-to-r from-purple-300 via-pink-300 to-yellow-300 text-white font-semibold text-base*/}
-        {/*      animate-fade-in-out"*/}
-        {/*    style={{*/}
-        {/*      pointerEvents: 'none',*/}
-        {/*      opacity: showAiTip ? 1 : 0,*/}
-        {/*      transition: 'opacity 0.5s'*/}
-        {/*    }}*/}
-        {/*  >*/}
-        {/*    */}
-        {/*    <Sparkles className="w-5 h-5 text-white drop-shadow" />*/}
-        {/*    */}
-        {/*    每次消耗 1 点 uTools AI能量*/}
-        {/*  </div>*/}
-        {/*)}*/}
+        {showAiTip && (
+          <div
+            className="absolute left-1/2 -translate-x-1/2 -top-14 flex items-center gap-2 px-4 py-2 rounded-lg shadow-lg z-50
+              bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-medium text-sm
+              animate-fade-in-out"
+            style={{
+              pointerEvents: 'none',
+              opacity: showAiTip ? 1 : 0,
+              transition: 'opacity 0.3s ease-out'
+            }}
+          >
+            <Sparkles className="w-4 h-4 text-white" />
+            每次消耗 1 点 uTools AI能量
+          </div>
+        )}
 
         {/* 错误提示 */}
         {error && (
-          <div className="absolute -top-6 left-0 text-sm text-red-500">
+          <div className="absolute -bottom-7 left-0 flex items-center text-sm text-red-600 bg-red-50 px-3 py-1.5 rounded-lg shadow">
+            <AlertCircle className="w-4 h-4 mr-1.5" />
             {error}
           </div>
         )}
 
-        {/* 七彩流动边框和光晕 */}
-        <div
-          className={cn(
-            'absolute inset-0 z-30 rounded-lg pointer-events-none transition-opacity duration-300',
-            (isAIActive && isProcessing) ? 'opacity-100' : 'opacity-0'
-          )}
-        >
-          <div
-            className="
-              absolute inset-0 rounded-lg
-              before:content-[''] before:absolute before:inset-0 before:rounded-lg
-              before:bg-gradient-to-r before:from-red-800 before:via-yellow-800 before:via-green-800 before:via-blue-800 before:via-indigo-800 before:via-purple-800 before:to-red-800
-              before:blur-[15px] before:opacity-80 before:animate-gradient-x animate-pulse
-            "
-          />
-        </div>
-
         <div className={cn(
-          'relative rounded-lg z-10 p-[2px] transition-all duration-300',
+          'relative rounded-xl z-10 p-[2px] transition-all duration-300 shadow-md',
           isAIActive
-            ? 'bg-gradient-to-r from-red-300 via-yellow-300 via-green-300 via-blue-300 via-indigo-300 via-purple-300 to-red-300 animate-gradient-x'
-            : 'bg-transparent'
+            ? 'bg-gradient-to-r from-purple-500 to-indigo-500 shadow-purple-500/20'
+            : 'bg-transparent shadow-transparent'
         )}>
-            <div className="relative">
-              <Input
-                value={title}
-                onChange={(e) => {
-                  if (!isProcessing) {
-                    setTitle(e.target.value);
-                    setError(null);
-                  }
-                }}
-                placeholder="添加任务..."
-                disabled={isSubmitting || isProcessing}
-                className={cn(
-                  'h-12 text-lg pl-10 pr-10 transition-all duration-200 focus:ring-0',
-                  isAIActive && 'bg-background',
-                  (isSubmitting || isProcessing) && 'opacity-70 cursor-not-allowed',
-                  isProcessing && 'animate-pulse'
-                )}
-              />
-              {isProcessing && (
-                <div className="absolute inset-0 overflow-y-auto scroll-smooth pl-10 pr-20 py-4 stream-container z-20 [&::-webkit-scrollbar]:hidden">
-                  <pre className="text-sm whitespace-pre-wrap text-gray-500">{streamContent}</pre>
-                </div>
+          <div className="relative bg-background rounded-xl overflow-hidden">
+            <Input
+              value={title}
+              onChange={(e) => {
+                if (!isProcessing) {
+                  setTitle(e.target.value);
+                  setError(null);
+                }
+              }}
+              placeholder="添加任务..."
+              disabled={isSubmitting || isProcessing}
+              className={cn(
+                'h-12 text-base pl-12 pr-12 transition-all duration-200 focus:ring-0 border-0',
+                (isSubmitting || isProcessing) && 'opacity-80 cursor-not-allowed',
+                isProcessing && 'animate-pulse'
               )}
-            </div>
+            />
+            {isProcessing && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-20">
+                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-purple-500"></div>
+              </div>
+            )}
+          </div>
         </div>
-        <Plus className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-20"/>
+        
+        <Plus className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-20 hover:text-primary transition-colors"/>
         <Sparkles
           className={cn(
-            'absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 cursor-pointer transition-colors duration-200 z-20',
-            isAIActive ? 'text-purple-800' : 'text-muted-foreground',
+            'absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 cursor-pointer transition-all duration-200 z-20 hover:scale-110',
+            isAIActive ? 'text-purple-600' : 'text-muted-foreground',
             (isSubmitting || isProcessing) && 'cursor-not-allowed opacity-70'
           )}
           onClick={toggleAI}
         />
+        
+        {isProcessing && streamContent && (
+          <div className="absolute top-full mt-2 w-full max-h-40 overflow-y-auto bg-background border rounded-lg shadow-lg p-3 text-sm text-muted-foreground z-30">
+            <pre className="whitespace-pre-wrap">{streamContent}</pre>
+          </div>
+        )}
       </div>
     </form>
   )
