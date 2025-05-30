@@ -52,7 +52,7 @@ export function TimelineView({ todos, onToggleStatus, onStar, onEdit, getCategor
   return (
     <div className="relative mx-3">
       {/* 主时间轴线 */}
-      <div className="absolute left-0.5 top-1.5 bottom-0 w-0.5 bg-gray-200 mt-4" />
+      <div className="absolute left-0.5 top-1.5 bottom-0 border-l-2 border-gray-200 border-dashed mt-4" />
 
       {days.map((day, dayIndex) => (
         <div key={day}>
