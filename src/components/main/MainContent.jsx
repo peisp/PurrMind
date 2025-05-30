@@ -27,7 +27,7 @@ export function MainContent ({
 }) {
   const Icon = Icons[currentIcon.icon] || Icons.ListIcon
   const [calendarCurrentDate, setCalendarCurrentDate] = useState(new Date())
-  const [calendarViewMode, setCalendarViewMode] = useState('month') // 'week'或'month'
+  const [calendarViewMode, setCalendarViewMode] = useState('week') // 默认显示周视图
 
   const handleViewChange = (view) => {
     setCalendarViewMode(view)
