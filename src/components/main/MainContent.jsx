@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import * as Icons from 'lucide-react'
 import { TodoList } from '@/components/todoList/todo-list.jsx'
 import { TodoForm } from '@/components/todoList/todo-form.jsx'
-import { CalendarHeader } from '@/components/todoList/CalendarHeader'
+import { CalendarDateDisplay, CalendarControls } from '@/components/todoList/CalendarHeader'
 import { useState } from 'react'
 import { addMonths, subMonths, addWeeks, subWeeks } from 'date-fns'
 
@@ -73,23 +73,30 @@ export function MainContent ({
   return (
     <TooltipProvider>
       <div className="flex h-[calc(100vh-1px)] min-w-0 flex-col">
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b">
-          <div className="flex flex-1 items-center gap-2 px-3">
+        <header className="flex h-14 shrink-0 items-center border-b">
+          <div className="flex items-center gap-4 px-3">
             <div className="flex items-center gap-2">
               <Icon className={cn('h-4 w-4', getColorClass(currentIcon.color))}/>
               <h1 className="text-lg font-semibold text-primary">{currentLabel}</h1>
             </div>
-          </div>
-          <div className="px-3 flex gap-1">
-            {/* 日历视图时显示日历导航 */}
+            {/* 日历视图时显示日期 */}
             {viewMode === 'calendar' && (
-              <CalendarHeader
-                currentDate={calendarCurrentDate}
+              <CalendarDateDisplay 
+                currentDate={calendarCurrentDate} 
+                currentView={calendarViewMode} 
+              />
+            )}
+          </div>
+          <div className="flex-1"></div> {/* 中间空白区域 */}
+          <div className="flex items-center gap-2 px-3">
+            {/* 日历视图时显示控制按钮 */}
+            {viewMode === 'calendar' && (
+              <CalendarControls 
+                currentView={calendarViewMode}
+                onViewChange={handleViewChange}
                 onPrevMonth={handlePrev}
                 onNextMonth={handleNext}
                 onToday={handleToday}
-                currentView={calendarViewMode}
-                onViewChange={handleViewChange}
               />
             )}
             {/* 固定Tooltip位置容器 */}
