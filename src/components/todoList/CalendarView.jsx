@@ -46,8 +46,8 @@ export function CalendarView({
         
         {/* 只显示当前月的待办事项 */}
         {isCurrentMonth && (
-          <ul className="mt-1 space-y-1">
-            {dayTodos.slice(0, 3).map(todo => (
+          <ul className="space-y-1">
+            {dayTodos.slice(0, 2).map(todo => (
               <li 
                 key={todo.id}
                 className="text-xs truncate px-1 py-0.5 rounded bg-blue-100 text-blue-800"

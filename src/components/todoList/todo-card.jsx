@@ -81,7 +81,7 @@ export function TodoCard({
 
   return (
     <Card 
-      className="p-3 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-accent/30"
+      className="p-2 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-accent/30"
       onClick={() => onEdit(todo)}
     >
       <div className="flex items-start gap-3">
@@ -91,7 +91,7 @@ export function TodoCard({
             onToggleStatus(todo.id)
           }}
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0 mt-1"
+          className="shrink-0 self-center"
         />
         <div className="flex-1 min-w-0">
           <h3 className={`text-base font-medium line-clamp-1 ${todo.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
