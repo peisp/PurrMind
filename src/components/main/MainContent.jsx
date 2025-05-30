@@ -6,7 +6,7 @@ import { TodoList } from '@/components/todoList/todo-list.jsx'
 import { TodoForm } from '@/components/todoList/todo-form.jsx'
 import { CalendarHeader } from '@/components/todoList/CalendarHeader'
 import { useState } from 'react'
-import { addMonths, subMonths } from 'date-fns'
+import { addMonths, subMonths, addWeeks, subWeeks } from 'date-fns'
 
 export function MainContent ({
   todos,
@@ -27,6 +27,11 @@ export function MainContent ({
 }) {
   const Icon = Icons[currentIcon.icon] || Icons.ListIcon
   const [calendarCurrentDate, setCalendarCurrentDate] = useState(new Date())
+  const [calendarViewMode, setCalendarViewMode] = useState('month') // 'week'或'month'
+
+  const handleViewChange = (view) => {
+    setCalendarViewMode(view)
+  }
 
   const getColorClass = (color) => {
     switch (color) {
@@ -47,8 +52,22 @@ export function MainContent ({
     }
   }
 
-  const handlePrevMonth = () => setCalendarCurrentDate(subMonths(calendarCurrentDate, 1))
-  const handleNextMonth = () => setCalendarCurrentDate(addMonths(calendarCurrentDate, 1))
+  const handlePrev = () => {
+    if (calendarViewMode === 'month') {
+      setCalendarCurrentDate(subMonths(calendarCurrentDate, 1))
+    } else {
+      setCalendarCurrentDate(subWeeks(calendarCurrentDate, 1))
+    }
+  }
+
+  const handleNext = () => {
+    if (calendarViewMode === 'month') {
+      setCalendarCurrentDate(addMonths(calendarCurrentDate, 1))
+    } else {
+      setCalendarCurrentDate(addWeeks(calendarCurrentDate, 1))
+    }
+  }
+
   const handleToday = () => setCalendarCurrentDate(new Date())
 
   return (
@@ -66,9 +85,11 @@ export function MainContent ({
             {viewMode === 'calendar' && (
               <CalendarHeader
                 currentDate={calendarCurrentDate}
-                onPrevMonth={handlePrevMonth}
-                onNextMonth={handleNextMonth}
+                onPrevMonth={handlePrev}
+                onNextMonth={handleNext}
                 onToday={handleToday}
+                currentView={calendarViewMode}
+                onViewChange={handleViewChange}
               />
             )}
             {/* 固定Tooltip位置容器 */}
@@ -111,9 +132,12 @@ export function MainContent ({
                     className="h-8 w-8"
                     onClick={() => {
                       console.log('Current viewMode:', viewMode)
-                      const newViewMode = viewMode === 'timeline' ? 'calendar' : 'timeline'
-                      console.log('Setting viewMode to:', newViewMode)
-                      setViewMode(newViewMode)
+                      if (viewMode === 'timeline') {
+                        setViewMode('calendar')
+                        setCalendarViewMode('week') // 默认显示周视图
+                      } else {
+                        setViewMode('timeline')
+                      }
                     }}
                   >
                     {viewMode === 'timeline' ? (
@@ -140,6 +164,7 @@ export function MainContent ({
               categories={categories}
               viewMode={viewMode}
               calendarCurrentDate={calendarCurrentDate}
+              calendarViewMode={calendarViewMode}
             />
           </div>
           {currentFilter !== 'completed' && (

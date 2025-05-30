@@ -7,21 +7,30 @@ import {
   isSameDay, 
   startOfWeek, 
   endOfWeek,
-  isSameMonth
+  isSameMonth,
+  addWeeks,
+  subWeeks
 } from 'date-fns'
 import { cn } from '@/lib/utils'
 
 export function CalendarView({ 
   todos, 
   onEdit, 
-  currentDate 
+  currentDate,
+  viewMode // 'week' 或 'month'
 }) {
   const [selectedDate, setSelectedDate] = useState(null)
 
-  // 获取日历视图的日期范围（从当月的第一个周日到最后一周的周六）
-  const monthStart = startOfMonth(currentDate)
-  const start = startOfWeek(monthStart, { weekStartsOn: 0 }) // 0表示周日
-  const end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 })
+  // 根据视图模式计算日期范围
+  let start, end
+  if (viewMode === 'month') {
+    const monthStart = startOfMonth(currentDate)
+    start = startOfWeek(monthStart, { weekStartsOn: 0 }) // 0表示周日
+    end = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 0 })
+  } else { // 周视图
+    start = startOfWeek(currentDate, { weekStartsOn: 0 })
+    end = endOfWeek(currentDate, { weekStartsOn: 0 })
+  }
   const days = eachDayOfInterval({ start, end })
 
   const renderDateCell = (day) => {

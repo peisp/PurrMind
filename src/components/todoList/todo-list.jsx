@@ -13,9 +13,10 @@ export function TodoList({
   onDelete, 
   onToggleStatus, 
   viewMode = 'timeline',
-  calendarCurrentDate 
+  calendarCurrentDate,
+  calendarViewMode = 'month' 
 }) {
-  console.log('TodoList received viewMode:', viewMode);
+  console.log('TodoList received viewMode:', viewMode, 'calendarViewMode:', calendarViewMode);
   const [categories, setCategories] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
@@ -86,6 +87,7 @@ export function TodoList({
         todos={todos}
         onEdit={handleEdit}
         currentDate={calendarCurrentDate}
+        viewMode={calendarViewMode}
       />
     )
   }
