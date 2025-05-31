@@ -16,7 +16,6 @@ export function TodoList({
   calendarCurrentDate,
   calendarViewMode = 'month' 
 }) {
-  console.log('TodoList received viewMode:', viewMode, 'calendarViewMode:', calendarViewMode);
   const [categories, setCategories] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
