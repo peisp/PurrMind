@@ -84,9 +84,9 @@ export function TodoList({
     return (
       <CalendarView 
         todos={todos}
-        onEdit={handleEdit}
         currentDate={calendarCurrentDate}
         viewMode={calendarViewMode}
+        onToggleStatus={onToggleStatus}
       />
     )
   }
