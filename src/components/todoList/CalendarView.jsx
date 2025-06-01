@@ -65,6 +65,7 @@ export function CalendarView ({
                       : 'text-foreground'
                   )}
                   onClick={(e) => onToggleStatus(todo.id)}
+                  title={todo.title} // 添加hover提示完整标题
                 >
                   <Checkbox
                     checked={!!todo.completedAt}
@@ -79,7 +80,6 @@ export function CalendarView ({
                       'flex-1 truncate select-none',
                       todo.completedAt && 'line-through'
                     )}
-                    title={todo.title} // 添加hover提示完整标题
                   >
                     {todo.title}
                   </span>
