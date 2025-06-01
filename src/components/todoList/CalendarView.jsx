@@ -100,7 +100,7 @@ export function CalendarView ({
         {['周日', '周一', '周二', '周三', '周四', '周五', '周六'].map((day, index) => (
           <div
             key={day}
-            className="border-r border-b border-gray-200"
+            className="border-r border-b border-gray-200 py-1"
           >
             {day}
           </div>
