@@ -39,13 +39,14 @@ export function CalendarView ({
 
     return (
       <div className="relative h-full flex flex-col min-h-0">
-        {/* 当天日期使用圆形背景 */}
-        <div className="flex-shrink-0">
+        {/* 当天日期使用圆形背景 - 绝对定位居中 */}
+        {/*isToday*/}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
           <span className={cn(
-            'inline-flex items-center justify-center w-6 h-4 text-xs',
-            isToday
-              ? 'bg-blue-500 text-white rounded-full'
-              : isCurrentMonth ? 'text-foreground' : 'text-muted-foreground opacity-50'
+            'inline-flex items-center justify-center text-5xl font-black text-muted-foreground opacity-20'
+            // isCurrentMonth ? 'opacity-30' : 'opacity-20'
+            // isToday
+            //   ? 'bg-blue-500 rounded-full text-muted-foreground opacity-50' : ''
           )}>
             {format(day, 'd')}
           </span>
@@ -59,7 +60,7 @@ export function CalendarView ({
                 <div
                   key={todo.id}
                   className={cn(
-                    'text-xs px-1 py-1 rounded flex items-center gap-1.5 group cursor-pointer hover:bg-accent/30',
+                    'text-xs rounded px-1 pb-1 flex items-center gap-1 group cursor-pointer hover:bg-accent/30',
                     todo.completedAt
                       ? 'text-muted-foreground'
                       : 'text-foreground'
