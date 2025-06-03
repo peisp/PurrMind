@@ -15,7 +15,7 @@ export function CalendarDateDisplay({ currentDate, currentView }) {
 
   return (
     <span className="text-lg font-medium">
-      {currentView === 'week' 
+      {currentView === 'week'
         ? `${format(currentDate, 'yyyy年MM月')} 第${getWeekOfMonth()}周`
         : format(currentDate, 'yyyy年MM月')}
     </span>
@@ -23,7 +23,7 @@ export function CalendarDateDisplay({ currentDate, currentView }) {
 }
 
 // 按钮组部分
-export function CalendarControls({ 
+export function CalendarControls({
   currentView,
   onViewChange,
   onPrevMonth,
@@ -32,11 +32,14 @@ export function CalendarControls({
 }) {
   return (
     <div className="flex items-center space-x-2">
+      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
+        Beta
+      </span>
       <div className="flex border rounded-md">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
-              variant={currentView === 'week' ? 'default' : 'ghost'} 
+            <Button
+              variant={currentView === 'week' ? 'default' : 'ghost'}
               className="rounded-r-none"
               onClick={() => onViewChange('week')}
             >
@@ -45,11 +48,11 @@ export function CalendarControls({
           </TooltipTrigger>
           <TooltipContent>切换至周视图</TooltipContent>
         </Tooltip>
-        
+
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
-              variant={currentView === 'month' ? 'default' : 'ghost'} 
+            <Button
+              variant={currentView === 'month' ? 'default' : 'ghost'}
               className="rounded-l-none border-l"
               onClick={() => onViewChange('month')}
             >
@@ -59,7 +62,7 @@ export function CalendarControls({
           <TooltipContent>切换至月视图</TooltipContent>
         </Tooltip>
       </div>
-      
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="ghost" size="icon" onClick={onPrevMonth}>
@@ -68,11 +71,11 @@ export function CalendarControls({
         </TooltipTrigger>
         <TooltipContent>{currentView === 'week' ? '上一周' : '上个月'}</TooltipContent>
       </Tooltip>
-      
+
       <Button variant="ghost" onClick={onToday}>
         今天
       </Button>
-      
+
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="ghost" size="icon" onClick={onNextMonth}>
