@@ -19,7 +19,7 @@ export function AppSidebar({
 }) {
   return (
     <Sidebar 
-      className="shadow-lg border-0 bg-gradient-to-b from-background to-accent/20 transition-all duration-300"
+      className="shadow-lg border-t bg-gradient-to-b from-background to-accent/20 transition-all duration-300"
       {...props}
     >
       <SidebarHeader className="p-3">
