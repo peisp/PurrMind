@@ -5,15 +5,9 @@ import { MainContent } from '@/components/main/MainContent.jsx'
 import { useState } from 'react'
 import { useTodoManagement } from '@/hooks/useTodoManagement.js'
 
-import { useEffect } from 'react'
-
 export function Index({ enterAction }) {
   const [viewMode, setViewMode] = useState('timeline')
-  const [forceUpdate, setForceUpdate] = useState(0)
 
-  useEffect(() => {
-    setForceUpdate(prev => prev + 1)
-  }, [viewMode])
   const {
     todos,
     categories,
