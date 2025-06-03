@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react'
-import { getAllCategories } from "@/db/todo"
+import { getAllCategories } from '@/db/todo'
 import { TodoCard } from './todo-card'
 import { TodoEditSheet } from './todo-edit-sheet'
-import { format } from "date-fns"
+import { format } from 'date-fns'
 import { DayLabel } from '@/components/todoList/day-label'
 import { CalendarView } from './CalendarView'
 import { TimelineView } from './TimelineView'
 
-export function TodoList({ 
-  todos, 
-  onUpdate, 
-  onDelete, 
-  onToggleStatus, 
+export function TodoList ({
+  todos,
+  onUpdate,
+  onDelete,
+  onToggleStatus,
   viewMode = 'timeline',
   calendarCurrentDate,
-  calendarViewMode = 'month' 
+  calendarViewMode = 'month'
 }) {
   const [categories, setCategories] = useState([])
   const [editingId, setEditingId] = useState(null)
@@ -67,9 +67,9 @@ export function TodoList({
   }
 
   const getCategoryName = (categoryId) => {
-    if (!categoryId) return "无分类"
+    if (!categoryId) return '无分类'
     const category = categories.find(cat => cat.id === categoryId)
-    return category ? category.name : "未知分类"
+    return category ? category.name : '未知分类'
   }
 
   if (todos.length === 0) {
@@ -82,12 +82,27 @@ export function TodoList({
 
   if (viewMode === 'calendar') {
     return (
-      <CalendarView 
-        todos={todos}
-        currentDate={calendarCurrentDate}
-        viewMode={calendarViewMode}
-        onToggleStatus={onToggleStatus}
-      />
+      <>
+        <CalendarView
+          todos={todos}
+          currentDate={calendarCurrentDate}
+          viewMode={calendarViewMode}
+          onToggleStatus={onToggleStatus}
+          onEdit={handleEdit}
+        />
+        <TodoEditSheet
+          isOpen={isSheetOpen}
+          onOpenChange={setIsSheetOpen}
+          todo={todos.find(t => t.id === editingId)}
+          categories={categories}
+          onSave={handleSave}
+          onDelete={() => {
+            onDelete(editingId)
+            setIsSheetOpen(false)
+          }}
+          onCancel={handleCancel}
+        />
+      </>
     )
   }
 

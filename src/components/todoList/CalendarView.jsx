@@ -15,7 +15,8 @@ export function CalendarView ({
   todos,
   currentDate,
   viewMode, // 'week' 或 'month'
-  onToggleStatus
+  onToggleStatus,
+  onEdit
 }) {
   // 根据视图模式计算日期范围
   let start, end
@@ -65,7 +66,7 @@ export function CalendarView ({
                       ? 'text-muted-foreground'
                       : 'text-foreground'
                   )}
-                  onClick={(e) => onToggleStatus(todo.id)}
+                  onClick={(e) => onEdit(todo)}
                   title={todo.title} // 添加hover提示完整标题
                 >
                   <Checkbox
