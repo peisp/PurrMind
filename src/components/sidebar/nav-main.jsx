@@ -117,7 +117,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
             key={item.filter}
             variant={isActive ? "default" : "ghost"}
             className={cn(
-              "justify-between",
+              "justify-between p-2",
               isActive && "font-medium"
             )}
             onClick={() => handleClick(item.filter, item.title, item.icon, isActive ? "default" : "default", null)}
@@ -131,10 +131,9 @@ export function NavMain({ onFilterChange, currentFilter }) {
                 {item.title}
               </span>
             </div>
-            {item.filter !== "completed" && (
-              <span className={cn(
-                "rounded-full px-2 py-0.5 text-xs"
-              )}>
+            {item.filter !== 'completed' && (
+              <span className="rounded-full text-xs">
+                {/*{item.filter !== "completed" ? count : "∞"}*/}
                 {count}
               </span>
             )}
