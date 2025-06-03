@@ -42,7 +42,6 @@ export function NavMyList ({
   onCategoryChange,
   currentCategory
 }) {
-  const { isMobile } = useSidebar()
   const [categories, setCategories] = useState([])
   const [todos, setTodos] = useState([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -50,7 +49,6 @@ export function NavMyList ({
   const [selectedIcon, setSelectedIcon] = useState({ icon: 'FolderIcon', color: 'default' })
   const [hoveredItem, setHoveredItem] = useState(null)
   const [openDropdownId, setOpenDropdownId] = useState(null)
-  const [isClosing, setIsClosing] = useState(false)
 
   useEffect(() => {
     loadCategories()
@@ -171,8 +169,6 @@ export function NavMyList ({
             const isActive = currentCategory === category.id
             const isHovered = hoveredItem === category.id
             const isDropdownOpen = openDropdownId === category.id
-            const showMoreIcon = isHovered || isDropdownOpen
-            const showCount = !isHovered && !isDropdownOpen
 
             return (
               <SidebarMenuItem
@@ -212,46 +208,47 @@ export function NavMyList ({
                         {category.name}
                       </span>
                     </div>
-                    <div className="relative w-10 flex items-center justify-center">
-                      {showCount && (
-                        <span
+                  <div 
+                    className="relative flex items-center transition-all duration-200"
+                    data-sidebar="menu-action"
+                  >
+                    <span
+                      className={cn(
+                        'absolute right-0 rounded-full px-2 py-0.5 text-xs transition-transform duration-200',
+                        (isHovered || isDropdownOpen) && 'translate-x-[-100%]'
+                      )}
+                    >
+                      {count}
+                    </span>
+                    <DropdownMenu
+                      open={isDropdownOpen}
+                      onOpenChange={(open) => handleDropdownOpenChange(open, category.id)}
+                    >
+                      <DropdownMenuTrigger asChild>
+                        <div
                           className={cn(
-                            'rounded-full px-2 py-0.5 text-xs'
+                            "h-6 w-6 p-0 flex items-center justify-center cursor-pointer hover:bg-accent rounded-sm opacity-0 transition-opacity duration-200",
+                            isActive ? "text-white" : "text-black",
+                            (isHovered || isDropdownOpen) && "opacity-100"
                           )}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
+                          }}
                         >
-                          {count}
-                        </span>
-                      )}
-                      {showMoreIcon && (
-                        <DropdownMenu
-                          open={isDropdownOpen}
-                          onOpenChange={(open) => handleDropdownOpenChange(open, category.id)}
+                          <MoreHorizontal className="h-4 w-4" />
+                        </div>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={(e) => handleDeleteCategory(category.id, e)}
                         >
-                          <DropdownMenuTrigger asChild>
-                            <div
-                              className={cn(
-                                "h-6 w-6 p-0 flex items-center justify-center cursor-pointer hover:bg-accent rounded-sm",
-                                isActive ? "text-white" : "text-black"
-                              )}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                e.preventDefault()
-                              }}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </div>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={(e) => handleDeleteCategory(category.id, e)}
-                            >
-                              删除
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
-                    </div>
+                          删除
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                   </SidebarMenuButton>
                 </div>
               </SidebarMenuItem>
