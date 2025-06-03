@@ -184,7 +184,7 @@ export function NavMyList ({
                   <SidebarMenuButton
                     variant={isActive ? 'default' : 'ghost'}
                     className={cn(
-                      'flex-1 justify-between mx-2 h-10',
+                      'flex-1 justify-between mr-2 h-10',
                       isActive && 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground active:bg-primary active:text-primary-foreground'
                     )}
                     onClick={(e) => {
