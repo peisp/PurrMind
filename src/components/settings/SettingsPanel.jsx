@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Info } from 'lucide-react'
+import { Info, Sparkles } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-export function SettingsPanel({ open, onOpenChange }) {
+export function SettingsPanel ({ open, onOpenChange }) {
   const [settings, setSettings] = useState({
     darkMode: false,
     notifications: true,
@@ -17,6 +17,7 @@ export function SettingsPanel({ open, onOpenChange }) {
     }
   })
   const [aiModels, setAiModels] = useState([])
+  const selectedModel = aiModels.find(model => model.id === settings.aiSetting.model)
 
   useEffect(() => {
     // 加载保存的设置
@@ -32,7 +33,7 @@ export function SettingsPanel({ open, onOpenChange }) {
 
   const handleChange = (key, value) => {
     let newSettings = { ...settings }
-    console.log("key:",key)
+    // console.log('key:', key)
     if (key === 'aiModel') {
       const selectedModel = aiModels.find(model => model.id === value)
       if (selectedModel) {
@@ -62,7 +63,7 @@ export function SettingsPanel({ open, onOpenChange }) {
         <DialogHeader>
           <DialogTitle>设置</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-4 gap-4 items-center">
             {/*<div className="col-span-1">*/}
@@ -109,7 +110,7 @@ export function SettingsPanel({ open, onOpenChange }) {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="text-muted-foreground cursor-help ml-auto">
-                        <Info className="w-4 h-4" />
+                        <Info className="w-4 h-4"/>
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-[300px]">
@@ -128,9 +129,20 @@ export function SettingsPanel({ open, onOpenChange }) {
                     <SelectContent>
                       {aiModels.map(model => (
                         <SelectItem key={model.id} value={model.id}>
-                          <div className="flex items-center gap-2">
-                            {model.icon && <img src={model.icon} alt="" className="w-5 h-5 object-contain" onError={(e) => e.target.style.display = 'none'} />}
-                            <span>{model.label} (消耗: {model.cost}点)</span>
+                          <div className="flex flex-row items-center gap-2">
+                            {model.icon && (
+                              <img
+                                src={model.icon}
+                                alt=""
+                                className="w-5 h-5 object-contain"
+                                onError={(e) => (e.target.style.display = 'none')}
+                              />
+                            )}
+                            <div className="flex items-center gap-1">
+                              <span>{model.label}</span>
+                              <Sparkles className="w-4 h-4 text-violet-400 ml-2" />
+                              <span className="text-sm text-violet-400">{model.cost}点</span>
+                            </div>
                           </div>
                         </SelectItem>
                       ))}
