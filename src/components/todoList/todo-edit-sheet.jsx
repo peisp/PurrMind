@@ -198,139 +198,126 @@ export function TodoEditSheet ({
     if (dueDate) {
       const hours = dueDate.getHours()
       const minutes = dueDate.getMinutes()
-      if (hours === 0 && minutes === 0) {
-        dueDate = new Date(dueDate)
-        dueDate.setHours(9, 0, 0, 0)
+      const seconds = dueDate.getSeconds()
+      const milliseconds = dueDate.getMilliseconds()
+
+      // 如果时间都是默认值，则不设置时间
+      if (hours === 0 && minutes === 0 && seconds === 0 && milliseconds === 0) {
+        dueDate = null
       }
     }
 
-    // 如果是循环任务，创建循环任务模板
+    let reminderTime = editForm.reminderTime
+    if (reminderTime) {
+      const hours = reminderTime.getHours()
+      const minutes = reminderTime.getMinutes()
+      const seconds = reminderTime.getSeconds()
+      const milliseconds = reminderTime.getMilliseconds()
+
+      // 如果时间都是默认值，则不设置时间
+      if (hours === 0 && minutes === 0 && seconds === 0 && milliseconds === 0) {
+        reminderTime = null
+      }
+    }
+
+    const updatedTodo = {
+      ...todo,
+      title: editForm.title,
+      description: editForm.description,
+      categoryId: editForm.categoryId,
+      dueDate,
+      reminderTime
+    }
+
+    // 如果是循环任务，保存循环任务配置
     if (editForm.isRecurring) {
-      const recurringTaskData = {
+      const recurringData = {
         title: editForm.title,
         description: editForm.description,
         categoryId: editForm.categoryId,
-        starred: todo?.starred || false,
-        recurringType: editForm.recurringType,
-        recurringConfig: editForm.recurringConfig,
-        repeatEndType: editForm.repeatEndType,
-        repeatUntil: editForm.repeatUntil?.toISOString(),
-        repeatCount: editForm.repeatCount,
+        type: editForm.recurringType,
+        config: editForm.recurringConfig,
+        endType: editForm.repeatEndType,
+        endDate: editForm.repeatUntil,
+        endCount: editForm.repeatCount,
         reminderEnabled: editForm.reminderEnabled,
-        reminderOffset: editForm.reminderOffset,
-        startDate: dueDate ? dueDate.toISOString() : new Date().toISOString()
+        reminderOffset: editForm.reminderOffset
       }
 
       try {
-        await addRecurringTask(recurringTaskData)
-        // 创建循环任务后关闭编辑框
-        onOpenChange(false)
-        // 触发刷新
-        window.dispatchEvent(new Event('todo-updated'))
-        return
+        await addRecurringTask(recurringData)
       } catch (error) {
-        console.error('创建循环任务失败:', error)
-        return
+        console.error('Failed to save recurring task:', error)
       }
+    } else {
+      onSave(updatedTodo)
     }
-
-    // 普通任务保存
-    onSave({
-      ...editForm,
-      dueDate: dueDate?.toISOString(),
-      reminderTime: editForm.reminderTime?.toISOString()
-    })
   }
 
   const handleTimeChange = (type, value, isReminder = false) => {
-    const targetDate = isReminder ? editForm.reminderTime : editForm.dueDate
-    if (!targetDate) return
+    const targetField = isReminder ? 'reminderTime' : 'dueDate'
+    const currentDate = editForm[targetField]
 
-    const newDate = new Date(targetDate)
-    const numValue = parseInt(value) || 0
+    if (!currentDate) return
+
+    const newDate = new Date(currentDate)
 
     if (type === 'hour') {
-      newDate.setHours(Math.min(Math.max(numValue, 0), 23), newDate.getMinutes(), 0, 0)
-    } else {
-      newDate.setMinutes(Math.min(Math.max(numValue, 0), 59), 0, 0)
+      const hour = Math.max(0, Math.min(23, parseInt(value) || 0))
+      newDate.setHours(hour)
+    } else if (type === 'minute') {
+      const minute = Math.max(0, Math.min(59, parseInt(value) || 0))
+      newDate.setMinutes(minute)
     }
 
-    if (isReminder) {
-      setEditForm({ ...editForm, reminderTime: newDate })
-    } else {
-      setEditForm({ ...editForm, dueDate: newDate })
-    }
+    setEditForm({ ...editForm, [targetField]: newDate })
   }
 
   const handleTimeKeyDown = (type, e, isReminder = false) => {
-    const targetDate = isReminder ? editForm.reminderTime : editForm.dueDate
-    if (!targetDate) return
-
-    const newDate = new Date(targetDate)
-    const currentValue = type === 'hour' ? newDate.getHours() : newDate.getMinutes()
-
     if (e.key === 'ArrowUp') {
-      if (type === 'hour') {
-        newDate.setHours((currentValue + 1) % 24, newDate.getMinutes(), 0, 0)
-      } else {
-        newDate.setMinutes((currentValue + 1) % 60, 0, 0)
-      }
-      if (isReminder) {
-        setEditForm({ ...editForm, reminderTime: newDate })
-      } else {
-        setEditForm({ ...editForm, dueDate: newDate })
-      }
+      e.preventDefault()
+      const currentValue = parseInt(e.target.value) || 0
+      const newValue = type === 'hour'
+        ? Math.min(23, currentValue + 1)
+        : Math.min(59, currentValue + 1)
+      handleTimeChange(type, newValue.toString(), isReminder)
     } else if (e.key === 'ArrowDown') {
-      if (type === 'hour') {
-        newDate.setHours((currentValue - 1 + 24) % 24, newDate.getMinutes(), 0, 0)
-      } else {
-        newDate.setMinutes((currentValue - 1 + 60) % 60, 0, 0)
-      }
-      if (isReminder) {
-        setEditForm({ ...editForm, reminderTime: newDate })
-      } else {
-        setEditForm({ ...editForm, dueDate: newDate })
-      }
+      e.preventDefault()
+      const currentValue = parseInt(e.target.value) || 0
+      const newValue = type === 'hour'
+        ? Math.max(0, currentValue - 1)
+        : Math.max(0, currentValue - 1)
+      handleTimeChange(type, newValue.toString(), isReminder)
     }
   }
 
   const getIconComponent = (iconName) => {
-    return Icons[iconName] || Icons.FolderIcon
+    return Icons[iconName] || Icons.Circle
   }
 
   const getColorClass = (color) => {
-    switch (color) {
-      case 'red':
-        return 'text-red-500'
-      case 'blue':
-        return 'text-blue-500'
-      case 'green':
-        return 'text-green-500'
-      case 'yellow':
-        return 'text-yellow-500'
-      case 'purple':
-        return 'text-purple-500'
-      case 'pink':
-        return 'text-pink-500'
-      default:
-        return 'text-gray-500'
+    const colorMap = {
+      primary: 'bg-blue-500',
+      secondary: 'bg-green-500',
+      accent: 'bg-yellow-500',
+      destructive: 'bg-red-500',
+      muted: 'bg-gray-500',
+      blue: 'bg-blue-500',
+      green: 'bg-green-500',
+      yellow: 'bg-yellow-500',
+      red: 'bg-red-500',
+      purple: 'bg-purple-500',
+      orange: 'bg-orange-500',
+      pink: 'bg-pink-500',
+      indigo: 'bg-indigo-500'
     }
+    return colorMap[color] || 'bg-gray-500'
   }
 
-  // 循环设置相关函数
   const updateRecurringConfig = (key, value) => {
     setEditForm(prev => ({
       ...prev,
       recurringConfig: {
-        // 提供默认配置，防止 undefined
-        dailyTime: '09:00',
-        weeklyDays: [1],
-        weeklyTime: '09:00',
-        monthlyDate: 1,
-        monthlyTime: '09:00',
-        intervalValue: 1,
-        intervalUnit: 'days',
-        customTime: '09:00',
         ...prev.recurringConfig,
         [key]: value
       }
@@ -338,215 +325,213 @@ export function TodoEditSheet ({
   }
 
   const toggleWeeklyDay = (day) => {
-    const currentDays = editForm.recurringConfig?.weeklyDays || [1]
+    const currentDays = editForm.recurringConfig?.weeklyDays || []
     const newDays = currentDays.includes(day)
       ? currentDays.filter(d => d !== day)
-      : [...currentDays, day].sort()
+      : [...currentDays, day].sort((a, b) => a - b)
 
-    if (newDays.length > 0) { // 至少保留一天
-      updateRecurringConfig('weeklyDays', newDays)
-    }
+    updateRecurringConfig('weeklyDays', newDays)
   }
 
   const getWeekDayName = (day) => {
-    const names = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    const names = ['日', '一', '二', '三', '四', '五', '六']
     return names[day]
   }
 
-  // 渲染循环类型选择器
   const renderRecurringTypeSelector = () => (
-    <div className='grid grid-cols-2 gap-2'>
-      {[
-        { type: 'daily', icon: Sun, label: '每日' },
-        { type: 'weekly', icon: CalendarDays, label: '每周' },
-        { type: 'monthly', icon: CalendarDays, label: '每月' },
-        { type: 'custom', icon: Settings, label: '自定义' }
-      ].map(({ type, icon: Icon, label }) => (
-        <Button
-          key={type}
-          type='button'
-          variant={editForm.recurringType === type ? 'default' : 'outline'}
-          className='h-12 flex-col gap-1'
-          onClick={() => setEditForm(prev => ({ ...prev, recurringType: type }))}
-        >
-          <Icon className='h-4 w-4' />
-          <span className='text-xs'>{label}</span>
-        </Button>
-      ))}
-    </div>
+    <Select
+      value={editForm.recurringType}
+      onValueChange={(value) => setEditForm(prev => ({ ...prev, recurringType: value }))}
+    >
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value='daily'>每日</SelectItem>
+        <SelectItem value='weekly'>每周</SelectItem>
+        <SelectItem value='monthly'>每月</SelectItem>
+        <SelectItem value='custom'>自定义</SelectItem>
+      </SelectContent>
+    </Select>
   )
 
-  // 渲染循环配置详情
   const renderRecurringConfig = () => {
-    // 确保 recurringConfig 存在
-    if (!editForm.recurringConfig) return null
+    const config = editForm.recurringConfig || {}
 
-    switch (editForm.recurringType) {
-      case 'daily':
-        return (
-          <div className='space-y-2'>
-            <label className='text-sm font-medium'>每日时间</label>
+    if (editForm.recurringType === 'daily') {
+      return (
+        <div className='space-y-2'>
+          <label className='text-sm font-medium'>每日时间</label>
+          <Input
+            type='time'
+            value={config.dailyTime || '09:00'}
+            onChange={(e) => updateRecurringConfig('dailyTime', e.target.value)}
+            className='w-full'
+          />
+        </div>
+      )
+    }
+
+    if (editForm.recurringType === 'weekly') {
+      return (
+        <div className='space-y-3'>
+          <div>
+            <label className='text-sm font-medium mb-2 block'>选择星期</label>
+            <div className='flex gap-1'>
+              {[0, 1, 2, 3, 4, 5, 6].map(day => (
+                <Button
+                  key={day}
+                  variant={(config.weeklyDays || []).includes(day) ? 'default' : 'outline'}
+                  size='sm'
+                  className='w-8 h-8 p-0'
+                  onClick={() => toggleWeeklyDay(day)}
+                >
+                  {getWeekDayName(day)}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className='text-sm font-medium'>时间</label>
             <Input
               type='time'
-              value={editForm.recurringConfig.dailyTime || '09:00'}
-              onChange={(e) => updateRecurringConfig('dailyTime', e.target.value)}
+              value={config.weeklyTime || '09:00'}
+              onChange={(e) => updateRecurringConfig('weeklyTime', e.target.value)}
               className='w-full'
             />
           </div>
-        )
+        </div>
+      )
+    }
 
-      case 'weekly':
-        return (
-          <div className='space-y-3'>
-            <div>
-              <label className='text-sm font-medium'>重复日期</label>
-              <div className='grid grid-cols-7 gap-1 mt-2'>
-                {[0, 1, 2, 3, 4, 5, 6].map(day => (
-                  <Button
-                    key={day}
-                    type='button'
-                    variant={(editForm.recurringConfig.weeklyDays || [1]).includes(day) ? 'default' : 'outline'}
-                    className='h-8 text-xs'
-                    onClick={() => toggleWeeklyDay(day)}
-                  >
-                    {getWeekDayName(day).slice(1)}
-                  </Button>
+    if (editForm.recurringType === 'monthly') {
+      return (
+        <div className='space-y-3'>
+          <div>
+            <label className='text-sm font-medium'>每月日期</label>
+            <Select
+              value={(config.monthlyDate || 1).toString()}
+              onValueChange={(value) => updateRecurringConfig('monthlyDate', parseInt(value))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 31 }, (_, i) => i + 1).map(date => (
+                  <SelectItem key={date} value={date.toString()}>
+                    {date}号
+                  </SelectItem>
                 ))}
-              </div>
-            </div>
-            <div>
-              <label className='text-sm font-medium'>时间</label>
-              <Input
-                type='time'
-                value={editForm.recurringConfig.weeklyTime || '09:00'}
-                onChange={(e) => updateRecurringConfig('weeklyTime', e.target.value)}
-                className='w-full'
-              />
-            </div>
+              </SelectContent>
+            </Select>
           </div>
-        )
+          <div>
+            <label className='text-sm font-medium'>时间</label>
+            <Input
+              type='time'
+              value={config.monthlyTime || '09:00'}
+              onChange={(e) => updateRecurringConfig('monthlyTime', e.target.value)}
+              className='w-full'
+            />
+          </div>
+        </div>
+      )
+    }
 
-      case 'monthly':
-        return (
-          <div className='space-y-3'>
-            <div>
-              <label className='text-sm font-medium'>每月日期</label>
+    if (editForm.recurringType === 'custom') {
+      return (
+        <div className='space-y-3'>
+          <div className='flex gap-2'>
+            <div className='flex-1'>
+              <label className='text-sm font-medium'>间隔数值</label>
               <Input
                 type='number'
                 min='1'
-                max='31'
-                value={editForm.recurringConfig.monthlyDate || 1}
-                onChange={(e) => updateRecurringConfig('monthlyDate', parseInt(e.target.value) || 1)}
-                className='w-full'
+                value={config.intervalValue || 1}
+                onChange={(e) => updateRecurringConfig('intervalValue', parseInt(e.target.value) || 1)}
               />
             </div>
-            <div>
-              <label className='text-sm font-medium'>时间</label>
-              <Input
-                type='time'
-                value={editForm.recurringConfig.monthlyTime || '09:00'}
-                onChange={(e) => updateRecurringConfig('monthlyTime', e.target.value)}
-                className='w-full'
-              />
+            <div className='flex-1'>
+              <label className='text-sm font-medium'>间隔单位</label>
+              <Select
+                value={config.intervalUnit || 'days'}
+                onValueChange={(value) => updateRecurringConfig('intervalUnit', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='days'>天</SelectItem>
+                  <SelectItem value='weeks'>周</SelectItem>
+                  <SelectItem value='months'>月</SelectItem>
+                  <SelectItem value='years'>年</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        )
-
-      case 'custom':
-        return (
-          <div className='space-y-3'>
-            <div className='flex gap-2'>
-              <div className='flex-1'>
-                <label className='text-sm font-medium'>间隔</label>
-                <Input
-                  type='number'
-                  min='1'
-                  value={editForm.recurringConfig.intervalValue || 1}
-                  onChange={(e) => updateRecurringConfig('intervalValue', parseInt(e.target.value) || 1)}
-                  className='w-full'
-                />
-              </div>
-              <div className='flex-1'>
-                <label className='text-sm font-medium'>单位</label>
-                <Select
-                  value={editForm.recurringConfig.intervalUnit || 'days'}
-                  onValueChange={(value) => updateRecurringConfig('intervalUnit', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value='days'>天</SelectItem>
-                    <SelectItem value='weeks'>周</SelectItem>
-                    <SelectItem value='months'>月</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <label className='text-sm font-medium'>时间</label>
-              <Input
-                type='time'
-                value={editForm.recurringConfig.customTime || '09:00'}
-                onChange={(e) => updateRecurringConfig('customTime', e.target.value)}
-                className='w-full'
-              />
-            </div>
+          <div>
+            <label className='text-sm font-medium'>时间</label>
+            <Input
+              type='time'
+              value={config.customTime || '09:00'}
+              onChange={(e) => updateRecurringConfig('customTime', e.target.value)}
+              className='w-full'
+            />
           </div>
-        )
-
-      default:
-        return null
+        </div>
+      )
     }
+
+    return null
   }
 
-  // 渲染结束条件
   const renderEndCondition = () => (
     <div className='space-y-3'>
-      <label className='text-sm font-medium'>结束条件</label>
-      <Select
-        value={editForm.repeatEndType}
-        onValueChange={(value) => setEditForm(prev => ({ ...prev, repeatEndType: value }))}
-      >
-        <SelectTrigger>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value='never'>永不结束</SelectItem>
-          <SelectItem value='until'>结束于特定日期</SelectItem>
-          <SelectItem value='count'>重复指定次数</SelectItem>
-        </SelectContent>
-      </Select>
+      <div>
+        <label className='text-sm font-medium mb-2 block'>结束条件</label>
+        <Select
+          value={editForm.repeatEndType}
+          onValueChange={(value) => setEditForm(prev => ({ ...prev, repeatEndType: value }))}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='never'>永不结束</SelectItem>
+            <SelectItem value='until'>指定日期结束</SelectItem>
+            <SelectItem value='count'>指定次数结束</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {editForm.repeatEndType === 'until' && (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant='outline'
-              className={cn(
-                'w-full justify-start text-left font-normal',
-                !editForm.repeatUntil && 'text-muted-foreground'
-              )}
-            >
-              <CalendarIcon className='mr-2 h-4 w-4' />
-              {editForm.repeatUntil
-                ? (
-                    format(editForm.repeatUntil, 'yyyy-MM-dd', { locale: zhCN })
-                  )
-                : (
-                  <span>选择结束日期</span>
-                  )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className='w-auto p-0'>
-            <Calendar
-              mode='single'
-              selected={editForm.repeatUntil}
-              onSelect={(date) => setEditForm(prev => ({ ...prev, repeatUntil: date }))}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <div>
+          <label className='text-sm font-medium'>结束日期</label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant='outline'
+                className={cn(
+                  'w-full justify-start text-left font-normal',
+                  !editForm.repeatUntil && 'text-muted-foreground'
+                )}
+              >
+                <CalendarIcon className='mr-2 h-4 w-4' />
+                {editForm.repeatUntil
+                  ? format(editForm.repeatUntil, 'yyyy-MM-dd', { locale: zhCN })
+                  : '选择结束日期'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className='w-auto p-0'>
+              <Calendar
+                mode='single'
+                selected={editForm.repeatUntil}
+                onSelect={(date) => setEditForm(prev => ({ ...prev, repeatUntil: date }))}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
       )}
 
       {editForm.repeatEndType === 'count' && (
@@ -558,207 +543,140 @@ export function TodoEditSheet ({
             value={editForm.repeatCount || ''}
             onChange={(e) => setEditForm(prev => ({ ...prev, repeatCount: parseInt(e.target.value) || null }))}
             placeholder='输入重复次数'
-            className='w-full'
           />
         </div>
       )}
     </div>
   )
 
-  return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className='p-2 flex flex-col'>
-        <SheetHeader>
-          <SheetTitle>编辑待办事项</SheetTitle>
-        </SheetHeader>
-        <div className='flex-1 space-y-1 overflow-y-auto'>
-          <div className='space-y-0.5'>
-            <label className='text-sm font-medium'>标题</label>
-            <LimitedInput
-              value={editForm.title}
-              onChange={(value) => setEditForm({ ...editForm, title: value })}
-              maxLength={50}
-              placeholder='输入标题'
-            />
-          </div>
-          <div className='space-y-0.5'>
-            <label className='text-sm font-medium'>描述</label>
-            <LimitedTextarea
-              value={editForm.description}
-              onChange={(value) => setEditForm({ ...editForm, description: value })}
-              maxLength={200}
-              placeholder='输入描述'
-            />
-          </div>
-          <div className='space-y-0.5'>
-            <label className='text-sm font-medium'>列表</label>
-            <Select
-              value={editForm.categoryId || 'none'}
-              onValueChange={(value) => setEditForm({ ...editForm, categoryId: value === 'none' ? null : value })}
-            >
-              <SelectTrigger
-                className=' data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=closed]:ring-0 data-[state=closed]:ring-offset-0 ring-0 ring-offset-0'
-              >
-                <SelectValue placeholder='选择列表'>
-                  {editForm.categoryId
-                    ? (
-                      <div className='flex items-center gap-2'>
-                        <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
-                          {(() => {
-                            const category = categories.find(cat => cat.id === editForm.categoryId)
-                            const Icon = getIconComponent(category?.icon)
-                            return <Icon className={cn('h-4 w-4', getColorClass(category?.color))} />
-                          })()}
-                        </div>
-                        <span>{categories.find(cat => cat.id === editForm.categoryId)?.name || '未知列表'}</span>
-                      </div>
-                      )
-                    : (
-                      <div className='flex items-center gap-2'>
-                        <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
-                          <Icons.FolderIcon className='h-4 w-4 text-gray-500' />
-                        </div>
-                        <span>无列表</span>
-                      </div>
-                      )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='none'>
-                  <div className='flex items-center gap-2'>
-                    <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
-                      <Icons.FolderIcon className='h-4 w-4 text-gray-500' />
-                    </div>
-                    <span>无列表</span>
-                  </div>
-                </SelectItem>
-                {categories.map((category) => {
-                  const Icon = getIconComponent(category.icon)
-                  return (
-                    <SelectItem
-                      key={category.id}
-                      value={category.id}
-                    >
-                      <div className='flex items-center gap-2'>
-                        <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
-                          <Icon className={cn('h-4 w-4', getColorClass(category.color))} />
-                        </div>
-                        <span>{category.name}</span>
-                      </div>
-                    </SelectItem>
-                  )
-                })}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className='space-y-0.5'>
-            <label className='text-sm font-medium'>截止时间</label>
-            <div className='flex gap-2'>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant='outline'
-                    className={cn(
-                      'flex-1 justify-start text-left font-normal ',
-                      !editForm.dueDate && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className='mr-2 h-4 w-4' />
-                    {editForm.dueDate
-                      ? (
-                          format(editForm.dueDate, 'yyyy-MM-dd', { locale: zhCN })
-                        )
-                      : (
-                        <span>选择日期</span>
-                        )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className='w-auto p-0'>
-                  <Calendar
-                    mode='single'
-                    selected={editForm.dueDate}
-                    onSelect={(date) => {
-                      if (date) {
-                        const newDate = new Date(date)
-                        if (editForm.dueDate) {
-                          newDate.setHours(
-                            editForm.dueDate.getHours(),
-                            editForm.dueDate.getMinutes(),
-                            0,
-                            0
-                          )
-                        } else {
-                          newDate.setHours(9, 0, 0, 0)
-                        }
-                        setEditForm({ ...editForm, dueDate: newDate })
-                      } else {
-                        setEditForm({ ...editForm, dueDate: null })
-                      }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <div className='flex items-center gap-1'>
-                <Input
-                  type='number'
-                  min='0'
-                  max='23'
-                  value={editForm.dueDate ? format(editForm.dueDate, 'HH') : ''}
-                  onChange={(e) => handleTimeChange('hour', e.target.value)}
-                  onKeyDown={(e) => handleTimeKeyDown('hour', e)}
-                  className='w-[50px] h-8 px-2 text-center '
-                  placeholder='时'
-                  disabled={!editForm.dueDate}
-                />
-                <span className='text-muted-foreground'>:</span>
-                <Input
-                  type='number'
-                  min='0'
-                  max='59'
-                  value={editForm.dueDate ? format(editForm.dueDate, 'mm') : ''}
-                  onChange={(e) => handleTimeChange('minute', e.target.value)}
-                  onKeyDown={(e) => handleTimeKeyDown('minute', e)}
-                  className='w-[50px] h-8 px-2 text-center '
-                  placeholder='分'
-                  disabled={!editForm.dueDate}
-                />
-              </div>
+  if (!editForm.reminderTime) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onOpenChange}>
+        <SheetContent className='w-[90vw] sm:w-[80vw] max-w-[700px] overflow-y-auto'>
+          <SheetHeader>
+            <SheetTitle>
+              {todo?.id ? '编辑任务' : '新建任务'}
+            </SheetTitle>
+          </SheetHeader>
+          <div className='space-y-3 py-4'>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>任务标题</label>
+              <LimitedInput
+                value={editForm.title}
+                onChange={(value) => setEditForm({ ...editForm, title: value })}
+                maxLength={50}
+                placeholder='请输入任务标题'
+              />
             </div>
-          </div>
-          <div className='space-y-0.5'>
-            <label className='text-sm font-medium'>提醒时间</label>
-            {!editForm.reminderTime ? (
+
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>任务描述</label>
+              <LimitedTextarea
+                value={editForm.description}
+                onChange={(value) => setEditForm({ ...editForm, description: value })}
+                maxLength={200}
+                placeholder='请输入任务描述'
+                className='min-h-[60px] resize-none'
+              />
+            </div>
+
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>任务列表</label>
               <Select
-                value=''
-                onValueChange={(value) => {
-                  if (value === 'custom') {
-                    // 设置默认时间为当前时间+1小时
-                    const defaultTime = new Date()
-                    defaultTime.setHours(defaultTime.getHours() + 1, 0, 0, 0)
-                    setEditForm({ ...editForm, reminderTime: defaultTime })
-                    return
-                  }
-                  const selectedDate = new Date(value)
-                  setEditForm({ ...editForm, reminderTime: selectedDate })
-                }}
+                value={editForm.categoryId}
+                onValueChange={(value) => setEditForm({ ...editForm, categoryId: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder='选择提醒时间' />
+                  <SelectValue placeholder='选择任务列表' />
                 </SelectTrigger>
                 <SelectContent>
-                  {getReminderTimeOptions().map((option) => (
-                    <SelectItem
-                      key={option.label}
-                      value={option.value === 'custom' ? 'custom' : option.value.toISOString()}
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                  {categories.map((category) => {
+                    const IconComponent = getIconComponent(category.icon)
+                    return (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className='flex items-center gap-2'>
+                          <div className={`w-3 h-3 rounded-full ${getColorClass(category.color)}`} />
+                          <IconComponent className='w-4 h-4' />
+                          <span>{category.name}</span>
+                        </div>
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
-            ) : (
-              <div className='space-y-1'>
+            </div>
+
+            {/* 循环设置区域 */}
+            <div className='space-y-0.5'>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-2'>
+                  <Repeat className='h-4 w-4 text-muted-foreground' />
+                  <label className='text-sm font-medium'>循环任务</label>
+                </div>
+                <Switch
+                  checked={editForm.isRecurring}
+                  onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, isRecurring: checked }))}
+                />
+              </div>
+
+              {editForm.isRecurring && (
+                <Collapsible open className='space-y-4 p-4 bg-accent/20 rounded-lg border'>
+                  <div className='space-y-3'>
+                    <div>
+                      <label className='text-sm font-medium mb-2 block'>循环类型</label>
+                      {renderRecurringTypeSelector()}
+                    </div>
+
+                    <div>
+                      {renderRecurringConfig()}
+                    </div>
+
+                    <div>
+                      {renderEndCondition()}
+                    </div>
+
+                    <div className='border-t pt-3'>
+                      <div className='flex items-center justify-between'>
+                        <label className='text-sm font-medium'>提醒设置</label>
+                        <Switch
+                          checked={editForm.reminderEnabled}
+                          onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, reminderEnabled: checked }))}
+                        />
+                      </div>
+
+                      {editForm.reminderEnabled && (
+                        <div className='mt-2'>
+                          <label className='text-sm font-medium'>提前提醒时间（分钟）</label>
+                          <Select
+                            value={editForm.reminderOffset.toString()}
+                            onValueChange={(value) => setEditForm(prev => ({
+                              ...prev,
+                              reminderOffset: parseInt(value)
+                            }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='5'>5分钟前</SelectItem>
+                              <SelectItem value='15'>15分钟前</SelectItem>
+                              <SelectItem value='30'>30分钟前</SelectItem>
+                              <SelectItem value='60'>1小时前</SelectItem>
+                              <SelectItem value='120'>2小时前</SelectItem>
+                              <SelectItem value='1440'>1天前</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Collapsible>
+              )}
+            </div>
+            {/* 截止时间 - 只在非循环任务时显示 */}
+            {!editForm.isRecurring && (
+              <div className='space-y-0.5'>
+                <label className='text-sm font-medium'>截止时间</label>
                 <div className='flex gap-2'>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -766,13 +684,13 @@ export function TodoEditSheet ({
                         variant='outline'
                         className={cn(
                           'flex-1 justify-start text-left font-normal ',
-                          !editForm.reminderTime && 'text-muted-foreground'
+                          !editForm.dueDate && 'text-muted-foreground'
                         )}
                       >
                         <CalendarIcon className='mr-2 h-4 w-4' />
-                        {editForm.reminderTime
+                        {editForm.dueDate
                           ? (
-                              format(editForm.reminderTime, 'yyyy-MM-dd', { locale: zhCN })
+                              format(editForm.dueDate, 'yyyy-MM-dd', { locale: zhCN })
                             )
                           : (
                             <span>选择日期</span>
@@ -782,23 +700,23 @@ export function TodoEditSheet ({
                     <PopoverContent className='w-auto p-0'>
                       <Calendar
                         mode='single'
-                        selected={editForm.reminderTime}
+                        selected={editForm.dueDate}
                         onSelect={(date) => {
                           if (date) {
                             const newDate = new Date(date)
-                            if (editForm.reminderTime) {
+                            if (editForm.dueDate) {
                               newDate.setHours(
-                                editForm.reminderTime.getHours(),
-                                editForm.reminderTime.getMinutes(),
+                                editForm.dueDate.getHours(),
+                                editForm.dueDate.getMinutes(),
                                 0,
                                 0
                               )
                             } else {
                               newDate.setHours(9, 0, 0, 0)
                             }
-                            setEditForm({ ...editForm, reminderTime: newDate })
+                            setEditForm({ ...editForm, dueDate: newDate })
                           } else {
-                            setEditForm({ ...editForm, reminderTime: null })
+                            setEditForm({ ...editForm, dueDate: null })
                           }
                         }}
                         initialFocus
@@ -810,137 +728,427 @@ export function TodoEditSheet ({
                       type='number'
                       min='0'
                       max='23'
-                      value={editForm.reminderTime ? format(editForm.reminderTime, 'HH') : ''}
-                      onChange={(e) => handleTimeChange('hour', e.target.value, true)}
-                      onKeyDown={(e) => handleTimeKeyDown('hour', e, true)}
+                      value={editForm.dueDate ? format(editForm.dueDate, 'HH') : ''}
+                      onChange={(e) => handleTimeChange('hour', e.target.value)}
+                      onKeyDown={(e) => handleTimeKeyDown('hour', e)}
                       className='w-[50px] h-8 px-2 text-center '
                       placeholder='时'
-                      disabled={!editForm.reminderTime}
+                      disabled={!editForm.dueDate}
                     />
                     <span className='text-muted-foreground'>:</span>
                     <Input
                       type='number'
                       min='0'
                       max='59'
-                      value={editForm.reminderTime ? format(editForm.reminderTime, 'mm') : ''}
-                      onChange={(e) => handleTimeChange('minute', e.target.value, true)}
-                      onKeyDown={(e) => handleTimeKeyDown('minute', e, true)}
+                      value={editForm.dueDate ? format(editForm.dueDate, 'mm') : ''}
+                      onChange={(e) => handleTimeChange('minute', e.target.value)}
+                      onKeyDown={(e) => handleTimeKeyDown('minute', e)}
                       className='w-[50px] h-8 px-2 text-center '
                       placeholder='分'
-                      disabled={!editForm.reminderTime}
+                      disabled={!editForm.dueDate}
                     />
                   </div>
                 </div>
-                <Button
-                  variant='outline'
-                  className='w-full '
-                  onClick={() => {
-                    setEditForm({ ...editForm, reminderTime: null })
-                  }}
-                >
-                  清除提醒时间
-                </Button>
               </div>
             )}
-            {timeValidationError && (
-              <div className='flex items-center gap-1 text-sm text-red-500'>
-                <AlertCircle className='h-4 w-4' />
-                <span>{timeValidationError}</span>
+            {/* 提醒时间 - 只在非循环任务时显示 */}
+            {!editForm.isRecurring && (
+              <div className='space-y-0.5'>
+                <label className='text-sm font-medium'>提醒时间</label>
+                {
+                  <Select
+                    value=''
+                    onValueChange={(value) => {
+                      if (value === 'custom') {
+                      // 设置默认时间为当前时间+1小时
+                        const defaultTime = new Date()
+                        defaultTime.setHours(defaultTime.getHours() + 1, 0, 0, 0)
+                        setEditForm({ ...editForm, reminderTime: defaultTime })
+                        return
+                      }
+                      const selectedDate = new Date(value)
+                      setEditForm({ ...editForm, reminderTime: selectedDate })
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder='选择提醒时间' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getReminderTimeOptions().map((option) => (
+                        <SelectItem
+                          key={option.label}
+                          value={option.value === 'custom' ? 'custom' : option.value.toISOString()}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                }
+                {timeValidationError && (
+                  <div className='flex items-center gap-1 text-sm text-red-500'>
+                    <AlertCircle className='h-4 w-4' />
+                    <span>{timeValidationError}</span>
+                  </div>
+                )}
               </div>
             )}
-          </div>
 
-          {/* 循环设置区域 */}
-          <div className='space-y-0.5'>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center gap-2'>
-                <Repeat className='h-4 w-4 text-muted-foreground' />
-                <label className='text-sm font-medium'>循环提醒</label>
-              </div>
-              <Switch
-                checked={editForm.isRecurring}
-                onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, isRecurring: checked }))}
+          </div>
+          <SheetFooter className='flex items-center justify-between pt-2 mt-2'>
+            <div className='flex-1 text-xs text-muted-foreground'>
+              创建于 {todo?.createdAt ? format(new Date(todo.createdAt), 'yyyy-MM-dd HH:mm', { locale: zhCN }) : ''}
+            </div>
+            <div className='flex items-center gap-2'>
+              <Button
+                variant='destructive'
+                onClick={onDelete}
+              >
+                删除
+              </Button>
+              <Button
+                variant='outline'
+                onClick={onCancel}
+              >
+                取消
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!!timeValidationError}
+              >
+                保存
+              </Button>
+            </div>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    )
+  } else {
+    return (
+      <Sheet open={isOpen} onOpenChange={onOpenChange}>
+        <SheetContent className='w-[90vw] sm:w-[80vw] max-w-[700px] overflow-y-auto'>
+          <SheetHeader>
+            <SheetTitle>
+              {todo?.id ? '编辑任务' : '新建任务'}
+            </SheetTitle>
+          </SheetHeader>
+          <div className='space-y-3 py-4'>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>任务标题</label>
+              <LimitedInput
+                value={editForm.title}
+                onChange={(value) => setEditForm({ ...editForm, title: value })}
+                maxLength={50}
+                placeholder='请输入任务标题'
               />
             </div>
 
-            {editForm.isRecurring && (
-              <Collapsible open className='space-y-4 p-4 bg-accent/20 rounded-lg border'>
-                <div className='space-y-3'>
-                  <div>
-                    <label className='text-sm font-medium mb-2 block'>循环类型</label>
-                    {renderRecurringTypeSelector()}
-                  </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>任务描述</label>
+              <LimitedTextarea
+                value={editForm.description}
+                onChange={(value) => setEditForm({ ...editForm, description: value })}
+                maxLength={200}
+                placeholder='请输入任务描述'
+                className='min-h-[60px] resize-none'
+              />
+            </div>
 
-                  <div>
-                    {renderRecurringConfig()}
-                  </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>任务列表</label>
+              <Select
+                value={editForm.categoryId}
+                onValueChange={(value) => setEditForm({ ...editForm, categoryId: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder='选择任务列表' />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => {
+                    const IconComponent = getIconComponent(category.icon)
+                    return (
+                      <SelectItem key={category.id} value={category.id}>
+                        <div className='flex items-center gap-2'>
+                          <div className={`w-3 h-3 rounded-full ${getColorClass(category.color)}`} />
+                          <IconComponent className='w-4 h-4' />
+                          <span>{category.name}</span>
+                        </div>
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
 
-                  <div>
-                    {renderEndCondition()}
-                  </div>
+            {/* 循环设置区域 */}
+            <div className='space-y-0.5'>
+              <div className='flex items-center justify-between'>
+                <div className='flex items-center gap-2'>
+                  <Repeat className='h-4 w-4 text-muted-foreground' />
+                  <label className='text-sm font-medium'>循环任务</label>
+                </div>
+                <Switch
+                  checked={editForm.isRecurring}
+                  onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, isRecurring: checked }))}
+                />
+              </div>
 
-                  <div className='border-t pt-3'>
-                    <div className='flex items-center justify-between'>
-                      <label className='text-sm font-medium'>提醒设置</label>
-                      <Switch
-                        checked={editForm.reminderEnabled}
-                        onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, reminderEnabled: checked }))}
-                      />
+              {editForm.isRecurring && (
+                <Collapsible open className='space-y-4 p-4 bg-accent/20 rounded-lg border'>
+                  <div className='space-y-3'>
+                    <div>
+                      <label className='text-sm font-medium mb-2 block'>循环类型</label>
+                      {renderRecurringTypeSelector()}
                     </div>
 
-                    {editForm.reminderEnabled && (
-                      <div className='mt-2'>
-                        <label className='text-sm font-medium'>提前提醒时间（分钟）</label>
-                        <Select
-                          value={editForm.reminderOffset.toString()}
-                          onValueChange={(value) => setEditForm(prev => ({ ...prev, reminderOffset: parseInt(value) }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value='5'>5分钟前</SelectItem>
-                            <SelectItem value='15'>15分钟前</SelectItem>
-                            <SelectItem value='30'>30分钟前</SelectItem>
-                            <SelectItem value='60'>1小时前</SelectItem>
-                            <SelectItem value='120'>2小时前</SelectItem>
-                            <SelectItem value='1440'>1天前</SelectItem>
-                          </SelectContent>
-                        </Select>
+                    <div>
+                      {renderRecurringConfig()}
+                    </div>
+
+                    <div>
+                      {renderEndCondition()}
+                    </div>
+
+                    <div className='border-t pt-3'>
+                      <div className='flex items-center justify-between'>
+                        <label className='text-sm font-medium'>提醒设置</label>
+                        <Switch
+                          checked={editForm.reminderEnabled}
+                          onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, reminderEnabled: checked }))}
+                        />
                       </div>
-                    )}
+
+                      {editForm.reminderEnabled && (
+                        <div className='mt-2'>
+                          <label className='text-sm font-medium'>提前提醒时间（分钟）</label>
+                          <Select
+                            value={editForm.reminderOffset.toString()}
+                            onValueChange={(value) => setEditForm(prev => ({
+                              ...prev,
+                              reminderOffset: parseInt(value)
+                            }))}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value='5'>5分钟前</SelectItem>
+                              <SelectItem value='15'>15分钟前</SelectItem>
+                              <SelectItem value='30'>30分钟前</SelectItem>
+                              <SelectItem value='60'>1小时前</SelectItem>
+                              <SelectItem value='120'>2小时前</SelectItem>
+                              <SelectItem value='1440'>1天前</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </Collapsible>
+              )}
+            </div>
+            {/* 截止时间 - 只在非循环任务时显示 */}
+            {!editForm.isRecurring && (
+              <div className='space-y-0.5'>
+                <label className='text-sm font-medium'>截止时间</label>
+                <div className='flex gap-2'>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant='outline'
+                        className={cn(
+                          'flex-1 justify-start text-left font-normal ',
+                          !editForm.dueDate && 'text-muted-foreground'
+                        )}
+                      >
+                        <CalendarIcon className='mr-2 h-4 w-4' />
+                        {editForm.dueDate
+                          ? (
+                              format(editForm.dueDate, 'yyyy-MM-dd', { locale: zhCN })
+                            )
+                          : (
+                            <span>选择日期</span>
+                            )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className='w-auto p-0'>
+                      <Calendar
+                        mode='single'
+                        selected={editForm.dueDate}
+                        onSelect={(date) => {
+                          if (date) {
+                            const newDate = new Date(date)
+                            if (editForm.dueDate) {
+                              newDate.setHours(
+                                editForm.dueDate.getHours(),
+                                editForm.dueDate.getMinutes(),
+                                0,
+                                0
+                              )
+                            } else {
+                              newDate.setHours(9, 0, 0, 0)
+                            }
+                            setEditForm({ ...editForm, dueDate: newDate })
+                          } else {
+                            setEditForm({ ...editForm, dueDate: null })
+                          }
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <div className='flex items-center gap-1'>
+                    <Input
+                      type='number'
+                      min='0'
+                      max='23'
+                      value={editForm.dueDate ? format(editForm.dueDate, 'HH') : ''}
+                      onChange={(e) => handleTimeChange('hour', e.target.value)}
+                      onKeyDown={(e) => handleTimeKeyDown('hour', e)}
+                      className='w-[50px] h-8 px-2 text-center '
+                      placeholder='时'
+                      disabled={!editForm.dueDate}
+                    />
+                    <span className='text-muted-foreground'>:</span>
+                    <Input
+                      type='number'
+                      min='0'
+                      max='59'
+                      value={editForm.dueDate ? format(editForm.dueDate, 'mm') : ''}
+                      onChange={(e) => handleTimeChange('minute', e.target.value)}
+                      onKeyDown={(e) => handleTimeKeyDown('minute', e)}
+                      className='w-[50px] h-8 px-2 text-center '
+                      placeholder='分'
+                      disabled={!editForm.dueDate}
+                    />
                   </div>
                 </div>
-              </Collapsible>
+              </div>
             )}
+            {/* 提醒时间 - 只在非循环任务时显示 */}
+            {!editForm.isRecurring && (
+              <div className='space-y-0.5'>
+                <label className='text-sm font-medium'>提醒时间</label>
+                <div className='space-y-1'>
+                  <div className='flex gap-2'>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant='outline'
+                          className={cn(
+                            'flex-1 justify-start text-left font-normal ',
+                            !editForm.reminderTime && 'text-muted-foreground'
+                          )}
+                        >
+                          <CalendarIcon className='mr-2 h-4 w-4' />
+                          {editForm.reminderTime
+                            ? (
+                                format(editForm.reminderTime, 'yyyy-MM-dd', { locale: zhCN })
+                              )
+                            : (
+                              <span>选择日期</span>
+                              )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className='w-auto p-0'>
+                        <Calendar
+                          mode='single'
+                          selected={editForm.reminderTime}
+                          onSelect={(date) => {
+                            if (date) {
+                              const newDate = new Date(date)
+                              if (editForm.reminderTime) {
+                                newDate.setHours(
+                                  editForm.reminderTime.getHours(),
+                                  editForm.reminderTime.getMinutes(),
+                                  0,
+                                  0
+                                )
+                              } else {
+                                newDate.setHours(9, 0, 0, 0)
+                              }
+                              setEditForm({ ...editForm, reminderTime: newDate })
+                            } else {
+                              setEditForm({ ...editForm, reminderTime: null })
+                            }
+                          }}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <div className='flex items-center gap-1'>
+                      <Input
+                        type='number'
+                        min='0'
+                        max='23'
+                        value={editForm.reminderTime ? format(editForm.reminderTime, 'HH') : ''}
+                        onChange={(e) => handleTimeChange('hour', e.target.value, true)}
+                        onKeyDown={(e) => handleTimeKeyDown('hour', e, true)}
+                        className='w-[50px] h-8 px-2 text-center '
+                        placeholder='时'
+                        disabled={!editForm.reminderTime}
+                      />
+                      <span className='text-muted-foreground'>:</span>
+                      <Input
+                        type='number'
+                        min='0'
+                        max='59'
+                        value={editForm.reminderTime ? format(editForm.reminderTime, 'mm') : ''}
+                        onChange={(e) => handleTimeChange('minute', e.target.value, true)}
+                        onKeyDown={(e) => handleTimeKeyDown('minute', e, true)}
+                        className='w-[50px] h-8 px-2 text-center '
+                        placeholder='分'
+                        disabled={!editForm.reminderTime}
+                      />
+                    </div>
+                  </div>
+                  <Button
+                    variant='outline'
+                    className='w-full '
+                    onClick={() => {
+                      setEditForm({ ...editForm, reminderTime: null })
+                    }}
+                  >
+                    清除提醒时间
+                  </Button>
+                </div>
+                {timeValidationError && (
+                  <div className='flex items-center gap-1 text-sm text-red-500'>
+                    <AlertCircle className='h-4 w-4' />
+                    <span>{timeValidationError}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
-        </div>
-        <SheetFooter className='flex items-center justify-between pt-2 mt-2'>
-          <div className='flex-1 text-xs text-muted-foreground'>
-            创建于 {todo?.createdAt ? format(new Date(todo.createdAt), 'yyyy-MM-dd HH:mm', { locale: zhCN }) : ''}
-          </div>
-          <div className='flex items-center gap-2'>
-            <Button
-              variant='destructive'
-              onClick={onDelete}
-            >
-              删除
-            </Button>
-            <Button
-              variant='outline'
-              onClick={onCancel}
-            >
-              取消
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={!!timeValidationError}
-            >
-              保存
-            </Button>
-          </div>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  )
+          <SheetFooter className='flex items-center justify-between pt-2 mt-2'>
+            <div className='flex-1 text-xs text-muted-foreground'>
+              创建于 {todo?.createdAt ? format(new Date(todo.createdAt), 'yyyy-MM-dd HH:mm', { locale: zhCN }) : ''}
+            </div>
+            <div className='flex items-center gap-2'>
+              <Button
+                variant='destructive'
+                onClick={onDelete}
+              >
+                删除
+              </Button>
+              <Button
+                variant='outline'
+                onClick={onCancel}
+              >
+                取消
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!!timeValidationError}
+              >
+                保存
+              </Button>
+            </div>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    )
+  }
 }
