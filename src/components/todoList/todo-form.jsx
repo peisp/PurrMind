@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { AlertCircle, Plus, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
+import { addRecurringTask } from '@/db/todo.js'
 import { Input } from '@/components/ui/input'
 
 export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDate }) {

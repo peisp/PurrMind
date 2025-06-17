@@ -1,7 +1,7 @@
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Star, Calendar, FileText, AlarmClock, CircleCheckBig } from 'lucide-react'
+import { Star, Calendar, FileText, AlarmClock, CircleCheckBig, Repeat } from 'lucide-react'
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { zhCN } from "date-fns/locale"
@@ -81,7 +81,10 @@ export function TodoCard({
 
   return (
     <Card 
-      className="p-2 cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-accent/30"
+      className={cn(
+        "p-2 cursor-pointer transition-all duration-200 hover:shadow-md",
+        todo.isVirtual ? "hover:bg-blue-50/30 border-blue-200/50" : "hover:bg-accent/30"
+      )}
       onClick={() => onEdit(todo)}
     >
       <div className="flex items-start gap-3">
@@ -99,6 +102,17 @@ export function TodoCard({
           </h3>
           
           <div className="mt-2 flex flex-wrap gap-1.5">
+            {/* 循环任务标识 */}
+            {(todo.isRecurringInstance || todo.recurringTaskId) && (
+              <div className={cn(
+                "flex items-center gap-1 px-2 py-1 rounded-md text-xs",
+                todo.isVirtual ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"
+              )}>
+                <Repeat className="h-3.5 w-3.5" />
+                <span>{todo.isVirtual ? "循环任务" : "已完成循环"}</span>
+              </div>
+            )}
+            
             {todo.categoryId && (
               <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-accent text-xs">
                 {(() => {

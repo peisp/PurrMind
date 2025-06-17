@@ -17,13 +17,15 @@ export function Index({ enterAction }) {
     showCompleted,
     currentFilter,
     defaultDueDate,
+    viewRange,
     handleAddTodo,
     handleUpdateTodo,
     handleDeleteTodo,
     handleToggleStatus,
     handleFilterChange,
     handleCategoryChange,
-    setShowCompleted
+    setShowCompleted,
+    updateViewRange
   } = useTodoManagement(enterAction)
   
   return (
@@ -45,11 +47,13 @@ export function Index({ enterAction }) {
             showCompleted={showCompleted}
             currentFilter={currentFilter}
             defaultDueDate={defaultDueDate}
+            viewRange={viewRange}
             handleAddTodo={handleAddTodo}
             handleUpdateTodo={handleUpdateTodo}
             handleDeleteTodo={handleDeleteTodo}
             handleToggleStatus={handleToggleStatus}
             setShowCompleted={setShowCompleted}
+            updateViewRange={updateViewRange}
             viewMode={viewMode}
             setViewMode={setViewMode}
             key={viewMode} // 添加key强制重新渲染

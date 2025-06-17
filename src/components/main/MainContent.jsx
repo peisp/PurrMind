@@ -17,11 +17,13 @@ export function MainContent ({
   showCompleted,
   currentFilter,
   defaultDueDate,
+  viewRange,
   handleAddTodo,
   handleUpdateTodo,
   handleDeleteTodo,
   handleToggleStatus,
   setShowCompleted,
+  updateViewRange,
   viewMode,
   setViewMode
 }) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import * as Icons from 'lucide-react'
-import { initTodoDB, getAllTodos, addTodo, updateTodo, deleteTodo, toggleTodoStatus, getAllCategories } from '@/db/todo.js'
+import { initTodoDB, getAllTodos, addTodo, updateTodo, deleteTodo, toggleTodoStatus, getAllCategories, handleRecurringInstanceStatusChange } from '@/db/todo.js'
+import { getAllRecurringInstancesInRange } from '@/db/recurring.js'
 
 export function useTodoManagement(enterAction) {
   const [todos, setTodos] = useState([])
@@ -11,6 +12,11 @@ export function useTodoManagement(enterAction) {
   const [categories, setCategories] = useState([])
   const [defaultDueDate, setDefaultDueDate] = useState(null)
   const [showCompleted, setShowCompleted] = useState(false)
+  // 循环任务相关状态
+  const [viewRange, setViewRange] = useState({
+    start: new Date(new Date().setDate(new Date().getDate() - 7)), // 一周前
+    end: new Date(new Date().setDate(new Date().getDate() + 30))   // 30天后
+  })
 
   useEffect(() => {
     initTodoDB()
@@ -25,6 +31,11 @@ export function useTodoManagement(enterAction) {
       window.removeEventListener('todo-updated', handleTodoUpdated)
     }
   }, [])
+
+  // 监听视图范围变化
+  useEffect(() => {
+    loadTodos()
+  }, [viewRange])
 
   const handleEnterAction = () => {
     if (enterAction?.type === "over" && enterAction?.payload) {
@@ -54,7 +65,28 @@ export function useTodoManagement(enterAction) {
 
   const loadTodos = () => {
     const allTodos = getAllTodos()
-    setTodos(allTodos)
+    
+    // 获取循环任务实例
+    const recurringInstances = getAllRecurringInstancesInRange(viewRange.start, viewRange.end)
+    
+    // 合并普通任务和循环任务实例
+    const combinedTodos = [...allTodos, ...recurringInstances]
+    
+    // 去重（如果循环任务实例已经变成了物理任务，避免重复显示）
+    const uniqueTodos = combinedTodos.filter((todo, index, self) => {
+      // 对于循环任务实例，如果已存在对应的物理任务，则移除虚拟实例
+      if (todo.isVirtual && todo.recurringTaskId) {
+        const hasPhysicalInstance = self.some(t => 
+          !t.isVirtual && 
+          t.recurringTaskId === todo.recurringTaskId && 
+          t.instanceDate === todo.instanceDate
+        )
+        return !hasPhysicalInstance
+      }
+      return true
+    })
+    
+    setTodos(uniqueTodos)
   }
 
   const loadCategories = () => {
@@ -69,10 +101,27 @@ export function useTodoManagement(enterAction) {
   }
 
   const handleUpdateTodo = (id, updates) => {
-    const updatedTodo = updateTodo(id, updates)
-    if (updatedTodo) {
-      setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo))
-      window.dispatchEvent(new Event('todo-updated'))
+    // 检查是否是循环任务的虚拟实例
+    const todo = todos.find(t => t.id === id)
+    if (todo && todo.isVirtual && todo.recurringTaskId) {
+      // 处理循环任务实例的更新
+      const updatedTodo = handleRecurringInstanceStatusChange(
+        todo.recurringTaskId, 
+        todo.instanceDate, 
+        updates
+      )
+      if (updatedTodo) {
+        // 重新加载所有任务来更新UI
+        loadTodos()
+        window.dispatchEvent(new Event('todo-updated'))
+      }
+    } else {
+      // 处理普通任务
+      const updatedTodo = updateTodo(id, updates)
+      if (updatedTodo) {
+        setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo))
+        window.dispatchEvent(new Event('todo-updated'))
+      }
     }
   }
 
@@ -84,10 +133,28 @@ export function useTodoManagement(enterAction) {
 
   const handleToggleStatus = (id, e) => {
     if (e) e.stopPropagation()
-    const updatedTodo = toggleTodoStatus(id)
-    if (updatedTodo) {
-      setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo))
-      window.dispatchEvent(new Event('todo-updated'))
+    
+    // 检查是否是循环任务的虚拟实例
+    const todo = todos.find(t => t.id === id)
+    if (todo && todo.isVirtual && todo.recurringTaskId) {
+      // 处理循环任务实例的状态变更
+      const updatedTodo = handleRecurringInstanceStatusChange(
+        todo.recurringTaskId, 
+        todo.instanceDate, 
+        { completed: !todo.completed }
+      )
+      if (updatedTodo) {
+        // 重新加载所有任务来更新UI
+        loadTodos()
+        window.dispatchEvent(new Event('todo-updated'))
+      }
+    } else {
+      // 处理普通任务
+      const updatedTodo = toggleTodoStatus(id)
+      if (updatedTodo) {
+        setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo))
+        window.dispatchEvent(new Event('todo-updated'))
+      }
     }
   }
 
@@ -145,6 +212,13 @@ export function useTodoManagement(enterAction) {
     }
   })
 
+  // 更新视图范围的函数
+  const updateViewRange = (start, end) => {
+    setViewRange({ start, end })
+    // 视图范围变更时重新加载任务
+    setTimeout(() => loadTodos(), 0)
+  }
+
   return {
     todos: filteredTodos,
     categories,
@@ -154,12 +228,14 @@ export function useTodoManagement(enterAction) {
     showCompleted,
     currentFilter,
     defaultDueDate,
+    viewRange,
     handleAddTodo,
     handleUpdateTodo,
     handleDeleteTodo,
     handleToggleStatus,
     handleFilterChange,
     handleCategoryChange,
-    setShowCompleted
+    setShowCompleted,
+    updateViewRange
   }
 }
