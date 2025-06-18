@@ -7,38 +7,38 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet"
+  SheetFooter
+} from '@/components/ui/sheet'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
+  SelectValue
+} from '@/components/ui/select'
+import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { CalendarIcon, Clock, Tag, AlertCircle } from "lucide-react"
-import { format } from "date-fns"
-import { zhCN } from "date-fns/locale"
-import { cn } from "@/lib/utils"
-import * as Icons from "lucide-react"
+  PopoverTrigger
+} from '@/components/ui/popover'
+import { CalendarIcon, Clock, Tag, AlertCircle } from 'lucide-react'
+import { format } from 'date-fns'
+import { zhCN } from 'date-fns/locale'
+import { cn } from '@/lib/utils'
+import * as Icons from 'lucide-react'
 
 const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) => {
   return (
-    <div className="space-y-0.5">
+    <div className='space-y-0.5'>
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={cn("", className)}
+        className={cn('', className)}
       />
-      <div className="text-xs text-muted-foreground text-right">
+      <div className='text-xs text-muted-foreground text-right'>
         {value.length}/{maxLength}
       </div>
     </div>
@@ -47,22 +47,22 @@ const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) =>
 
 const LimitedTextarea = ({ value, onChange, maxLength, placeholder, className }) => {
   return (
-    <div className="space-y-0.5">
+    <div className='space-y-0.5'>
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
-        className={cn(" resize-none", className)}
+        className={cn(' resize-none', className)}
       />
-      <div className="text-xs text-muted-foreground text-right">
+      <div className='text-xs text-muted-foreground text-right'>
         {value.length}/{maxLength}
       </div>
     </div>
   )
 }
 
-export function TodoEditSheet({
+export function TodoEditSheet ({
   isOpen,
   onOpenChange,
   todo,
@@ -233,215 +233,424 @@ export function TodoEditSheet({
     }
   }
 
-  return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="p-2 flex flex-col">
-        <SheetHeader>
-          <SheetTitle>编辑待办事项</SheetTitle>
-        </SheetHeader>
-        <div className="flex-1 space-y-1 overflow-y-auto">
-          <div className="space-y-0.5">
-            <label className="text-sm font-medium">标题</label>
-            <LimitedInput
-              value={editForm.title}
-              onChange={(value) => setEditForm({ ...editForm, title: value })}
-              maxLength={50}
-              placeholder="输入标题"
-            />
-          </div>
-          <div className="space-y-0.5">
-            <label className="text-sm font-medium">描述</label>
-            <LimitedTextarea
-              value={editForm.description}
-              onChange={(value) => setEditForm({ ...editForm, description: value })}
-              maxLength={200}
-              placeholder="输入描述"
-            />
-          </div>
-          <div className="space-y-0.5">
-            <label className="text-sm font-medium">列表</label>
-            <Select 
-              value={editForm.categoryId || "none"} 
-              onValueChange={(value) => setEditForm({ ...editForm, categoryId: value === "none" ? null : value })}
-            >
-              <SelectTrigger className=" data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=closed]:ring-0 data-[state=closed]:ring-offset-0 ring-0 ring-offset-0">
-                <SelectValue placeholder="选择列表">
-                  {editForm.categoryId ? (
-                    <div className="flex items-center gap-2">
-                      <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
-                        {(() => {
-                          const category = categories.find(cat => cat.id === editForm.categoryId)
-                          const Icon = getIconComponent(category?.icon)
-                          return <Icon className={cn('h-4 w-4', getColorClass(category?.color))} />
-                        })()}
-                      </div>
-                      <span>{categories.find(cat => cat.id === editForm.categoryId)?.name || "未知列表"}</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
-                        <Icons.FolderIcon className="h-4 w-4 text-gray-500" />
+  if (!editForm.reminderTime) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onOpenChange}>
+        <SheetContent className='p-2 flex flex-col'>
+          <SheetHeader>
+            <SheetTitle>编辑待办事项</SheetTitle>
+          </SheetHeader>
+          <div className='flex-1 space-y-1 overflow-y-auto'>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>标题</label>
+              <LimitedInput
+                value={editForm.title}
+                onChange={(value) => setEditForm({ ...editForm, title: value })}
+                maxLength={50}
+                placeholder='输入标题'
+              />
+            </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>描述</label>
+              <LimitedTextarea
+                value={editForm.description}
+                onChange={(value) => setEditForm({ ...editForm, description: value })}
+                maxLength={200}
+                placeholder='输入描述'
+              />
+            </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>列表</label>
+              <Select
+                value={editForm.categoryId || 'none'}
+                onValueChange={(value) => setEditForm({ ...editForm, categoryId: value === 'none' ? null : value })}
+              >
+                <SelectTrigger
+                  className=' data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=closed]:ring-0 data-[state=closed]:ring-offset-0 ring-0 ring-offset-0'
+                >
+                  <SelectValue placeholder='选择列表'>
+                    {editForm.categoryId
+                      ? (
+                        <div className='flex items-center gap-2'>
+                          <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
+                            {(() => {
+                              const category = categories.find(cat => cat.id === editForm.categoryId)
+                              const Icon = getIconComponent(category?.icon)
+                              return <Icon className={cn('h-4 w-4', getColorClass(category?.color))} />
+                            })()}
+                          </div>
+                          <span>{categories.find(cat => cat.id === editForm.categoryId)?.name || '未知列表'}</span>
+                        </div>
+                        )
+                      : (
+                        <div className='flex items-center gap-2'>
+                          <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
+                            <Icons.FolderIcon className='h-4 w-4 text-gray-500' />
+                          </div>
+                          <span>无列表</span>
+                        </div>
+                        )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='none'>
+                    <div className='flex items-center gap-2'>
+                      <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
+                        <Icons.FolderIcon className='h-4 w-4 text-gray-500' />
                       </div>
                       <span>无列表</span>
                     </div>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
-                      <Icons.FolderIcon className="h-4 w-4 text-gray-500" />
-                    </div>
-                    <span>无列表</span>
-                  </div>
-                </SelectItem>
-                {categories.map((category) => {
-                  const Icon = getIconComponent(category.icon)
-                  return (
-                    <SelectItem 
-                      key={category.id} 
-                      value={category.id}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center">
-                          <Icon className={cn('h-4 w-4', getColorClass(category.color))} />
+                  </SelectItem>
+                  {categories.map((category) => {
+                    const Icon = getIconComponent(category.icon)
+                    return (
+                      <SelectItem
+                        key={category.id}
+                        value={category.id}
+                      >
+                        <div className='flex items-center gap-2'>
+                          <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
+                            <Icon className={cn('h-4 w-4', getColorClass(category.color))} />
+                          </div>
+                          <span>{category.name}</span>
                         </div>
-                        <span>{category.name}</span>
-                      </div>
-                    </SelectItem>
-                  )
-                })}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-0.5">
-            <label className="text-sm font-medium">截止时间</label>
-            <div className="flex gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "flex-1 justify-start text-left font-normal ",
-                      !editForm.dueDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {editForm.dueDate ? (
-                      format(editForm.dueDate, "yyyy-MM-dd", { locale: zhCN })
-                    ) : (
-                      <span>选择日期</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={editForm.dueDate}
-                    onSelect={(date) => {
-                      if (date) {
-                        const newDate = new Date(date)
-                        if (editForm.dueDate) {
-                          newDate.setHours(
-                            editForm.dueDate.getHours(),
-                            editForm.dueDate.getMinutes(),
-                            0,
-                            0
-                          )
-                        } else {
-                          newDate.setHours(9, 0, 0, 0)
-                        }
-                        setEditForm({ ...editForm, dueDate: newDate })
-                      } else {
-                        setEditForm({ ...editForm, dueDate: null })
-                      }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <div className="flex items-center gap-1">
-                <Input
-                  type="number"
-                  min="0"
-                  max="23"
-                  value={editForm.dueDate ? format(editForm.dueDate, "HH") : ""}
-                  onChange={(e) => handleTimeChange('hour', e.target.value)}
-                  onKeyDown={(e) => handleTimeKeyDown('hour', e)}
-                  className="w-[50px] h-8 px-2 text-center "
-                  placeholder="时"
-                  disabled={!editForm.dueDate}
-                />
-                <span className="text-muted-foreground">:</span>
-                <Input
-                  type="number"
-                  min="0"
-                  max="59"
-                  value={editForm.dueDate ? format(editForm.dueDate, "mm") : ""}
-                  onChange={(e) => handleTimeChange('minute', e.target.value)}
-                  onKeyDown={(e) => handleTimeKeyDown('minute', e)}
-                  className="w-[50px] h-8 px-2 text-center "
-                  placeholder="分"
-                  disabled={!editForm.dueDate}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-0.5">
-            <label className="text-sm font-medium">提醒时间</label>
-            {!editForm.reminderTime ? (
-              <Select
-                value=""
-                onValueChange={(value) => {
-                  if (value === "custom") {
-                    // 设置默认时间为当前时间+1小时
-                    const defaultTime = new Date()
-                    defaultTime.setHours(defaultTime.getHours() + 1, 0, 0, 0)
-                    setEditForm({ ...editForm, reminderTime: defaultTime })
-                    return
-                  }
-                  const selectedDate = new Date(value)
-                  setEditForm({ ...editForm, reminderTime: selectedDate })
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="选择提醒时间" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getReminderTimeOptions().map((option) => (
-                    <SelectItem 
-                      key={option.label} 
-                      value={option.value === 'custom' ? 'custom' : option.value.toISOString()}
-                    >
-                      {option.label}
-                    </SelectItem>
-                  ))}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
-            ) : (
-              <div className="space-y-1">
-                <div className="flex gap-2">
+            </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>截止时间</label>
+              <div className='flex gap-2'>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant='outline'
+                      className={cn(
+                        'flex-1 justify-start text-left font-normal ',
+                        !editForm.dueDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {editForm.dueDate
+                        ? (
+                            format(editForm.dueDate, 'yyyy-MM-dd', { locale: zhCN })
+                          )
+                        : (
+                          <span>选择日期</span>
+                          )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={editForm.dueDate}
+                      onSelect={(date) => {
+                        if (date) {
+                          const newDate = new Date(date)
+                          if (editForm.dueDate) {
+                            newDate.setHours(
+                              editForm.dueDate.getHours(),
+                              editForm.dueDate.getMinutes(),
+                              0,
+                              0
+                            )
+                          } else {
+                            newDate.setHours(9, 0, 0, 0)
+                          }
+                          setEditForm({ ...editForm, dueDate: newDate })
+                        } else {
+                          setEditForm({ ...editForm, dueDate: null })
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <div className='flex items-center gap-1'>
+                  <Input
+                    type='number'
+                    min='0'
+                    max='23'
+                    value={editForm.dueDate ? format(editForm.dueDate, 'HH') : ''}
+                    onChange={(e) => handleTimeChange('hour', e.target.value)}
+                    onKeyDown={(e) => handleTimeKeyDown('hour', e)}
+                    className='w-[50px] h-8 px-2 text-center '
+                    placeholder='时'
+                    disabled={!editForm.dueDate}
+                  />
+                  <span className='text-muted-foreground'>:</span>
+                  <Input
+                    type='number'
+                    min='0'
+                    max='59'
+                    value={editForm.dueDate ? format(editForm.dueDate, 'mm') : ''}
+                    onChange={(e) => handleTimeChange('minute', e.target.value)}
+                    onKeyDown={(e) => handleTimeKeyDown('minute', e)}
+                    className='w-[50px] h-8 px-2 text-center '
+                    placeholder='分'
+                    disabled={!editForm.dueDate}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>提醒时间</label>
+              {
+                <Select
+                  value=''
+                  onValueChange={(value) => {
+                    if (value === 'custom') {
+                      // 设置默认时间为当前时间+1小时
+                      const defaultTime = new Date()
+                      defaultTime.setHours(defaultTime.getHours() + 1, 0, 0, 0)
+                      setEditForm({ ...editForm, reminderTime: defaultTime })
+                      return
+                    }
+                    const selectedDate = new Date(value)
+                    setEditForm({ ...editForm, reminderTime: selectedDate })
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder='选择提醒时间' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getReminderTimeOptions().map((option) => (
+                      <SelectItem
+                        key={option.label}
+                        value={option.value === 'custom' ? 'custom' : option.value.toISOString()}
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              }
+              {timeValidationError && (
+                <div className='flex items-center gap-1 text-sm text-red-500'>
+                  <AlertCircle className='h-4 w-4' />
+                  <span>{timeValidationError}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          <SheetFooter className='flex items-center justify-between pt-2 mt-2'>
+            <div className='flex-1 text-xs text-muted-foreground'>
+              创建于 {todo?.createdAt ? format(new Date(todo.createdAt), 'yyyy-MM-dd HH:mm', { locale: zhCN }) : ''}
+            </div>
+            <div className='flex items-center gap-2'>
+              <Button
+                variant='destructive'
+                onClick={onDelete}
+              >
+                删除
+              </Button>
+              <Button
+                variant='outline'
+                onClick={onCancel}
+              >
+                取消
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!!timeValidationError}
+              >
+                保存
+              </Button>
+            </div>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    )
+  } else {
+    return (
+      <Sheet open={isOpen} onOpenChange={onOpenChange}>
+        <SheetContent className='p-2 flex flex-col'>
+          <SheetHeader>
+            <SheetTitle>编辑待办事项</SheetTitle>
+          </SheetHeader>
+          <div className='flex-1 space-y-1 overflow-y-auto'>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>标题</label>
+              <LimitedInput
+                value={editForm.title}
+                onChange={(value) => setEditForm({ ...editForm, title: value })}
+                maxLength={50}
+                placeholder='输入标题'
+              />
+            </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>描述</label>
+              <LimitedTextarea
+                value={editForm.description}
+                onChange={(value) => setEditForm({ ...editForm, description: value })}
+                maxLength={200}
+                placeholder='输入描述'
+              />
+            </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>列表</label>
+              <Select
+                value={editForm.categoryId || 'none'}
+                onValueChange={(value) => setEditForm({ ...editForm, categoryId: value === 'none' ? null : value })}
+              >
+                <SelectTrigger
+                  className=' data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=closed]:ring-0 data-[state=closed]:ring-offset-0 ring-0 ring-offset-0'
+                >
+                  <SelectValue placeholder='选择列表'>
+                    {editForm.categoryId
+                      ? (
+                        <div className='flex items-center gap-2'>
+                          <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
+                            {(() => {
+                              const category = categories.find(cat => cat.id === editForm.categoryId)
+                              const Icon = getIconComponent(category?.icon)
+                              return <Icon className={cn('h-4 w-4', getColorClass(category?.color))} />
+                            })()}
+                          </div>
+                          <span>{categories.find(cat => cat.id === editForm.categoryId)?.name || '未知列表'}</span>
+                        </div>
+                        )
+                      : (
+                        <div className='flex items-center gap-2'>
+                          <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
+                            <Icons.FolderIcon className='h-4 w-4 text-gray-500' />
+                          </div>
+                          <span>无列表</span>
+                        </div>
+                        )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='none'>
+                    <div className='flex items-center gap-2'>
+                      <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
+                        <Icons.FolderIcon className='h-4 w-4 text-gray-500' />
+                      </div>
+                      <span>无列表</span>
+                    </div>
+                  </SelectItem>
+                  {categories.map((category) => {
+                    const Icon = getIconComponent(category.icon)
+                    return (
+                      <SelectItem
+                        key={category.id}
+                        value={category.id}
+                      >
+                        <div className='flex items-center gap-2'>
+                          <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
+                            <Icon className={cn('h-4 w-4', getColorClass(category.color))} />
+                          </div>
+                          <span>{category.name}</span>
+                        </div>
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>截止时间</label>
+              <div className='flex gap-2'>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant='outline'
+                      className={cn(
+                        'flex-1 justify-start text-left font-normal ',
+                        !editForm.dueDate && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className='mr-2 h-4 w-4' />
+                      {editForm.dueDate
+                        ? (
+                            format(editForm.dueDate, 'yyyy-MM-dd', { locale: zhCN })
+                          )
+                        : (
+                          <span>选择日期</span>
+                          )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className='w-auto p-0'>
+                    <Calendar
+                      mode='single'
+                      selected={editForm.dueDate}
+                      onSelect={(date) => {
+                        if (date) {
+                          const newDate = new Date(date)
+                          if (editForm.dueDate) {
+                            newDate.setHours(
+                              editForm.dueDate.getHours(),
+                              editForm.dueDate.getMinutes(),
+                              0,
+                              0
+                            )
+                          } else {
+                            newDate.setHours(9, 0, 0, 0)
+                          }
+                          setEditForm({ ...editForm, dueDate: newDate })
+                        } else {
+                          setEditForm({ ...editForm, dueDate: null })
+                        }
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <div className='flex items-center gap-1'>
+                  <Input
+                    type='number'
+                    min='0'
+                    max='23'
+                    value={editForm.dueDate ? format(editForm.dueDate, 'HH') : ''}
+                    onChange={(e) => handleTimeChange('hour', e.target.value)}
+                    onKeyDown={(e) => handleTimeKeyDown('hour', e)}
+                    className='w-[50px] h-8 px-2 text-center '
+                    placeholder='时'
+                    disabled={!editForm.dueDate}
+                  />
+                  <span className='text-muted-foreground'>:</span>
+                  <Input
+                    type='number'
+                    min='0'
+                    max='59'
+                    value={editForm.dueDate ? format(editForm.dueDate, 'mm') : ''}
+                    onChange={(e) => handleTimeChange('minute', e.target.value)}
+                    onKeyDown={(e) => handleTimeKeyDown('minute', e)}
+                    className='w-[50px] h-8 px-2 text-center '
+                    placeholder='分'
+                    disabled={!editForm.dueDate}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className='space-y-0.5'>
+              <label className='text-sm font-medium'>提醒时间</label>
+              <div className='space-y-1'>
+                <div className='flex gap-2'>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant="outline"
+                        variant='outline'
                         className={cn(
-                          "flex-1 justify-start text-left font-normal ",
-                          !editForm.reminderTime && "text-muted-foreground"
+                          'flex-1 justify-start text-left font-normal ',
+                          !editForm.reminderTime && 'text-muted-foreground'
                         )}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {editForm.reminderTime ? (
-                          format(editForm.reminderTime, "yyyy-MM-dd", { locale: zhCN })
-                        ) : (
-                          <span>选择日期</span>
-                        )}
+                        <CalendarIcon className='mr-2 h-4 w-4' />
+                        {editForm.reminderTime
+                          ? (
+                              format(editForm.reminderTime, 'yyyy-MM-dd', { locale: zhCN })
+                            )
+                          : (
+                            <span>选择日期</span>
+                            )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
+                    <PopoverContent className='w-auto p-0'>
                       <Calendar
-                        mode="single"
+                        mode='single'
                         selected={editForm.reminderTime}
                         onSelect={(date) => {
                           if (date) {
@@ -465,35 +674,35 @@ export function TodoEditSheet({
                       />
                     </PopoverContent>
                   </Popover>
-                  <div className="flex items-center gap-1">
+                  <div className='flex items-center gap-1'>
                     <Input
-                      type="number"
-                      min="0"
-                      max="23"
-                      value={editForm.reminderTime ? format(editForm.reminderTime, "HH") : ""}
+                      type='number'
+                      min='0'
+                      max='23'
+                      value={editForm.reminderTime ? format(editForm.reminderTime, 'HH') : ''}
                       onChange={(e) => handleTimeChange('hour', e.target.value, true)}
                       onKeyDown={(e) => handleTimeKeyDown('hour', e, true)}
-                      className="w-[50px] h-8 px-2 text-center "
-                      placeholder="时"
+                      className='w-[50px] h-8 px-2 text-center '
+                      placeholder='时'
                       disabled={!editForm.reminderTime}
                     />
-                    <span className="text-muted-foreground">:</span>
+                    <span className='text-muted-foreground'>:</span>
                     <Input
-                      type="number"
-                      min="0"
-                      max="59"
-                      value={editForm.reminderTime ? format(editForm.reminderTime, "mm") : ""}
+                      type='number'
+                      min='0'
+                      max='59'
+                      value={editForm.reminderTime ? format(editForm.reminderTime, 'mm') : ''}
                       onChange={(e) => handleTimeChange('minute', e.target.value, true)}
                       onKeyDown={(e) => handleTimeKeyDown('minute', e, true)}
-                      className="w-[50px] h-8 px-2 text-center "
-                      placeholder="分"
+                      className='w-[50px] h-8 px-2 text-center '
+                      placeholder='分'
                       disabled={!editForm.reminderTime}
                     />
                   </div>
                 </div>
                 <Button
-                  variant="outline"
-                  className="w-full "
+                  variant='outline'
+                  className='w-full '
                   onClick={() => {
                     setEditForm({ ...editForm, reminderTime: null })
                   }}
@@ -501,41 +710,41 @@ export function TodoEditSheet({
                   清除提醒时间
                 </Button>
               </div>
-            )}
-            {timeValidationError && (
-              <div className="flex items-center gap-1 text-sm text-red-500">
-                <AlertCircle className="h-4 w-4" />
-                <span>{timeValidationError}</span>
-              </div>
-            )}
+              {timeValidationError && (
+                <div className='flex items-center gap-1 text-sm text-red-500'>
+                  <AlertCircle className='h-4 w-4' />
+                  <span>{timeValidationError}</span>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-        <SheetFooter className="flex items-center justify-between pt-2 mt-2">
-          <div className="flex-1 text-xs text-muted-foreground">
-            创建于 {todo?.createdAt ? format(new Date(todo.createdAt), "yyyy-MM-dd HH:mm", { locale: zhCN }) : ''}
-          </div>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="destructive" 
-              onClick={onDelete}
-            >
-              删除
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={onCancel}
-            >
-              取消
-            </Button>
-            <Button 
-              onClick={handleSave}
-              disabled={!!timeValidationError}
-            >
-              保存
-            </Button>
-          </div>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  )
+          <SheetFooter className='flex items-center justify-between pt-2 mt-2'>
+            <div className='flex-1 text-xs text-muted-foreground'>
+              创建于 {todo?.createdAt ? format(new Date(todo.createdAt), 'yyyy-MM-dd HH:mm', { locale: zhCN }) : ''}
+            </div>
+            <div className='flex items-center gap-2'>
+              <Button
+                variant='destructive'
+                onClick={onDelete}
+              >
+                删除
+              </Button>
+              <Button
+                variant='outline'
+                onClick={onCancel}
+              >
+                取消
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={!!timeValidationError}
+              >
+                保存
+              </Button>
+            </div>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+    )
+  }
 }
