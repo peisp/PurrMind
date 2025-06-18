@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getAllCategories } from '@/db/todo'
-import { TodoCard } from './todo-card'
-import { TodoEditSheet } from './todo-edit-sheet'
-import { format } from 'date-fns'
-import { DayLabel } from '@/components/todoList/day-label'
+import { TodoEditSheet } from './editCard/TodoEditSheet'
 import { CalendarView } from './CalendarView'
 import { TimelineView } from './TimelineView'
 
