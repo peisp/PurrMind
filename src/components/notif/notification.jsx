@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 
-export function TodoNotification({ todos }) {
+export function Notification ({ todos }) {
   const checkInterval = useRef(null)
   const notifiedTodos = useRef(new Set())
 
@@ -10,8 +10,8 @@ export function TodoNotification({ todos }) {
       const now = new Date()
       todos.forEach(todo => {
         if (
-          todo.reminderTime && 
-          !todo.completed && 
+          todo.reminderTime &&
+          !todo.completed &&
           !notifiedTodos.current.has(todo.id)
         ) {
           const reminderTime = new Date(todo.reminderTime)
@@ -45,4 +45,4 @@ export function TodoNotification({ todos }) {
   }, [todos])
 
   return null
-} 
+}
