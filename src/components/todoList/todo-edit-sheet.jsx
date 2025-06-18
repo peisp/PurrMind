@@ -43,7 +43,7 @@ import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 import * as Icons from 'lucide-react'
-import { addRecurringTask } from '@/db/todo.js'
+import { addRecurringTask, getRecurringTaskByTodo, updateRecurringTask } from '@/db/todo.js'
 
 const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) => {
   return (
@@ -119,31 +119,64 @@ export function TodoEditSheet ({
 
   useEffect(() => {
     if (todo) {
-      setEditForm({
-        title: todo.title || '',
-        description: todo.description || '',
-        categoryId: todo.categoryId || '',
-        dueDate: todo.dueDate ? new Date(todo.dueDate) : null,
-        reminderTime: todo.reminderTime ? new Date(todo.reminderTime) : null,
-        // 循环任务相关字段 - 确保总是有默认值
-        isRecurring: false,
-        recurringType: 'daily',
-        recurringConfig: {
-          dailyTime: '09:00',
-          weeklyDays: [1],
-          weeklyTime: '09:00',
-          monthlyDate: 1,
-          monthlyTime: '09:00',
-          intervalValue: 1,
-          intervalUnit: 'days',
-          customTime: '09:00'
-        },
-        repeatEndType: 'never',
-        repeatUntil: null,
-        repeatCount: null,
-        reminderEnabled: false,
-        reminderOffset: 15
-      })
+      // 检查是否是循环任务实例，如果是则从模板加载配置
+      const recurringTemplate = getRecurringTaskByTodo(todo)
+      
+      if (recurringTemplate) {
+        // 这是一个循环任务实例，从模板加载配置
+        setEditForm({
+          title: todo.title || '',
+          description: todo.description || '',
+          categoryId: todo.categoryId || '',
+          dueDate: todo.dueDate ? new Date(todo.dueDate) : null,
+          reminderTime: todo.reminderTime ? new Date(todo.reminderTime) : null,
+          // 从循环任务模板加载配置
+          isRecurring: true,
+          recurringType: recurringTemplate.recurringType || 'daily',
+          recurringConfig: recurringTemplate.recurringConfig || {
+            dailyTime: '09:00',
+            weeklyDays: [1],
+            weeklyTime: '09:00',
+            monthlyDate: 1,
+            monthlyTime: '09:00',
+            intervalValue: 1,
+            intervalUnit: 'days',
+            customTime: '09:00'
+          },
+          repeatEndType: recurringTemplate.repeatEndType || 'never',
+          repeatUntil: recurringTemplate.repeatUntil || null,
+          repeatCount: recurringTemplate.repeatCount || null,
+          reminderEnabled: recurringTemplate.reminderEnabled || false,
+          reminderOffset: recurringTemplate.reminderOffset || 15
+        })
+      } else {
+        // 这是一个普通任务
+        setEditForm({
+          title: todo.title || '',
+          description: todo.description || '',
+          categoryId: todo.categoryId || '',
+          dueDate: todo.dueDate ? new Date(todo.dueDate) : null,
+          reminderTime: todo.reminderTime ? new Date(todo.reminderTime) : null,
+          // 循环任务相关字段 - 确保总是有默认值
+          isRecurring: false,
+          recurringType: 'daily',
+          recurringConfig: {
+            dailyTime: '09:00',
+            weeklyDays: [1],
+            weeklyTime: '09:00',
+            monthlyDate: 1,
+            monthlyTime: '09:00',
+            intervalValue: 1,
+            intervalUnit: 'days',
+            customTime: '09:00'
+          },
+          repeatEndType: 'never',
+          repeatUntil: null,
+          repeatCount: null,
+          reminderEnabled: false,
+          reminderOffset: 15
+        })
+      }
     }
   }, [todo])
 
@@ -301,32 +334,41 @@ export function TodoEditSheet ({
       }
     }
 
-    const updatedTodo = {
-      ...todo,
-      title: editForm.title,
-      description: editForm.description,
-      categoryId: editForm.categoryId,
-      dueDate,
-      reminderTime
-    }
-
     // 如果是循环任务，保存循环任务配置
     if (editForm.isRecurring) {
       const recurringData = {
         title: editForm.title,
         description: editForm.description,
         categoryId: editForm.categoryId,
-        type: editForm.recurringType,
-        config: editForm.recurringConfig,
-        endType: editForm.repeatEndType,
-        endDate: editForm.repeatUntil,
-        endCount: editForm.repeatCount,
+        starred: editForm.starred || false,
+        recurringType: editForm.recurringType,
+        recurringConfig: editForm.recurringConfig,
+        repeatEndType: editForm.repeatEndType,
+        repeatUntil: editForm.repeatUntil,
+        repeatCount: editForm.repeatCount,
         reminderEnabled: editForm.reminderEnabled,
-        reminderOffset: editForm.reminderOffset
+        reminderOffset: editForm.reminderOffset,
+        startDate: new Date().toISOString(), // 从今天开始
+        isActive: true
       }
 
       try {
-        await addRecurringTask(recurringData)
+        // 检查是否是编辑现有的循环任务实例
+        const existingTemplate = getRecurringTaskByTodo(todo)
+        
+        if (existingTemplate) {
+          // 更新现有的循环任务模板
+          await updateRecurringTask(existingTemplate.id, recurringData)
+        } else {
+          // 创建新的循环任务模板
+          await addRecurringTask(recurringData)
+          
+          // 如果是编辑现有的普通任务转换为循环任务，需要删除原有任务
+          if (todo && todo.id && !todo.isRecurringInstance && !todo.recurringTaskId) {
+            onDelete(todo.id)
+          }
+        }
+        
         // 循环任务保存成功后关闭编辑页面
         onOpenChange(false)
         // 触发数据刷新事件
@@ -336,6 +378,15 @@ export function TodoEditSheet ({
         // 保存失败时可以显示错误提示，但不关闭页面
       }
     } else {
+      // 处理普通任务的保存
+      const updatedTodo = {
+        ...todo,
+        title: editForm.title,
+        description: editForm.description,
+        categoryId: editForm.categoryId,
+        dueDate,
+        reminderTime
+      }
       onSave(updatedTodo)
     }
   }
@@ -692,7 +743,7 @@ export function TodoEditSheet ({
           </div>
 
           {/* 循环设置区域 */}
-          <div className='space-y-0.5'>
+          <div className='space-y-3'>
             <div className='flex items-center justify-between'>
               <div className='flex items-center gap-2'>
                 <Repeat className='h-4 w-4 text-muted-foreground' />
@@ -705,8 +756,7 @@ export function TodoEditSheet ({
             </div>
 
             {editForm.isRecurring && (
-              // <Collapsible open className='space-y-4 p-4 bg-accent/20 rounded-lg border mt-3'>
-              <Collapsible open>
+              <Collapsible open className='space-y-4 p-4 bg-accent/20 rounded-lg border'>
                 <div className='space-y-3'>
                   <div>
                     <label className='text-sm font-medium mb-2 block'>循环类型</label>

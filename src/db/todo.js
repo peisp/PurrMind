@@ -204,6 +204,18 @@ export const getRecurringTask = (id) => {
   return recurringTasks.find(task => task.id === id)
 }
 
+// 根据任务获取关联的循环任务模板
+export const getRecurringTaskByTodo = (todo) => {
+  if (!todo) return null
+  
+  // 如果任务有 recurringTaskId，直接查找模板
+  if (todo.recurringTaskId) {
+    return getRecurringTask(todo.recurringTaskId)
+  }
+  
+  return null
+}
+
 // 切换循环任务模板的启用状态
 export const toggleRecurringTaskStatus = (id) => {
   const recurringTasks = getAllRecurringTasks()

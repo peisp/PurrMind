@@ -46,13 +46,6 @@ export function TodoList ({
   }
 
   const handleEdit = (todo) => {
-    // 如果是循环任务的虚拟实例，不允许直接编辑
-    if (todo.isVirtual && todo.recurringTaskId) {
-      // 可以在这里添加提示或者将其转换为物理实例后编辑
-      console.log('循环任务实例需要先完成操作才能编辑')
-      return
-    }
-    
     setEditingId(todo.id)
     setIsSheetOpen(true)
   }
