@@ -194,23 +194,19 @@ export function SettingsPanel ({ open, onOpenChange }) {
             {/* Bark推送设置 */}
             <div className='col-span-4'>
               <Separator className='my-4' />
-              <div className='flex items-center gap-2 mb-4'>
-                <h3 className='text-lg font-medium'>Bark推送设置</h3>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className='text-muted-foreground cursor-help'>
-                      <Info className='w-4 h-4' />
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side='top' className='max-w-[300px]'>
-                    配置Bark推送服务，用于发送任务提醒到iOS设备。
-                  </TooltipContent>
-                </Tooltip>
-              </div>
             </div>
-
-            <div className='col-span-1'>
-              <Label htmlFor='bark-enabled'>启用Bark推送</Label>
+            <div className='col-span-1 flex items-center'>
+              <Label htmlFor='bark-enabled'>Bark推送</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className='text-muted-foreground cursor-help ml-auto'>
+                    <Info className='w-4 h-4' />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side='top' className='max-w-[300px]'>
+                  配置Bark推送服务，用于发送任务提醒到iOS设备。
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className='col-span-3'>
               <Switch
@@ -249,7 +245,7 @@ export function SettingsPanel ({ open, onOpenChange }) {
             </div>
 
             {/* 测试按钮和结果 */}
-            <div className='col-span-4 mt-4'>
+            <div className='col-span-4 mt-2'>
               <div className='flex items-center gap-4'>
                 <Button
                   onClick={handleTestBark}
