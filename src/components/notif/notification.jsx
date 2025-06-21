@@ -14,11 +14,12 @@ export function Notification ({ todos }) {
     if (window.utools && window.utools.showNotification) {
       window.utools.showNotification(
         title,
-        content,
-        {
-          icon: 'https://res.u-tools.cn/plugins/logo/tmdyai7glykmor3my3vp2sy88dao1fgk.png',
-          sound: true
-        }
+        'index'
+        // ,
+        // {
+        //   icon: 'https://res.u-tools.cn/plugins/logo/tmdyai7glykmor3my3vp2sy88dao1fgk.png',
+        //   sound: true
+        // }
       )
     }
 
