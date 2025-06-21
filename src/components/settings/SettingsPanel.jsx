@@ -195,26 +195,50 @@ export function SettingsPanel ({ open, onOpenChange }) {
             <div className='col-span-4'>
               <Separator className='my-4' />
             </div>
-            <div className='col-span-1 flex items-center'>
-              <Label htmlFor='bark-enabled'>Bark推送</Label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className='text-muted-foreground cursor-help ml-auto'>
-                    <Info className='w-4 h-4' />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side='top' className='max-w-[300px]'>
-                  配置Bark推送服务，用于发送任务提醒到iOS设备。
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <div className='col-span-3'>
-              <Switch
-                id='bark-enabled'
-                checked={barkSettings.enabled}
-                onCheckedChange={(val) => handleBarkChange('enabled', val)}
-              />
-            </div>
+                         <div className='col-span-1 flex items-center'>
+               <Label htmlFor='bark-enabled'>Bark推送</Label>
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <span className='text-muted-foreground cursor-help ml-auto'>
+                     <Info className='w-4 h-4' />
+                   </span>
+                 </TooltipTrigger>
+                 <TooltipContent side='top' className='max-w-[300px]'>
+                   配置Bark推送服务，用于发送任务提醒到iOS设备。
+                 </TooltipContent>
+               </Tooltip>
+             </div>
+             <div className='col-span-3 flex items-center justify-between'>
+               <Switch
+                 id='bark-enabled'
+                 checked={barkSettings.enabled}
+                 onCheckedChange={(val) => handleBarkChange('enabled', val)}
+               />
+               <div className='flex items-center gap-2'>
+                 {testResult && (
+                   <div className={`flex items-center gap-1 text-xs ${
+                     testResult.success ? 'text-green-600' : 'text-red-600'
+                   }`}>
+                     {testResult.success ? (
+                       <CheckCircle className='w-3 h-3' />
+                     ) : (
+                       <XCircle className='w-3 h-3' />
+                     )}
+                     <span>{testResult.success ? '成功' : '失败'}</span>
+                   </div>
+                 )}
+                 <Button
+                   onClick={handleTestBark}
+                   disabled={!barkSettings.enabled || !barkSettings.token || testing}
+                   variant='outline'
+                   size='xs'
+                   className='h-6 text-xs px-2'
+                 >
+                   <Send className='w-3 h-3 mr-1' />
+                   {testing ? '测试中' : '测试'}
+                 </Button>
+               </div>
+             </div>
 
             <div className='col-span-1'>
               <Label htmlFor='bark-api-url'>API地址</Label>
@@ -244,36 +268,7 @@ export function SettingsPanel ({ open, onOpenChange }) {
               />
             </div>
 
-            {/* 测试按钮和结果 */}
-            <div className='col-span-4 mt-2'>
-              <div className='flex items-center gap-4'>
-                <Button
-                  onClick={handleTestBark}
-                  disabled={!barkSettings.enabled || !barkSettings.token || testing}
-                  variant='outline'
-                  size='sm'
-                >
-                  <Send className='w-4 h-4 mr-2' />
-                  {testing ? '测试中...' : '测试推送'}
-                </Button>
-
-                {testResult && (
-                  <div className={`flex items-center gap-2 text-sm ${
-                    testResult.success ? 'text-green-600' : 'text-red-600'
-                  }`}
-                  >
-                    {testResult.success
-                      ? (
-                        <CheckCircle className='w-4 h-4' />
-                        )
-                      : (
-                        <XCircle className='w-4 h-4' />
-                        )}
-                    <span>{testResult.success ? testResult.message : testResult.error}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            
           </div>
         </div>
       </DialogContent>
