@@ -87,5 +87,28 @@
   [role="combobox"]:focus {
     @apply !ring-0 !ring-offset-0 !outline-none;
   }
+}
 
+@layer utilities {
+  /* 动画定义 */
+  @keyframes fade-in-out {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.95); }
+    10% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    90% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.95); }
+  }
+
+  @keyframes gradient-x {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .animate-fade-in-out {
+    animation: fade-in-out 3s ease-in-out;
+  }
+
+  .animate-gradient-x {
+    background-size: 200% 200%;
+    animation: gradient-x 3s ease infinite;
+  }
 }

@@ -3,9 +3,31 @@ const getDefaultAIModel = () => {
   return settings?.aiSetting?.model || 'deepseek-v3'
 }
 
+// 获取AI模型设置信息（包括是否为自定义模型）
+const getAIModelSetting = () => {
+  const settings = window.utools?.dbStorage?.getItem('purrmind_settings')
+  return settings?.aiSetting || {
+    model: 'deepseek-v3',
+    icon: 'sparkles',
+    cost: 1,
+    custom: false
+  }
+}
+
 export async function getTaskObjByAi (taskMsg, onChunk) {
-  const model = getDefaultAIModel()
-  console.log("use model:", model)
+  const modelSetting = getAIModelSetting()
+  const model = modelSetting.model
+  
+  console.log("使用模型:", model)
+  console.log("模型设置:", modelSetting)
+  
+  // 如果是自定义模型，可以在此处添加特殊处理逻辑
+  if (modelSetting.custom) {
+    console.log("使用自定义模型，按token计费")
+  } else {
+    console.log("使用内置模型，消耗AI点数:", modelSetting.cost)
+  }
+
   const messages = [
     {
       role: "user",

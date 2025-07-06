@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Info, Sparkles, Send, CheckCircle, XCircle } from 'lucide-react'
+import { Info, Sparkles, Send, CheckCircle, XCircle, Cpu, Coins } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
@@ -29,7 +29,10 @@ export function SettingsPanel ({ open, onOpenChange }) {
   })
   const [testResult, setTestResult] = useState(null)
   const [testing, setTesting] = useState(false)
-  // const selectedModel = aiModels.find(model => model.id === settings.aiSetting.model)
+
+  // 分离内置模型和自定义模型
+  const builtInModels = aiModels.filter(model => !model.custom)
+  const customModels = aiModels.filter(model => model.custom)
 
   useEffect(() => {
     // 加载保存的设置
@@ -43,7 +46,10 @@ export function SettingsPanel ({ open, onOpenChange }) {
     // 异步获取可用AI模型
     if (window.utools?.allAiModels) {
       window.utools.allAiModels()
-        .then(models => setAiModels(models))
+        .then(models => {
+          console.log('获取到的AI模型:', models)
+          setAiModels(models)
+        })
         .catch(err => console.error('获取AI模型失败:', err))
     }
   }, [])
@@ -59,7 +65,8 @@ export function SettingsPanel ({ open, onOpenChange }) {
           aiSetting: {
             model: value,
             icon: selectedModel.icon || 'sparkles',
-            cost: selectedModel.cost || 1
+            cost: selectedModel.cost || 1,
+            custom: selectedModel.custom || false
           }
         }
       } else {
@@ -153,7 +160,16 @@ export function SettingsPanel ({ open, onOpenChange }) {
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side='top' className='max-w-[300px]'>
-                      AI能量由uTools统一管理，自定义模型即将到来
+                      <div className='space-y-2'>
+                        <div className='flex items-center gap-2'>
+                          <Sparkles className='w-4 h-4 text-violet-400' />
+                          <span>内置模型 - 消耗uTools AI点数</span>
+                        </div>
+                        <div className='flex items-center gap-2'>
+                          <Cpu className='w-4 h-4 text-blue-400' />
+                          <span>自定义模型 - 按token计费</span>
+                        </div>
+                      </div>
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -166,25 +182,69 @@ export function SettingsPanel ({ open, onOpenChange }) {
                       <SelectValue placeholder='选择AI模型' />
                     </SelectTrigger>
                     <SelectContent>
-                      {aiModels.map(model => (
-                        <SelectItem key={model.id} value={model.id}>
-                          <div className='flex flex-row items-center gap-2'>
-                            {model.icon && (
-                              <img
-                                src={model.icon}
-                                alt=''
-                                className='w-5 h-5 object-contain'
-                                onError={(e) => (e.target.style.display = 'none')}
-                              />
-                            )}
-                            <div className='flex items-center gap-1'>
-                              <span>{model.label}</span>
-                              <Sparkles className='w-4 h-4 text-violet-400 ml-2' />
-                              <span className='text-sm text-violet-400'>{model.cost}点</span>
+                      {/* 自定义模型分组 - 放在前面 */}
+                      {customModels.length > 0 && (
+                        <>
+                          <div className='px-2 py-1.5 text-sm font-medium text-muted-foreground bg-muted/50'>
+                            <div className='flex items-center gap-2'>
+                              <Cpu className='w-4 h-4 text-blue-400' />
+                              <span>自定义模型</span>
+                              <span className='text-xs text-blue-400 ml-1'>- 按token计费</span>
                             </div>
                           </div>
-                        </SelectItem>
-                      ))}
+                          {customModels.map(model => (
+                            <SelectItem key={model.id} value={model.id}>
+                              <div className='flex flex-row items-center gap-2'>
+                                {model.icon && (
+                                  <img
+                                    src={model.icon}
+                                    alt=''
+                                    className='w-5 h-5 object-contain'
+                                    onError={(e) => (e.target.style.display = 'none')}
+                                  />
+                                )}
+                                <span>{model.label}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </>
+                      )}
+
+                      {/* 内置模型分组 */}
+                      {builtInModels.length > 0 && (
+                        <>
+                          {customModels.length > 0 && (
+                            <div className='border-t border-border my-1'></div>
+                          )}
+                          <div className='px-2 py-1.5 text-sm font-medium text-muted-foreground bg-muted/50'>
+                            <div className='flex items-center gap-2'>
+                              <Sparkles className='w-4 h-4 text-violet-400' />
+                              <span>内置模型</span>
+                            </div>
+                          </div>
+                          {builtInModels.map(model => (
+                            <SelectItem key={model.id} value={model.id}>
+                              <div className='flex flex-row items-center gap-2'>
+                                {model.icon && (
+                                  <img
+                                    src={model.icon}
+                                    alt=''
+                                    className='w-5 h-5 object-contain'
+                                    onError={(e) => (e.target.style.display = 'none')}
+                                  />
+                                )}
+                                <div className='flex items-center gap-1'>
+                                  <span>{model.label}</span>
+                                  <div className='flex items-center gap-1 ml-2'>
+                                    <Coins className='w-4 h-4 text-violet-400' />
+                                    <span className='text-sm text-violet-400'>{model.cost}点</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

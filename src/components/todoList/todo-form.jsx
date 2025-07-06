@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { AlertCircle, Plus, Sparkles } from 'lucide-react'
+import { AlertCircle, Plus, Sparkles, Cpu, Coins } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
 import { Input } from '@/components/ui/input'
@@ -24,6 +24,17 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
       }
     }
   }, [streamContent, isProcessing])
+
+  // 获取当前AI模型设置
+  const getAIModelSetting = () => {
+    const settings = window.utools?.dbStorage?.getItem('purrmind_settings')
+    return settings?.aiSetting || {
+      model: 'deepseek-v3',
+      icon: 'sparkles',
+      cost: 1,
+      custom: false
+    }
+  }
 
   // 创建基础任务对象
   const createBaseTask = (taskTitle) => ({
@@ -110,33 +121,45 @@ export function TodoForm ({ onAdd, defaultCategory, defaultStarred, defaultDueDa
   const toggleAI = () => {
     if (!isAIActive) {
       setShowAiTip(true)
-      setTimeout(() => setShowAiTip(false), 2000)
+      setTimeout(() => setShowAiTip(false), 3000) // 延长显示时间
     }
     setIsAIActive(!isAIActive)
     setError(null)
   }
 
+  // 获取当前模型设置用于显示
+  const currentModelSetting = getAIModelSetting()
+
   return (
     <form onSubmit={handleSubmit} className="flex items-center w-full">
       <div className="relative w-full">
-        {/* AI能量提示-暂时不需要 */}
-        {/*{showAiTip && (*/}
-        {/*  <div*/}
-        {/*    className="absolute left-1/2 -translate-x-1/2 -top-14 flex items-center gap-2 px-5 py-2 rounded-xl shadow-lg z-50*/}
-        {/*      bg-gradient-to-r from-purple-300 via-pink-300 to-yellow-300 text-white font-semibold text-base*/}
-        {/*      animate-fade-in-out"*/}
-        {/*    style={{*/}
-        {/*      pointerEvents: 'none',*/}
-        {/*      opacity: showAiTip ? 1 : 0,*/}
-        {/*      transition: 'opacity 0.5s'*/}
-        {/*    }}*/}
-        {/*  >*/}
-        {/*    */}
-        {/*    <Sparkles className="w-5 h-5 text-white drop-shadow" />*/}
-        {/*    */}
-        {/*    每次消耗 1 点 uTools AI能量*/}
-        {/*  </div>*/}
-        {/*)}*/}
+        {/* AI模型计费提示 */}
+        {showAiTip && (
+          <div
+            className="absolute left-1/2 -translate-x-1/2 -top-16 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg z-50
+              bg-gradient-to-r text-white font-medium text-sm animate-fade-in-out"
+            style={{
+              pointerEvents: 'none',
+              opacity: showAiTip ? 1 : 0,
+              transition: 'opacity 0.5s',
+              background: currentModelSetting.custom 
+                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)' 
+                : 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
+            }}
+          >
+            {currentModelSetting.custom ? (
+              <>
+                <Cpu className="w-4 h-4 text-white drop-shadow" />
+                <span>自定义模型 - 按token计费</span>
+              </>
+            ) : (
+              <>
+                <Coins className="w-4 h-4 text-white drop-shadow" />
+                <span>消耗 {currentModelSetting.cost} 点uTools AI能量</span>
+              </>
+            )}
+          </div>
+        )}
 
         {/* 错误提示 */}
         {error && (
