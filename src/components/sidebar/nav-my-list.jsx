@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   getAllCategories,
   getTodosByCategory,
@@ -61,73 +61,88 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
   const [hoveredItem, setHoveredItem] = useState(null)
   const [openDropdownId, setOpenDropdownId] = useState(null)
 
+  // 数据加载函数 - 使用useCallback避免不必要的重新创建
+  const loadData = useCallback(() => {
+    const allCategories = getAllCategories()
+    const allTodos = getAllTodos()
+    setCategories(allCategories)
+    setTodos(allTodos)
+  }, [])
+
+  // 初始化加载
   useEffect(() => {
-    loadCategories()
-    loadTodos()
+    loadData()
+  }, [loadData])
+
+  // 外部事件监听 - 分离事件监听逻辑
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === 'todos' || e.key === 'categories') {
+        loadData()
+      }
+    }
+
+    const handleTodoUpdated = () => {
+      loadData()
+    }
+
     window.addEventListener('storage', handleStorageChange)
     window.addEventListener('todo-updated', handleTodoUpdated)
+
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('todo-updated', handleTodoUpdated)
     }
-  }, [])
+  }, [loadData])
 
-  const handleStorageChange = e => {
-    if (e.key === 'todos' || e.key === 'categories') {
-      loadCategories()
-      loadTodos()
-    }
-  }
-
-  const handleTodoUpdated = () => {
-    loadCategories()
-    loadTodos()
-  }
-
-  const loadCategories = () => {
-    const allCategories = getAllCategories()
-    setCategories(allCategories)
-  }
-
-  const loadTodos = () => {
-    const allTodos = getAllTodos()
-    setTodos(allTodos)
-  }
-
-  const handleAddCategory = () => {
+  const handleAddCategory = useCallback(() => {
     if (newCategoryName.trim()) {
-      addCategory({
+      const newCategory = addCategory({
         name: newCategoryName,
         icon: selectedIcon.icon,
         color: selectedIcon.color
       })
+
+      // 直接更新状态而不是重新加载全部数据
+      setCategories(prev => [...prev, newCategory])
       setNewCategoryName('')
       setSelectedIcon({ icon: 'FolderIcon', color: 'default' })
       setIsDialogOpen(false)
-      loadCategories()
       window.dispatchEvent(new Event('todo-updated'))
     }
-  }
+  }, [newCategoryName, selectedIcon])
 
-  const handleDeleteCategory = (id, e) => {
+  const handleDeleteCategory = useCallback((id, e) => {
     if (e) {
       e.stopPropagation()
       e.preventDefault()
     }
     deleteCategory(id)
-    loadCategories()
+
+    // 直接从状态中移除而不是重新加载
+    setCategories(prev => prev.filter(cat => cat.id !== id))
     setOpenDropdownId(null)
     window.dispatchEvent(new Event('todo-updated'))
-  }
+  }, [])
 
-  const getCategoryCount = categoryId => {
-    const count = todos.filter(
-      todo => !todo.completed && todo.categoryId === categoryId
-    ).length
+  // 使用useMemo优化分类计数计算
+  const categoryCountMap = useMemo(() => {
+    const countMap = new Map()
+    todos.forEach(todo => {
+      if (!todo.completed && todo.categoryId) {
+        const current = countMap.get(todo.categoryId) || 0
+        countMap.set(todo.categoryId, current + 1)
+      }
+    })
+    return countMap
+  }, [todos])
+
+  const getCategoryCount = useCallback((categoryId) => {
+    const count = categoryCountMap.get(categoryId) || 0
     return count > 99 ? '99+' : count
-  }
+  }, [categoryCountMap])
 
-  const getColorClass = color => {
+  const getColorClass = useCallback((color) => {
     switch (color) {
       case 'red':
         return 'text-red-500'
@@ -144,13 +159,13 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
       default:
         return 'text-gray-500'
     }
-  }
+  }, [])
 
-  const getIconComponent = iconName => {
+  const getIconComponent = useCallback((iconName) => {
     return Icons[iconName] || FolderIcon
-  }
+  }, [])
 
-  const handleDropdownOpenChange = (open, categoryId) => {
+  const handleDropdownOpenChange = useCallback((open, categoryId) => {
     if (!open) {
       setOpenDropdownId(null)
       if (hoveredItem !== categoryId) {
@@ -159,7 +174,7 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
     } else {
       setOpenDropdownId(categoryId)
     }
-  }
+  }, [hoveredItem])
 
   return (
     <SidebarGroup className='group-data-[collapsible=icon]:hidden'>

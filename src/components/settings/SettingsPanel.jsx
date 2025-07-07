@@ -57,17 +57,17 @@ export function SettingsPanel({ open, onOpenChange }) {
   const builtInModels = aiModels.filter(model => !model.custom)
   const customModels = aiModels.filter(model => model.custom)
 
+  // 初始化设置 - 加载本地数据和异步获取AI模型
   useEffect(() => {
-    // 加载保存的设置
+    // 同步加载本地设置
     const savedSettings =
       window.utools.dbStorage.getItem('purrmind_settings') || {}
     setSettings(prev => ({ ...prev, ...savedSettings }))
 
-    // 加载bark设置
     const savedBarkSettings = barkService.getSettings()
     setBarkSettings(savedBarkSettings)
 
-    // 异步获取可用AI模型
+    // 异步获取AI模型列表
     if (window.utools?.allAiModels) {
       window.utools
         .allAiModels()

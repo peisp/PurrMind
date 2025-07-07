@@ -40,8 +40,8 @@ export function Notification({ todos }) {
     }
   }
 
+  // 定时检查提醒时间 - 每分钟检查一次
   useEffect(() => {
-    // 每分钟检查一次提醒时间
     checkInterval.current = setInterval(() => {
       const now = new Date()
       todos.forEach(todo => {
@@ -53,14 +53,12 @@ export function Notification({ todos }) {
           const reminderTime = new Date(todo.reminderTime)
           // 如果提醒时间在当前时间的前后1分钟内
           if (Math.abs(reminderTime - now) <= 60000) {
-            // 使用统一的通知发送方法
             sendNotification(todo)
-            // 记录已通知的任务
             notifiedTodos.current.add(todo.id)
           }
         }
       })
-    }, 60000) // 60000ms = 1分钟
+    }, 60000) // 每分钟检查一次
 
     return () => {
       if (checkInterval.current) {
@@ -69,7 +67,7 @@ export function Notification({ todos }) {
     }
   }, [todos])
 
-  // 当任务列表更新时，重置已通知的任务集合
+  // 当任务列表更新时，重置已通知集合 - 避免重复通知
   useEffect(() => {
     notifiedTodos.current.clear()
   }, [todos])

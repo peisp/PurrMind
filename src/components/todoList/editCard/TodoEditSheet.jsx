@@ -81,6 +81,7 @@ export function TodoEditSheet({
 
   const [timeValidationError, setTimeValidationError] = useState('')
 
+  // 初始化表单 - 当todo改变时重置表单
   useEffect(() => {
     if (todo) {
       setEditForm({
@@ -93,28 +94,25 @@ export function TodoEditSheet({
     }
   }, [todo])
 
-  // 监听列表变化
+  // 监听分类变化 - 如果当前选中的分类被删除，则清除选择
   useEffect(() => {
-    // 如果当前选中的列表不存在于新的列表列表中，则清除列表选择
     if (
       editForm.categoryId &&
       !categories.find(cat => cat.id === editForm.categoryId)
     ) {
-      setEditForm(prev => ({ ...prev, categoryId: null }))
+      setEditForm(prev => ({ ...prev, categoryId: '' }))
     }
   }, [categories, editForm.categoryId])
 
-  // 校验提醒时间是否在截止时间之前
+  // 时间校验 - 使用useMemo优化校验逻辑
   useEffect(() => {
+    let error = ''
     if (editForm.dueDate && editForm.reminderTime) {
       if (editForm.reminderTime >= editForm.dueDate) {
-        setTimeValidationError('提醒时间必须在截止时间之前')
-      } else {
-        setTimeValidationError('')
+        error = '提醒时间必须在截止时间之前'
       }
-    } else {
-      setTimeValidationError('')
     }
+    setTimeValidationError(error)
   }, [editForm.dueDate, editForm.reminderTime])
 
   const handleSave = () => {

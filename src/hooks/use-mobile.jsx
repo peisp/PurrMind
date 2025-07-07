@@ -7,11 +7,19 @@ export function useIsMobile() {
 
   React.useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+
+    // 统一的检查函数，避免重复逻辑
+    const checkIsMobile = () => mql.matches
+
     const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+      setIsMobile(checkIsMobile())
     }
+
+    // 设置初始值
+    setIsMobile(checkIsMobile())
+
+    // 监听变化
     mql.addEventListener('change', onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
     return () => mql.removeEventListener('change', onChange)
   }, [])
 

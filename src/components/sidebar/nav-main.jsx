@@ -1,17 +1,8 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { getAllTodos } from '@/db/todo'
-import {
-  CalendarIcon,
-  ClockIcon,
-  ListIcon,
-  StarIcon,
-  CheckCircleIcon,
-  SunMedium,
-  Sun
-} from 'lucide-react'
 import * as Icons from 'lucide-react'
 
 const items = [
@@ -51,7 +42,7 @@ export function NavMain({ onFilterChange, currentFilter }) {
   const [todos, setTodos] = useState([])
 
   // 获取今天的默认截止时间：如果在18点之前，设置为今天下午6点，否则设置为今天晚上11:59
-  const getDefaultDueDate = () => {
+  const getDefaultDueDate = useCallback(() => {
     const now = new Date()
     const dueDate = new Date()
 
@@ -64,81 +55,95 @@ export function NavMain({ onFilterChange, currentFilter }) {
     }
 
     return dueDate
-  }
+  }, [])
 
+  // 数据加载函数 - 使用useCallback避免不必要的重新创建
+  const loadTodos = useCallback(() => {
+    const allTodos = getAllTodos()
+    setTodos(allTodos)
+  }, [])
+
+  // 初始化加载
   useEffect(() => {
     loadTodos()
+  }, [loadTodos])
+
+  // 外部事件监听 - 分离事件监听逻辑
+  useEffect(() => {
+    const handleStorageChange = e => {
+      if (e.key === 'todos') {
+        loadTodos()
+      }
+    }
+
+    const handleTodoUpdated = () => {
+      loadTodos()
+    }
+
     window.addEventListener('storage', handleStorageChange)
     window.addEventListener('todo-updated', handleTodoUpdated)
+
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('todo-updated', handleTodoUpdated)
     }
-  }, [])
+  }, [loadTodos])
 
-  const handleStorageChange = e => {
-    if (e.key === 'todos') {
-      loadTodos()
-    }
-  }
-
-  const handleTodoUpdated = () => {
-    loadTodos()
-  }
-
-  const loadTodos = () => {
-    const allTodos = getAllTodos()
-    setTodos(allTodos)
-  }
-
-  const getCount = filter => {
+  // 使用useMemo优化计数计算
+  const filterCounts = useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    let count = 0
-    switch (filter) {
-      case 'today':
-        count = todos.filter(todo => {
-          const todoDate = new Date(todo.dueDate)
-          todoDate.setHours(0, 0, 0, 0)
-          return !todo.completed && todoDate.getTime() === today.getTime()
-        }).length
-        break
-      case 'planned':
-        count = todos.filter(todo => {
-          const todoDate = new Date(todo.dueDate)
-          todoDate.setHours(0, 0, 0, 0)
-          return !todo.completed && todoDate.getTime() > today.getTime()
-        }).length
-        break
-      case 'all':
-        count = todos.filter(todo => !todo.completed).length
-        break
-      case 'starred':
-        count = todos.filter(todo => !todo.completed && todo.starred).length
-        break
-      case 'completed':
-        count = todos.filter(todo => todo.completed).length
-        break
-      default:
-        count = 0
-    }
-    return count > 99 ? '99+' : count
-  }
+    const counts = {}
 
-  const handleClick = (filter, title, icon, color, defaultDueDate) => {
+    items.forEach(item => {
+      let count = 0
+      switch (item.filter) {
+        case 'today':
+          count = todos.filter(todo => {
+            const todoDate = new Date(todo.dueDate)
+            todoDate.setHours(0, 0, 0, 0)
+            return !todo.completed && todoDate.getTime() === today.getTime()
+          }).length
+          break
+        case 'planned':
+          count = todos.filter(todo => {
+            const todoDate = new Date(todo.dueDate)
+            todoDate.setHours(0, 0, 0, 0)
+            return !todo.completed && todoDate.getTime() > today.getTime()
+          }).length
+          break
+        case 'all':
+          count = todos.filter(todo => !todo.completed).length
+          break
+        case 'starred':
+          count = todos.filter(todo => !todo.completed && todo.starred).length
+          break
+        case 'completed':
+          count = todos.filter(todo => todo.completed).length
+          break
+        default:
+          count = 0
+      }
+      counts[item.filter] = count > 99 ? '99+' : count
+    })
+
+    return counts
+  }, [todos])
+
+  const handleClick = useCallback((filter, title, icon, color, defaultDueDate) => {
     // 如果选择"今天"，设置默认截止时间为今天下午6点
     const defaultDueDateToUse =
       filter === 'today' ? getDefaultDueDate() : defaultDueDate
     onFilterChange(filter, title, icon, color, defaultDueDateToUse)
-  }
+  }, [getDefaultDueDate, onFilterChange])
 
   return (
     <div className='grid grid-cols-2 gap-2'>
       {items.map(item => {
         const Icon = Icons[item.icon]
         const isActive = currentFilter === item.filter
-        const count = getCount(item.filter)
+        const count = filterCounts[item.filter]
 
         return (
           <Button

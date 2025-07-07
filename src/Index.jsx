@@ -27,8 +27,8 @@ export function Index({ enterAction }) {
     setShowCompleted
   } = useTodoManagement(enterAction)
 
+  // 检查开发环境 - 只运行一次
   useEffect(() => {
-    // 检查是否为开发环境
     if (window.utools?.isDev) {
       setIsDev(window.utools.isDev())
     }

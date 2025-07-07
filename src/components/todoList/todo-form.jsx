@@ -18,15 +18,19 @@ export function TodoForm({
   const [showAiTip, setShowAiTip] = useState(false)
   const [streamContent, setStreamContent] = useState('')
 
+  // 优化滚动效果 - 使用useEffect但减少不必要的重复计算
   useEffect(() => {
     if (isProcessing && streamContent) {
-      const scrollContainer = document.querySelector('.stream-container')
-      if (scrollContainer) {
-        scrollContainer.scrollTo({
-          top: scrollContainer.scrollHeight,
-          behavior: 'smooth'
-        })
-      }
+      // 使用setTimeout确保DOM更新后再滚动
+      setTimeout(() => {
+        const scrollContainer = document.querySelector('.stream-container')
+        if (scrollContainer) {
+          scrollContainer.scrollTo({
+            top: scrollContainer.scrollHeight,
+            behavior: 'smooth'
+          })
+        }
+      }, 0)
     }
   }, [streamContent, isProcessing])
 
