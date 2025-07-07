@@ -16,12 +16,18 @@ import { TimeSelector } from './TimeSelector.jsx'
 import { CategorySelector } from './CategorySelector.jsx'
 import { ReminderTimeSelector } from './ReminderTimeSelector.jsx'
 
-const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) => {
+const LimitedInput = ({
+  value,
+  onChange,
+  maxLength,
+  placeholder,
+  className
+}) => {
   return (
     <div className='space-y-0.5'>
       <Input
         value={value}
-        onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
+        onChange={e => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
         className={cn('', className)}
@@ -33,12 +39,18 @@ const LimitedInput = ({ value, onChange, maxLength, placeholder, className }) =>
   )
 }
 
-const LimitedTextarea = ({ value, onChange, maxLength, placeholder, className }) => {
+const LimitedTextarea = ({
+  value,
+  onChange,
+  maxLength,
+  placeholder,
+  className
+}) => {
   return (
     <div className='space-y-0.5'>
       <Textarea
         value={value}
-        onChange={(e) => onChange(e.target.value.slice(0, maxLength))}
+        onChange={e => onChange(e.target.value.slice(0, maxLength))}
         placeholder={placeholder}
         maxLength={maxLength}
         className={cn(' resize-none', className)}
@@ -50,7 +62,7 @@ const LimitedTextarea = ({ value, onChange, maxLength, placeholder, className })
   )
 }
 
-export function TodoEditSheet ({
+export function TodoEditSheet({
   isOpen,
   onOpenChange,
   todo,
@@ -84,7 +96,10 @@ export function TodoEditSheet ({
   // 监听列表变化
   useEffect(() => {
     // 如果当前选中的列表不存在于新的列表列表中，则清除列表选择
-    if (editForm.categoryId && !categories.find(cat => cat.id === editForm.categoryId)) {
+    if (
+      editForm.categoryId &&
+      !categories.find(cat => cat.id === editForm.categoryId)
+    ) {
       setEditForm(prev => ({ ...prev, categoryId: null }))
     }
   }, [categories, editForm.categoryId])
@@ -141,7 +156,7 @@ export function TodoEditSheet ({
             <label className='text-sm font-medium'>标题</label>
             <LimitedInput
               value={editForm.title}
-              onChange={(value) => updateFormField('title', value)}
+              onChange={value => updateFormField('title', value)}
               maxLength={50}
               placeholder='输入标题'
             />
@@ -152,7 +167,7 @@ export function TodoEditSheet ({
             <label className='text-sm font-medium'>描述</label>
             <LimitedTextarea
               value={editForm.description}
-              onChange={(value) => updateFormField('description', value)}
+              onChange={value => updateFormField('description', value)}
               maxLength={200}
               placeholder='输入描述'
             />
@@ -161,7 +176,7 @@ export function TodoEditSheet ({
           {/* 类别选择器 */}
           <CategorySelector
             value={editForm.categoryId}
-            onChange={(value) => updateFormField('categoryId', value)}
+            onChange={value => updateFormField('categoryId', value)}
             categories={categories}
           />
 
@@ -169,14 +184,14 @@ export function TodoEditSheet ({
           <TimeSelector
             label='截止时间'
             value={editForm.dueDate}
-            onChange={(value) => updateFormField('dueDate', value)}
+            onChange={value => updateFormField('dueDate', value)}
             placeholder='选择截止日期'
           />
 
           {/* 提醒时间选择器 */}
           <ReminderTimeSelector
             value={editForm.reminderTime}
-            onChange={(value) => updateFormField('reminderTime', value)}
+            onChange={value => updateFormField('reminderTime', value)}
             dueDate={editForm.dueDate}
             validationError={timeValidationError}
           />
@@ -184,25 +199,21 @@ export function TodoEditSheet ({
 
         <SheetFooter className='flex items-center justify-between pt-2 mt-2'>
           <div className='flex-1 text-xs text-muted-foreground'>
-            创建于 {todo?.createdAt ? format(new Date(todo.createdAt), 'yyyy-MM-dd HH:mm', { locale: zhCN }) : ''}
+            创建于{' '}
+            {todo?.createdAt
+              ? format(new Date(todo.createdAt), 'yyyy-MM-dd HH:mm', {
+                locale: zhCN
+              })
+              : ''}
           </div>
           <div className='flex items-center gap-2'>
-            <Button
-              variant='destructive'
-              onClick={onDelete}
-            >
+            <Button variant='destructive' onClick={onDelete}>
               删除
             </Button>
-            <Button
-              variant='outline'
-              onClick={onCancel}
-            >
+            <Button variant='outline' onClick={onCancel}>
               取消
             </Button>
-            <Button
-              onClick={handleSave}
-              disabled={!!timeValidationError}
-            >
+            <Button onClick={handleSave} disabled={!!timeValidationError}>
               保存
             </Button>
           </div>

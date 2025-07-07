@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react'
 import * as Icons from 'lucide-react'
-import { initTodoDB, getAllTodos, addTodo, updateTodo, deleteTodo, toggleTodoStatus, getAllCategories } from '@/db/todo.js'
+import {
+  initTodoDB,
+  getAllTodos,
+  addTodo,
+  updateTodo,
+  deleteTodo,
+  toggleTodoStatus,
+  getAllCategories
+} from '@/db/todo.js'
 
 export function useTodoManagement(enterAction) {
   const [todos, setTodos] = useState([])
   const [currentFilter, setCurrentFilter] = useState('all')
   const [currentCategory, setCurrentCategory] = useState(null)
   const [currentLabel, setCurrentLabel] = useState('全部')
-  const [currentIcon, setCurrentIcon] = useState({ icon: 'ListIcon', color: 'default' })
+  const [currentIcon, setCurrentIcon] = useState({
+    icon: 'ListIcon',
+    color: 'default'
+  })
   const [categories, setCategories] = useState([])
   const [defaultDueDate, setDefaultDueDate] = useState(null)
   const [showCompleted, setShowCompleted] = useState(false)
@@ -27,7 +38,7 @@ export function useTodoManagement(enterAction) {
   }, [])
 
   const handleEnterAction = () => {
-    if (enterAction?.type === "over" && enterAction?.payload) {
+    if (enterAction?.type === 'over' && enterAction?.payload) {
       addTodo({
         title: enterAction.payload.trim(),
         description: '',
@@ -40,7 +51,7 @@ export function useTodoManagement(enterAction) {
     }
   }
 
-  const handleStorageChange = (e) => {
+  const handleStorageChange = e => {
     if (e.key === 'todos' || e.key === 'categories') {
       loadTodos()
       loadCategories()
@@ -62,7 +73,7 @@ export function useTodoManagement(enterAction) {
     setCategories(allCategories)
   }
 
-  const handleAddTodo = (todo) => {
+  const handleAddTodo = todo => {
     const newTodo = addTodo(todo)
     setTodos([...todos, newTodo])
     window.dispatchEvent(new Event('todo-updated'))
@@ -71,12 +82,12 @@ export function useTodoManagement(enterAction) {
   const handleUpdateTodo = (id, updates) => {
     const updatedTodo = updateTodo(id, updates)
     if (updatedTodo) {
-      setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo))
+      setTodos(todos.map(todo => (todo.id === id ? updatedTodo : todo)))
       window.dispatchEvent(new Event('todo-updated'))
     }
   }
 
-  const handleDeleteTodo = (id) => {
+  const handleDeleteTodo = id => {
     deleteTodo(id)
     setTodos(todos.filter(todo => todo.id !== id))
     window.dispatchEvent(new Event('todo-updated'))
@@ -86,7 +97,7 @@ export function useTodoManagement(enterAction) {
     if (e) e.stopPropagation()
     const updatedTodo = toggleTodoStatus(id)
     if (updatedTodo) {
-      setTodos(todos.map(todo => todo.id === id ? updatedTodo : todo))
+      setTodos(todos.map(todo => (todo.id === id ? updatedTodo : todo)))
       window.dispatchEvent(new Event('todo-updated'))
     }
   }
@@ -98,7 +109,7 @@ export function useTodoManagement(enterAction) {
     if (filter === 'completed') {
       setShowCompleted(true)
     }
-    
+
     setCurrentFilter(filter)
     setCurrentCategory(null)
     setCurrentLabel(label)
@@ -112,7 +123,7 @@ export function useTodoManagement(enterAction) {
     setCurrentFilter(null)
     setCurrentLabel(label)
     setShowCompleted(false)
-    
+
     const categoryData = categories.find(cat => cat.id === category)
     if (categoryData) {
       setCurrentIcon({ icon: categoryData.icon, color: categoryData.color })
@@ -121,7 +132,10 @@ export function useTodoManagement(enterAction) {
 
   const filteredTodos = todos.filter(todo => {
     if (currentCategory !== null) {
-      return (showCompleted || !todo.completed) && todo.categoryId === currentCategory
+      return (
+        (showCompleted || !todo.completed) &&
+        todo.categoryId === currentCategory
+      )
     }
 
     const today = new Date()
@@ -131,9 +145,15 @@ export function useTodoManagement(enterAction) {
 
     switch (currentFilter) {
       case 'today':
-        return (showCompleted || !todo.completed) && todoDate.getTime() === today.getTime()
+        return (
+          (showCompleted || !todo.completed) &&
+          todoDate.getTime() === today.getTime()
+        )
       case 'planned':
-        return (showCompleted || !todo.completed) && todoDate.getTime() > today.getTime()
+        return (
+          (showCompleted || !todo.completed) &&
+          todoDate.getTime() > today.getTime()
+        )
       case 'starred':
         return (showCompleted || !todo.completed) && todo.starred
       case 'completed':

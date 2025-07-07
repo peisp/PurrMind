@@ -8,7 +8,7 @@ import {
 import { TimeSelector } from './TimeSelector.jsx'
 import { AlertCircle } from 'lucide-react'
 
-export function ReminderTimeSelector ({
+export function ReminderTimeSelector({
   value,
   onChange,
   dueDate,
@@ -36,7 +36,7 @@ export function ReminderTimeSelector ({
     ]
   }
 
-  const handleQuickSelect = (selectedValue) => {
+  const handleQuickSelect = selectedValue => {
     if (selectedValue === 'custom') {
       // 设置默认时间为当前时间+1小时
       const defaultTime = new Date()
@@ -52,36 +52,37 @@ export function ReminderTimeSelector ({
     <div className={className}>
       {!value
         ? (
-          <div className='space-y-0.5'>
-            <label className='text-sm font-medium'>提醒时间</label>
-            <Select
-              value=''
-              onValueChange={handleQuickSelect}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder='选择提醒时间' />
-              </SelectTrigger>
-              <SelectContent>
-                {getReminderTimeOptions().map((option) => (
-                  <SelectItem
-                    key={option.label}
-                    value={option.value === 'custom' ? 'custom' : option.value.toISOString()}
-                  >
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <div className='space-y-0.5'>
+          <label className='text-sm font-medium'>提醒时间</label>
+          <Select value='' onValueChange={handleQuickSelect}>
+            <SelectTrigger>
+              <SelectValue placeholder='选择提醒时间' />
+            </SelectTrigger>
+            <SelectContent>
+              {getReminderTimeOptions().map(option => (
+                <SelectItem
+                  key={option.label}
+                  value={
+                    option.value === 'custom'
+                      ? 'custom'
+                      : option.value.toISOString()
+                  }
+                >
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
           )
         : (
-          <TimeSelector
-            label='提醒时间'
-            value={value}
-            onChange={onChange}
-            placeholder='选择提醒日期'
-            showClearButton
-          />
+        <TimeSelector
+          label='提醒时间'
+          value={value}
+          onChange={onChange}
+          placeholder='选择提醒日期'
+          showClearButton
+        />
           )}
 
       {validationError && (

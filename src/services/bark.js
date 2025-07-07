@@ -1,12 +1,13 @@
 // Bark推送服务
 export class BarkService {
-  constructor () {
+  constructor() {
     this.settings = this.getSettings()
   }
 
   // 获取bark设置
-  getSettings () {
-    const settings = window.utools.dbStorage.getItem('purrmind_bark_settings') || {}
+  getSettings() {
+    const settings =
+      window.utools.dbStorage.getItem('purrmind_bark_settings') || {}
     return {
       enabled: settings.enabled || false,
       apiUrl: settings.apiUrl || 'https://api.day.app',
@@ -18,13 +19,13 @@ export class BarkService {
   }
 
   // 保存bark设置
-  saveSettings (settings) {
+  saveSettings(settings) {
     window.utools.dbStorage.setItem('purrmind_bark_settings', settings)
     this.settings = settings
   }
 
   // 发送bark推送
-  async sendNotification (title, content, options = {}) {
+  async sendNotification(title, content, options = {}) {
     if (!this.settings.enabled || !this.settings.token) {
       return { success: false, error: 'Bark推送未启用或Token未配置' }
     }
@@ -32,14 +33,17 @@ export class BarkService {
     try {
       const url = this.buildUrl(title, content, options)
       console.log('Bark推送URL:', url) // 调试日志
-      
+
       const response = await fetch(url, {
         method: 'GET'
       })
 
       // 检查响应状态
       if (!response.ok) {
-        return { success: false, error: `HTTP错误: ${response.status} ${response.statusText}` }
+        return {
+          success: false,
+          error: `HTTP错误: ${response.status} ${response.statusText}`
+        }
       }
 
       // 获取响应文本
@@ -72,7 +76,7 @@ export class BarkService {
   }
 
   // 构建推送URL
-  buildUrl (title, content, options = {}) {
+  buildUrl(title, content, options = {}) {
     const {
       sound = this.settings.sound,
       icon = this.settings.icon,
@@ -109,7 +113,7 @@ export class BarkService {
   }
 
   // 测试连接
-  async testConnection () {
+  async testConnection() {
     if (!this.settings.token) {
       return { success: false, error: 'Token未配置' }
     }

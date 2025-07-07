@@ -24,7 +24,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
-    
+
     /* Sidebar specific variables */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -80,11 +80,11 @@
   textarea:focus-visible,
   select:focus-visible,
   button:focus-visible,
-  [role="combobox"]:focus-visible {
+  [role='combobox']:focus-visible {
     @apply !ring-0 !ring-offset-0 !outline-none;
   }
 
-  [role="combobox"]:focus {
+  [role='combobox']:focus {
     @apply !ring-0 !ring-offset-0 !outline-none;
   }
 }
@@ -92,15 +92,32 @@
 @layer utilities {
   /* 动画定义 */
   @keyframes fade-in-out {
-    0% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.95); }
-    10% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-    90% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-    100% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.95); }
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px) scale(0.95);
+    }
+    10% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+    90% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px) scale(0.95);
+    }
   }
 
   @keyframes gradient-x {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
   }
 
   .animate-fade-in-out {

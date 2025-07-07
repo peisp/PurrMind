@@ -11,7 +11,7 @@ import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { cn } from '@/lib/utils.js'
 
-export function TimeSelector ({
+export function TimeSelector({
   label,
   value,
   onChange,
@@ -26,7 +26,12 @@ export function TimeSelector ({
     const numValue = parseInt(inputValue) || 0
 
     if (type === 'hour') {
-      newDate.setHours(Math.min(Math.max(numValue, 0), 23), newDate.getMinutes(), 0, 0)
+      newDate.setHours(
+        Math.min(Math.max(numValue, 0), 23),
+        newDate.getMinutes(),
+        0,
+        0
+      )
     } else {
       newDate.setMinutes(Math.min(Math.max(numValue, 0), 59), 0, 0)
     }
@@ -38,7 +43,8 @@ export function TimeSelector ({
     if (!value) return
 
     const newDate = new Date(value)
-    const currentValue = type === 'hour' ? newDate.getHours() : newDate.getMinutes()
+    const currentValue =
+      type === 'hour' ? newDate.getHours() : newDate.getMinutes()
 
     if (e.key === 'ArrowUp') {
       if (type === 'hour') {
@@ -49,7 +55,12 @@ export function TimeSelector ({
       onChange(newDate)
     } else if (e.key === 'ArrowDown') {
       if (type === 'hour') {
-        newDate.setHours((currentValue - 1 + 24) % 24, newDate.getMinutes(), 0, 0)
+        newDate.setHours(
+          (currentValue - 1 + 24) % 24,
+          newDate.getMinutes(),
+          0,
+          0
+        )
       } else {
         newDate.setMinutes((currentValue - 1 + 60) % 60, 0, 0)
       }
@@ -73,15 +84,19 @@ export function TimeSelector ({
               >
                 <CalendarIcon className='mr-2 h-4 w-4' />
                 {value
-                  ? format(value, 'yyyy-MM-dd', { locale: zhCN })
-                  : <span>{placeholder}</span>}
+                  ? (
+                      format(value, 'yyyy-MM-dd', { locale: zhCN })
+                    )
+                  : (
+                  <span>{placeholder}</span>
+                    )}
               </Button>
             </PopoverTrigger>
             <PopoverContent className='w-auto p-0'>
               <Calendar
                 mode='single'
                 selected={value}
-                onSelect={(date) => {
+                onSelect={date => {
                   if (date) {
                     const newDate = new Date(date)
                     if (value) {
@@ -109,8 +124,8 @@ export function TimeSelector ({
               min='0'
               max='23'
               value={value ? format(value, 'HH') : ''}
-              onChange={(e) => handleTimeChange('hour', e.target.value)}
-              onKeyDown={(e) => handleTimeKeyDown('hour', e)}
+              onChange={e => handleTimeChange('hour', e.target.value)}
+              onKeyDown={e => handleTimeKeyDown('hour', e)}
               className='w-[50px] h-8 px-2 text-center'
               placeholder='时'
               disabled={!value}
@@ -121,8 +136,8 @@ export function TimeSelector ({
               min='0'
               max='59'
               value={value ? format(value, 'mm') : ''}
-              onChange={(e) => handleTimeChange('minute', e.target.value)}
-              onKeyDown={(e) => handleTimeKeyDown('minute', e)}
+              onChange={e => handleTimeChange('minute', e.target.value)}
+              onKeyDown={e => handleTimeKeyDown('minute', e)}
               className='w-[50px] h-8 px-2 text-center'
               placeholder='分'
               disabled={!value}

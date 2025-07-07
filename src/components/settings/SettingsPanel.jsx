@@ -1,16 +1,39 @@
 import React, { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Info, Sparkles, Send, CheckCircle, XCircle, Cpu, Coins } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Info,
+  Sparkles,
+  Send,
+  CheckCircle,
+  XCircle,
+  Cpu,
+  Coins
+} from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { barkService } from '@/services/bark'
 
-export function SettingsPanel ({ open, onOpenChange }) {
+export function SettingsPanel({ open, onOpenChange }) {
   const [settings, setSettings] = useState({
     darkMode: false,
     notifications: true,
@@ -36,7 +59,8 @@ export function SettingsPanel ({ open, onOpenChange }) {
 
   useEffect(() => {
     // 加载保存的设置
-    const savedSettings = window.utools.dbStorage.getItem('purrmind_settings') || {}
+    const savedSettings =
+      window.utools.dbStorage.getItem('purrmind_settings') || {}
     setSettings(prev => ({ ...prev, ...savedSettings }))
 
     // 加载bark设置
@@ -45,7 +69,8 @@ export function SettingsPanel ({ open, onOpenChange }) {
 
     // 异步获取可用AI模型
     if (window.utools?.allAiModels) {
-      window.utools.allAiModels()
+      window.utools
+        .allAiModels()
         .then(models => {
           console.log('获取到的AI模型:', models)
           setAiModels(models)
@@ -176,7 +201,7 @@ export function SettingsPanel ({ open, onOpenChange }) {
                 <div className='col-span-3'>
                   <Select
                     value={settings.aiSetting.model}
-                    onValueChange={(val) => handleChange('aiModel', val)}
+                    onValueChange={val => handleChange('aiModel', val)}
                   >
                     <SelectTrigger className='w-full'>
                       <SelectValue placeholder='选择AI模型' />
@@ -189,7 +214,9 @@ export function SettingsPanel ({ open, onOpenChange }) {
                             <div className='flex items-center gap-2'>
                               <Cpu className='w-4 h-4 text-blue-400' />
                               <span>自定义模型</span>
-                              <span className='text-xs text-blue-400 ml-1'>- 按token计费</span>
+                              <span className='text-xs text-blue-400 ml-1'>
+                                - 按token计费
+                              </span>
                             </div>
                           </div>
                           {customModels.map(model => (
@@ -200,7 +227,9 @@ export function SettingsPanel ({ open, onOpenChange }) {
                                     src={model.icon}
                                     alt=''
                                     className='w-5 h-5 object-contain'
-                                    onError={(e) => (e.target.style.display = 'none')}
+                                    onError={e =>
+                                      (e.target.style.display = 'none')
+                                    }
                                   />
                                 )}
                                 <span>{model.label}</span>
@@ -230,14 +259,18 @@ export function SettingsPanel ({ open, onOpenChange }) {
                                     src={model.icon}
                                     alt=''
                                     className='w-5 h-5 object-contain'
-                                    onError={(e) => (e.target.style.display = 'none')}
+                                    onError={e =>
+                                      (e.target.style.display = 'none')
+                                    }
                                   />
                                 )}
                                 <div className='flex items-center gap-1'>
                                   <span>{model.label}</span>
                                   <div className='flex items-center gap-1 ml-2'>
                                     <Coins className='w-4 h-4 text-violet-400' />
-                                    <span className='text-sm text-violet-400'>{model.cost}点</span>
+                                    <span className='text-sm text-violet-400'>
+                                      {model.cost}点
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -255,50 +288,56 @@ export function SettingsPanel ({ open, onOpenChange }) {
             <div className='col-span-4'>
               <Separator className='my-4' />
             </div>
-                         <div className='col-span-1 flex items-center'>
-               <Label htmlFor='bark-enabled'>Bark推送</Label>
-               <Tooltip>
-                 <TooltipTrigger asChild>
-                   <span className='text-muted-foreground cursor-help ml-auto'>
-                     <Info className='w-4 h-4' />
-                   </span>
-                 </TooltipTrigger>
-                 <TooltipContent side='top' className='max-w-[300px]'>
-                   配置Bark推送服务，用于发送任务提醒到iOS设备。
-                 </TooltipContent>
-               </Tooltip>
-             </div>
-             <div className='col-span-3 flex items-center justify-between'>
-               <Switch
-                 id='bark-enabled'
-                 checked={barkSettings.enabled}
-                 onCheckedChange={(val) => handleBarkChange('enabled', val)}
-               />
-               <div className='flex items-center gap-2'>
-                 {testResult && (
-                   <div className={`flex items-center gap-1 text-xs ${
-                     testResult.success ? 'text-green-600' : 'text-red-600'
-                   }`}>
-                     {testResult.success ? (
-                       <CheckCircle className='w-3 h-3' />
-                     ) : (
-                       <XCircle className='w-3 h-3' />
-                     )}
-                     <span>{testResult.success ? '成功' : '失败'}</span>
-                   </div>
-                 )}
-                 <Button
-                   onClick={handleTestBark}
-                   disabled={!barkSettings.enabled || !barkSettings.token || testing}
-                   variant='outline'
-                   size='xs'
-                   className='h-6 text-xs px-2'
-                 >
-                   <Send className='w-3 h-3 mr-1' />
-                   {testing ? '测试中' : '测试'}
-                 </Button>
-               </div>
-             </div>
+            <div className='col-span-1 flex items-center'>
+              <Label htmlFor='bark-enabled'>Bark推送</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className='text-muted-foreground cursor-help ml-auto'>
+                    <Info className='w-4 h-4' />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side='top' className='max-w-[300px]'>
+                  配置Bark推送服务，用于发送任务提醒到iOS设备。
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <div className='col-span-3 flex items-center justify-between'>
+              <Switch
+                id='bark-enabled'
+                checked={barkSettings.enabled}
+                onCheckedChange={val => handleBarkChange('enabled', val)}
+              />
+              <div className='flex items-center gap-2'>
+                {testResult && (
+                  <div
+                    className={`flex items-center gap-1 text-xs ${
+                      testResult.success ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
+                    {testResult.success
+                      ? (
+                      <CheckCircle className='w-3 h-3' />
+                        )
+                      : (
+                      <XCircle className='w-3 h-3' />
+                        )}
+                    <span>{testResult.success ? '成功' : '失败'}</span>
+                  </div>
+                )}
+                <Button
+                  onClick={handleTestBark}
+                  disabled={
+                    !barkSettings.enabled || !barkSettings.token || testing
+                  }
+                  variant='outline'
+                  size='xs'
+                  className='h-6 text-xs px-2'
+                >
+                  <Send className='w-3 h-3 mr-1' />
+                  {testing ? '测试中' : '测试'}
+                </Button>
+              </div>
+            </div>
 
             <div className='col-span-1'>
               <Label htmlFor='bark-api-url'>API地址</Label>
@@ -309,7 +348,7 @@ export function SettingsPanel ({ open, onOpenChange }) {
                 type='url'
                 placeholder='https://api.day.app'
                 value={barkSettings.apiUrl}
-                onChange={(e) => handleBarkChange('apiUrl', e.target.value)}
+                onChange={e => handleBarkChange('apiUrl', e.target.value)}
                 disabled={!barkSettings.enabled}
               />
             </div>
@@ -323,12 +362,10 @@ export function SettingsPanel ({ open, onOpenChange }) {
                 type='text'
                 placeholder='输入您的Bark Token'
                 value={barkSettings.token}
-                onChange={(e) => handleBarkChange('token', e.target.value)}
+                onChange={e => handleBarkChange('token', e.target.value)}
                 disabled={!barkSettings.enabled}
               />
             </div>
-
-            
           </div>
         </div>
       </DialogContent>

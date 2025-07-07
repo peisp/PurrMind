@@ -4,7 +4,7 @@ import { TodoEditSheet } from './editCard/TodoEditSheet'
 import { CalendarView } from './CalendarView'
 import { TimelineView } from './TimelineView'
 
-export function TodoList ({
+export function TodoList({
   todos,
   onUpdate,
   onDelete,
@@ -27,7 +27,7 @@ export function TodoList ({
     }
   }, [])
 
-  const handleStorageChange = (e) => {
+  const handleStorageChange = e => {
     if (e.key === 'categories') {
       loadCategories()
     }
@@ -42,12 +42,12 @@ export function TodoList ({
     setCategories(allCategories)
   }
 
-  const handleEdit = (todo) => {
+  const handleEdit = todo => {
     setEditingId(todo.id)
     setIsSheetOpen(true)
   }
 
-  const handleSave = (updates) => {
+  const handleSave = updates => {
     onUpdate(editingId, updates)
     setEditingId(null)
     setIsSheetOpen(false)
@@ -63,7 +63,7 @@ export function TodoList ({
     onUpdate(todo.id, { ...todo, starred: !todo.starred })
   }
 
-  const getCategoryName = (categoryId) => {
+  const getCategoryName = categoryId => {
     if (!categoryId) return '无分类'
     const category = categories.find(cat => cat.id === categoryId)
     return category ? category.name : '未知分类'
@@ -71,8 +71,8 @@ export function TodoList ({
 
   if (todos.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <p className="text-muted-foreground">暂无待办事项</p>
+      <div className='flex h-full items-center justify-center'>
+        <p className='text-muted-foreground'>暂无待办事项</p>
       </div>
     )
   }

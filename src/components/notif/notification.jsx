@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react'
 import { barkService } from '@/services/bark'
 
-export function Notification ({ todos }) {
+export function Notification({ todos }) {
   const checkInterval = useRef(null)
   const notifiedTodos = useRef(new Set())
 
   // 发送通知的统一方法
-  const sendNotification = async (todo) => {
+  const sendNotification = async todo => {
     const title = todo.title
     const content = todo.description || '该任务需要您的关注'
 

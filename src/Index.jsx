@@ -5,7 +5,7 @@ import { MainContent } from '@/components/main/MainContent.jsx'
 import { useState, useEffect } from 'react'
 import { useTodoManagement } from '@/hooks/useTodoManagement.js'
 
-export function Index ({ enterAction }) {
+export function Index({ enterAction }) {
   const [viewMode, setViewMode] = useState('timeline')
   const [isDev, setIsDev] = useState(false)
 

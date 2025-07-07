@@ -9,24 +9,24 @@ export default function App() {
   useEffect(() => {
     // 监听系统颜色偏好
     const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    const handleSystemThemeChange = (e) => {
+    const handleSystemThemeChange = e => {
       setIsDarkMode(e.matches)
       updateThemeClass(e.matches)
     }
-    
+
     // 初始设置
     setIsDarkMode(darkModeMediaQuery.matches)
     updateThemeClass(darkModeMediaQuery.matches)
-    
+
     // 监听变化
     darkModeMediaQuery.addEventListener('change', handleSystemThemeChange)
 
     // uTools插件生命周期
-    window.utools.onPluginEnter((action) => {
+    window.utools.onPluginEnter(action => {
       setRoute(action.code)
       setEnterAction(action)
     })
-    window.utools.onPluginOut((isKill) => {
+    window.utools.onPluginOut(isKill => {
       setRoute('')
     })
 
@@ -35,7 +35,7 @@ export default function App() {
     }
   }, [])
 
-  const updateThemeClass = (darkMode) => {
+  const updateThemeClass = darkMode => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
     } else {

@@ -8,17 +8,17 @@ import {
 import { cn } from '@/lib/utils.js'
 import * as Icons from 'lucide-react'
 
-export function CategorySelector ({
+export function CategorySelector({
   value,
   onChange,
   categories = [],
   className
 }) {
-  const getIconComponent = (iconName) => {
+  const getIconComponent = iconName => {
     return Icons[iconName] || Icons.FolderIcon
   }
 
-  const getColorClass = (color) => {
+  const getColorClass = color => {
     switch (color) {
       case 'red':
         return 'text-red-500'
@@ -63,7 +63,9 @@ export function CategorySelector ({
       <label className='text-sm font-medium'>列表</label>
       <Select
         value={value || 'none'}
-        onValueChange={(newValue) => onChange(newValue === 'none' ? null : newValue)}
+        onValueChange={newValue =>
+          onChange(newValue === 'none' ? null : newValue)
+        }
       >
         <SelectTrigger className='data-[state=open]:ring-0 data-[state=open]:ring-offset-0 data-[state=closed]:ring-0 data-[state=closed]:ring-offset-0 ring-0 ring-offset-0'>
           <SelectValue placeholder='选择列表'>
@@ -73,10 +75,8 @@ export function CategorySelector ({
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value='none'>
-            {renderNoneItem()}
-          </SelectItem>
-          {categories.map((category) => (
+          <SelectItem value='none'>{renderNoneItem()}</SelectItem>
+          {categories.map(category => (
             <SelectItem key={category.id} value={category.id}>
               {renderCategoryItem(category)}
             </SelectItem>

@@ -19,7 +19,7 @@ export const getAllTodos = () => {
 }
 
 // 添加待办事项
-export const addTodo = (todo) => {
+export const addTodo = todo => {
   const todos = getAllTodos()
   const newTodo = {
     id: Date.now().toString(),
@@ -55,14 +55,14 @@ export const updateTodo = (id, updates) => {
 }
 
 // 删除待办事项
-export const deleteTodo = (id) => {
+export const deleteTodo = id => {
   const todos = getAllTodos()
   const filteredTodos = todos.filter(todo => todo.id !== id)
   db.set(TODO_DB_NAME, filteredTodos)
 }
 
 // 切换待办事项状态
-export const toggleTodoStatus = (id) => {
+export const toggleTodoStatus = id => {
   const todos = getAllTodos()
   const index = todos.findIndex(todo => todo.id === id)
   if (index !== -1) {
@@ -85,13 +85,13 @@ export const getAllCategories = () => {
 }
 
 // 添加分类
-export const addCategory = (category) => {
+export const addCategory = category => {
   const categories = getAllCategories()
   const newCategory = {
     id: Date.now().toString(),
     name: category.name,
     icon: category.icon,
-    color: category.color || "default",
+    color: category.color || 'default',
     createdAt: new Date().toISOString()
   }
   categories.push(newCategory)
@@ -100,13 +100,13 @@ export const addCategory = (category) => {
 }
 
 // 按分类获取待办事项
-export const getTodosByCategory = (categoryId) => {
+export const getTodosByCategory = categoryId => {
   const todos = getAllTodos()
   return todos.filter(todo => todo.categoryId === categoryId)
 }
 
 // 删除分类
-export const deleteCategory = (categoryId) => {
+export const deleteCategory = categoryId => {
   // 删除分类
   const categories = getAllCategories()
   const filteredCategories = categories.filter(cat => cat.id !== categoryId)
@@ -121,4 +121,4 @@ export const deleteCategory = (categoryId) => {
     return todo
   })
   db.set(TODO_DB_NAME, updatedTodos)
-} 
+}

@@ -1,7 +1,11 @@
 import { format, getWeek, startOfMonth } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 
 // 日期显示部分
 export function CalendarDateDisplay({ currentDate, currentView }) {
@@ -14,7 +18,7 @@ export function CalendarDateDisplay({ currentDate, currentView }) {
   }
 
   return (
-    <span className="text-lg font-medium">
+    <span className='text-lg font-medium'>
       {currentView === 'week'
         ? `${format(currentDate, 'yyyy年MM月')} 第${getWeekOfMonth()}周`
         : format(currentDate, 'yyyy年MM月')}
@@ -31,16 +35,16 @@ export function CalendarControls({
   onToday
 }) {
   return (
-    <div className="flex items-center space-x-2">
-      <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
+    <div className='flex items-center space-x-2'>
+      <span className='px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800'>
         Beta
       </span>
-      <div className="flex border rounded-md">
+      <div className='flex border rounded-md'>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant={currentView === 'week' ? 'default' : 'ghost'}
-              className="rounded-r-none"
+              className='rounded-r-none'
               onClick={() => onViewChange('week')}
             >
               周
@@ -53,7 +57,7 @@ export function CalendarControls({
           <TooltipTrigger asChild>
             <Button
               variant={currentView === 'month' ? 'default' : 'ghost'}
-              className="rounded-l-none border-l"
+              className='rounded-l-none border-l'
               onClick={() => onViewChange('month')}
             >
               月
@@ -65,24 +69,28 @@ export function CalendarControls({
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" onClick={onPrevMonth}>
+          <Button variant='ghost' size='icon' onClick={onPrevMonth}>
             <ChevronLeft />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{currentView === 'week' ? '上一周' : '上个月'}</TooltipContent>
+        <TooltipContent>
+          {currentView === 'week' ? '上一周' : '上个月'}
+        </TooltipContent>
       </Tooltip>
 
-      <Button variant="ghost" onClick={onToday}>
+      <Button variant='ghost' onClick={onToday}>
         今天
       </Button>
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" onClick={onNextMonth}>
-            <ChevronRight/>
+          <Button variant='ghost' size='icon' onClick={onNextMonth}>
+            <ChevronRight />
           </Button>
         </TooltipTrigger>
-        <TooltipContent>{currentView === 'week' ? '下一周' : '下个月'}</TooltipContent>
+        <TooltipContent>
+          {currentView === 'week' ? '下一周' : '下个月'}
+        </TooltipContent>
       </Tooltip>
     </div>
   )
