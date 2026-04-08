@@ -13,7 +13,8 @@ import {
   CheckCircle,
   XCircle,
   Cpu,
-  Coins
+  Coins,
+  Download
 } from 'lucide-react'
 import {
   Select,
@@ -32,6 +33,7 @@ import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { barkService } from '@/services/bark'
+import { getAllTodos, getAllCategories } from '@/db/todo'
 
 export function SettingsPanel({ open, onOpenChange }) {
   const [settings, setSettings] = useState({
@@ -112,6 +114,67 @@ export function SettingsPanel({ open, onOpenChange }) {
     barkService.saveSettings(newBarkSettings)
     // 清除上次的测试结果
     setTestResult(null)
+  }
+
+  const handleExportMarkdown = () => {
+    const todos = getAllTodos()
+    const categories = getAllCategories()
+    const categoryMap = Object.fromEntries(categories.map(c => [c.id, c.name]))
+
+    const formatDate = dateStr => {
+      if (!dateStr) return null
+      const d = new Date(dateStr)
+      return d.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    }
+
+    const pendingTodos = todos.filter(t => !t.completed)
+    const completedTodos = todos.filter(t => t.completed)
+
+    const renderTodo = todo => {
+      const checkbox = todo.completed ? '[x]' : '[ ]'
+      let line = `- ${checkbox} **${todo.title}**`
+      const meta = []
+      if (todo.dueDate) meta.push(`截止: ${formatDate(todo.dueDate)}`)
+      if (todo.reminderTime) meta.push(`提醒: ${formatDate(todo.reminderTime)}`)
+      if (todo.categoryId && categoryMap[todo.categoryId]) { meta.push(`分类: ${categoryMap[todo.categoryId]}`) }
+      if (todo.starred) meta.push('⭐ 收藏')
+      if (meta.length > 0) line += `  (${meta.join(' | ')})`
+      if (todo.description) line += `\n  > ${todo.description}`
+      return line
+    }
+
+    let md = '# 喵咚咚 - 待办事项导出\n\n'
+    md += `> 导出时间: ${formatDate(new Date().toISOString())}\n\n`
+
+    if (pendingTodos.length > 0) {
+      md += `## 待办 (${pendingTodos.length})\n\n`
+      md += pendingTodos.map(renderTodo).join('\n\n') + '\n\n'
+    }
+
+    if (completedTodos.length > 0) {
+      md += `## 已完成 (${completedTodos.length})\n\n`
+      md += completedTodos.map(renderTodo).join('\n\n') + '\n\n'
+    }
+
+    if (todos.length === 0) {
+      md += '暂无待办事项。\n'
+    }
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `purrmind-export-${new Date().toISOString().slice(0, 10)}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   const handleTestBark = async () => {
@@ -365,6 +428,25 @@ export function SettingsPanel({ open, onOpenChange }) {
                 onChange={e => handleBarkChange('token', e.target.value)}
                 disabled={!barkSettings.enabled}
               />
+            </div>
+
+            {/* 数据导出 */}
+            <div className='col-span-4'>
+              <Separator className='my-4' />
+            </div>
+            <div className='col-span-1 flex items-center'>
+              <Label>数据导出</Label>
+            </div>
+            <div className='col-span-3'>
+              <Button
+                onClick={handleExportMarkdown}
+                variant='outline'
+                size='sm'
+                className='gap-2'
+              >
+                <Download className='w-4 h-4' />
+                导出为 Markdown
+              </Button>
             </div>
           </div>
         </div>
