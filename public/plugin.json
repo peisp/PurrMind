@@ -2,6 +2,7 @@
   "pluginName": "喵咚咚",
   "description": "喵咚咚是一款待办事项提醒APP，集任务清单管理、日程提醒、todolist于一体。由萌宠猫咪“咚咚”贴心提醒，帮你高效规划时间，提升专注力，打造高效生活必备的时间管理工具！",
   "main": "index.html",
+  "preload": "preload/services.js",
   "logo": "logo.png",
   "author": "🍉",
   "development": {
@@ -28,5 +29,226 @@
         }
       ]
     }
-  ]
+  ],
+  "tools": {
+    "query_todos": {
+      "description": "查询待办事项列表，支持按时间范围、分类、完成状态筛选",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["all", "completed", "pending"],
+            "description": "完成状态筛选：all-全部, completed-已完成, pending-未完成"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "按分类ID筛选"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "截止日期范围起始，ISO 8601 格式，如 2025-05-01T00:00:00.000Z"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "截止日期范围结束，ISO 8601 格式，如 2025-05-31T23:59:59.000Z"
+          }
+        }
+      }
+    },
+    "add_todo": {
+      "description": "添加一条新的待办事项",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "待办事项标题"
+          },
+          "description": {
+            "type": "string",
+            "description": "待办事项描述"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "截止日期，ISO 8601 格式"
+          },
+          "reminderTime": {
+            "type": "string",
+            "description": "提醒时间，ISO 8601 格式"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "分类ID"
+          },
+          "starred": {
+            "type": "boolean",
+            "description": "是否收藏"
+          }
+        },
+        "required": ["title"]
+      }
+    },
+    "update_todo": {
+      "description": "更新一条待办事项的信息（标题、描述、截止日期、提醒时间、分类、收藏状态等）",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "待办事项ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "新标题"
+          },
+          "description": {
+            "type": "string",
+            "description": "新描述"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "新截止日期，ISO 8601 格式"
+          },
+          "reminderTime": {
+            "type": "string",
+            "description": "新提醒时间，ISO 8601 格式"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "新分类ID"
+          },
+          "starred": {
+            "type": "boolean",
+            "description": "是否收藏"
+          },
+          "completed": {
+            "type": "boolean",
+            "description": "是否已完成"
+          }
+        },
+        "required": ["id"]
+      }
+    },
+    "delete_todo": {
+      "description": "删除一条待办事项",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "待办事项ID"
+          }
+        },
+        "required": ["id"]
+      }
+    },
+    "toggle_todo_status": {
+      "description": "切换待办事项的完成/未完成状态",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "待办事项ID"
+          }
+        },
+        "required": ["id"]
+      }
+    },
+    "query_categories": {
+      "description": "查询所有待办分类（列表）",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      }
+    },
+    "add_category": {
+      "description": "添加一个新的待办分类（列表）",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "分类名称"
+          },
+          "icon": {
+            "type": "string",
+            "description": "图标名称，来自 lucide-react，如 FolderIcon、HomeIcon、BriefcaseIcon 等"
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "default",
+              "red",
+              "orange",
+              "yellow",
+              "green",
+              "blue",
+              "purple",
+              "pink"
+            ],
+            "description": "图标颜色"
+          }
+        },
+        "required": ["name"]
+      }
+    },
+    "update_category": {
+      "description": "更新一个待办分类（列表）的名称、图标或颜色",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "分类ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "新名称"
+          },
+          "icon": {
+            "type": "string",
+            "description": "新图标名称"
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "default",
+              "red",
+              "orange",
+              "yellow",
+              "green",
+              "blue",
+              "purple",
+              "pink"
+            ],
+            "description": "新颜色"
+          }
+        },
+        "required": ["id"]
+      }
+    },
+    "delete_category": {
+      "description": "删除一个待办分类（列表），该分类下的待办事项将变为未分类",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "分类ID"
+          }
+        },
+        "required": ["id"]
+      }
+    }
+  }
 }
