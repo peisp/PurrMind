@@ -7,7 +7,8 @@ import {
   FolderIcon,
   StarOff,
   Trash2,
-  MoreVertical
+  MoreVertical,
+  Pencil
 } from 'lucide-react'
 
 import {
@@ -35,6 +36,7 @@ import {
   getTodosByCategory,
   deleteCategory,
   addCategory,
+  updateCategory,
   getAllTodos
 } from '@/db/todo'
 import {
@@ -58,6 +60,7 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
     icon: 'FolderIcon',
     color: 'default'
   })
+  const [editingCategory, setEditingCategory] = useState(null)
   const [hoveredItem, setHoveredItem] = useState(null)
   const [openDropdownId, setOpenDropdownId] = useState(null)
 
@@ -76,7 +79,7 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
 
   // 外部事件监听 - 分离事件监听逻辑
   useEffect(() => {
-    const handleStorageChange = (e) => {
+    const handleStorageChange = e => {
       if (e.key === 'todos' || e.key === 'categories') {
         loadData()
       }
@@ -95,22 +98,54 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
     }
   }, [loadData])
 
-  const handleAddCategory = useCallback(() => {
-    if (newCategoryName.trim()) {
+  const handleOpenCreate = useCallback(() => {
+    setEditingCategory(null)
+    setNewCategoryName('')
+    setSelectedIcon({ icon: 'FolderIcon', color: 'default' })
+    setIsDialogOpen(true)
+  }, [])
+
+  const handleOpenEdit = useCallback((category, e) => {
+    if (e) {
+      e.stopPropagation()
+      e.preventDefault()
+    }
+    setEditingCategory(category)
+    setNewCategoryName(category.name)
+    setSelectedIcon({ icon: category.icon, color: category.color || 'default' })
+    setOpenDropdownId(null)
+    setIsDialogOpen(true)
+  }, [])
+
+  const handleSaveCategory = useCallback(() => {
+    if (!newCategoryName.trim()) return
+
+    if (editingCategory) {
+      const updated = updateCategory(editingCategory.id, {
+        name: newCategoryName,
+        icon: selectedIcon.icon,
+        color: selectedIcon.color
+      })
+      if (updated) {
+        setCategories(prev =>
+          prev.map(cat => (cat.id === updated.id ? updated : cat))
+        )
+      }
+    } else {
       const newCategory = addCategory({
         name: newCategoryName,
         icon: selectedIcon.icon,
         color: selectedIcon.color
       })
-
-      // 直接更新状态而不是重新加载全部数据
       setCategories(prev => [...prev, newCategory])
-      setNewCategoryName('')
-      setSelectedIcon({ icon: 'FolderIcon', color: 'default' })
-      setIsDialogOpen(false)
-      window.dispatchEvent(new Event('todo-updated'))
     }
-  }, [newCategoryName, selectedIcon])
+
+    setNewCategoryName('')
+    setSelectedIcon({ icon: 'FolderIcon', color: 'default' })
+    setEditingCategory(null)
+    setIsDialogOpen(false)
+    window.dispatchEvent(new Event('todo-updated'))
+  }, [newCategoryName, selectedIcon, editingCategory])
 
   const handleDeleteCategory = useCallback((id, e) => {
     if (e) {
@@ -137,12 +172,15 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
     return countMap
   }, [todos])
 
-  const getCategoryCount = useCallback((categoryId) => {
-    const count = categoryCountMap.get(categoryId) || 0
-    return count > 99 ? '99+' : count
-  }, [categoryCountMap])
+  const getCategoryCount = useCallback(
+    categoryId => {
+      const count = categoryCountMap.get(categoryId) || 0
+      return count > 99 ? '99+' : count
+    },
+    [categoryCountMap]
+  )
 
-  const getColorClass = useCallback((color) => {
+  const getColorClass = useCallback(color => {
     switch (color) {
       case 'red':
         return 'text-red-500'
@@ -161,20 +199,23 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
     }
   }, [])
 
-  const getIconComponent = useCallback((iconName) => {
+  const getIconComponent = useCallback(iconName => {
     return Icons[iconName] || FolderIcon
   }, [])
 
-  const handleDropdownOpenChange = useCallback((open, categoryId) => {
-    if (!open) {
-      setOpenDropdownId(null)
-      if (hoveredItem !== categoryId) {
-        setHoveredItem(null)
+  const handleDropdownOpenChange = useCallback(
+    (open, categoryId) => {
+      if (!open) {
+        setOpenDropdownId(null)
+        if (hoveredItem !== categoryId) {
+          setHoveredItem(null)
+        }
+      } else {
+        setOpenDropdownId(categoryId)
       }
-    } else {
-      setOpenDropdownId(categoryId)
-    }
-  }, [hoveredItem])
+    },
+    [hoveredItem]
+  )
 
   return (
     <SidebarGroup className='group-data-[collapsible=icon]:hidden'>
@@ -184,7 +225,7 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
           variant='ghost'
           size='icon'
           className='h-8'
-          onClick={() => setIsDialogOpen(true)}
+          onClick={handleOpenCreate}
         >
           <Plus />
         </Button>
@@ -273,9 +314,17 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
                           onClick={e => e.stopPropagation()}
                         >
                           <DropdownMenuItem
+                            onClick={e => handleOpenEdit(category, e)}
+                          >
+                            <Pencil className='h-4 w-4 mr-2' />
+                            编辑
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
                             className='text-destructive'
                             onClick={e => handleDeleteCategory(category.id, e)}
                           >
+                            <Trash2 className='h-4 w-4 mr-2' />
                             删除
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -292,7 +341,9 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>新建列表</DialogTitle>
+            <DialogTitle>
+              {editingCategory ? '编辑列表' : '新建列表'}
+            </DialogTitle>
           </DialogHeader>
           <div className='space-y-4 py-4'>
             <div className='space-y-2'>
@@ -313,7 +364,9 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
             <Button variant='outline' onClick={() => setIsDialogOpen(false)}>
               取消
             </Button>
-            <Button onClick={handleAddCategory}>添加</Button>
+            <Button onClick={handleSaveCategory}>
+              {editingCategory ? '保存' : '添加'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

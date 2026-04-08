@@ -99,6 +99,18 @@ export const addCategory = category => {
   return newCategory
 }
 
+// 更新分类
+export const updateCategory = (id, updates) => {
+  const categories = getAllCategories()
+  const index = categories.findIndex(cat => cat.id === id)
+  if (index !== -1) {
+    categories[index] = { ...categories[index], ...updates }
+    db.set(CATEGORIES_DB_NAME, categories)
+    return categories[index]
+  }
+  return null
+}
+
 // 按分类获取待办事项
 export const getTodosByCategory = categoryId => {
   const todos = getAllTodos()
