@@ -15,7 +15,9 @@
       "Bash(npm -v)",
       "Bash(pnpm add:*)",
       "Bash(npx eslint:*)",
-      "Bash(npx update-browserslist-db@latest:*)"
+      "Bash(npx update-browserslist-db@latest:*)",
+      "Bash(pnpm list:*)",
+      "Bash(pnpm up:*)"
     ]
   }
 }
