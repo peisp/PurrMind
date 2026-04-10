@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm build:*)",
+      "Bash(curl -s https://support.apple.com/en-us/guide/reminders/welcome/mac)",
+      "WebSearch",
+      "WebFetch(domain:support.apple.com)",
+      "WebFetch(domain:support.microsoft.com)",
+      "WebFetch(domain:support.google.com)",
+      "WebFetch(domain:www.todoist.com)",
+      "WebFetch(domain:help.ticktick.com)",
+      "WebFetch(domain:www.androidcentral.com)",
+      "Bash(pnpm lint:*)",
+      "Bash(npm install:*)",
+      "Bash(npm -v)",
+      "Bash(pnpm add:*)",
+      "Bash(npx eslint:*)"
+    ]
+  }
+}

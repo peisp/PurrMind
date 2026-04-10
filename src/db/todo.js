@@ -31,7 +31,8 @@ export const addTodo = todo => {
     categoryId: todo.categoryId || null,
     dueDate: todo.dueDate || null,
     reminderTime: todo.reminderTime || null,
-    starred: todo.starred || false
+    starred: todo.starred || false,
+    recurrence: todo.recurrence || null
   }
   todos.push(newTodo)
   db.set(TODO_DB_NAME, todos)

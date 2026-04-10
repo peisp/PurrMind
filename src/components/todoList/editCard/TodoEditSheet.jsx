@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils.js'
 import { TimeSelector } from './TimeSelector.jsx'
 import { CategorySelector } from './CategorySelector.jsx'
 import { ReminderTimeSelector } from './ReminderTimeSelector.jsx'
+import { RecurrenceSelector } from './RecurrenceSelector.jsx'
 
 const LimitedInput = ({
   value,
@@ -76,7 +77,8 @@ export function TodoEditSheet({
     description: '',
     categoryId: '',
     dueDate: null,
-    reminderTime: null
+    reminderTime: null,
+    recurrence: null
   })
 
   const [timeValidationError, setTimeValidationError] = useState('')
@@ -89,7 +91,8 @@ export function TodoEditSheet({
         description: todo.description || '',
         categoryId: todo.categoryId || '',
         dueDate: todo.dueDate ? new Date(todo.dueDate) : null,
-        reminderTime: todo.reminderTime ? new Date(todo.reminderTime) : null
+        reminderTime: todo.reminderTime ? new Date(todo.reminderTime) : null,
+        recurrence: todo.recurrence || null
       })
     }
   }, [todo])
@@ -104,42 +107,64 @@ export function TodoEditSheet({
     }
   }, [categories, editForm.categoryId])
 
-  // 时间校验 - 使用useMemo优化校验逻辑
+  // 时间校验 - 仅非循环任务需要
   useEffect(() => {
     let error = ''
-    if (editForm.dueDate && editForm.reminderTime) {
+    if (!editForm.recurrence && editForm.dueDate && editForm.reminderTime) {
       if (editForm.reminderTime >= editForm.dueDate) {
         error = '提醒时间必须在截止时间之前'
       }
     }
     setTimeValidationError(error)
-  }, [editForm.dueDate, editForm.reminderTime])
+  }, [editForm.dueDate, editForm.reminderTime, editForm.recurrence])
+
+  const isRecurring = !!editForm.recurrence
 
   const handleSave = () => {
-    // 如果有时间校验错误，不允许保存
-    if (timeValidationError) {
-      return
-    }
+    if (timeValidationError) return
 
-    let dueDate = editForm.dueDate
-    if (dueDate) {
-      const hours = dueDate.getHours()
-      const minutes = dueDate.getMinutes()
-      if (hours === 0 && minutes === 0) {
-        dueDate = new Date(dueDate)
-        dueDate.setHours(9, 0, 0, 0)
+    if (isRecurring) {
+      // 循环任务：不需要 dueDate，reminderTime 由 RecurrenceSelector 计算
+      onSave({
+        ...editForm,
+        dueDate: null,
+        reminderTime: editForm.reminderTime?.toISOString() || null,
+        recurrence: editForm.recurrence
+      })
+    } else {
+      // 非循环任务：正常处理
+      let dueDate = editForm.dueDate
+      if (dueDate) {
+        const hours = dueDate.getHours()
+        const minutes = dueDate.getMinutes()
+        if (hours === 0 && minutes === 0) {
+          dueDate = new Date(dueDate)
+          dueDate.setHours(9, 0, 0, 0)
+        }
       }
-    }
 
-    onSave({
-      ...editForm,
-      dueDate: dueDate?.toISOString(),
-      reminderTime: editForm.reminderTime?.toISOString()
-    })
+      onSave({
+        ...editForm,
+        dueDate: dueDate?.toISOString() || null,
+        reminderTime: editForm.reminderTime?.toISOString() || null,
+        recurrence: null
+      })
+    }
   }
 
   const updateFormField = (field, value) => {
     setEditForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  // RecurrenceSelector 同时返回 recurrence 和 reminderTime
+  const handleRecurrenceChange = ({ recurrence, reminderTime }) => {
+    setEditForm(prev => ({
+      ...prev,
+      recurrence,
+      reminderTime,
+      // 开启循环时清掉 dueDate
+      ...(recurrence ? { dueDate: null } : {})
+    }))
   }
 
   return (
@@ -178,21 +203,31 @@ export function TodoEditSheet({
             categories={categories}
           />
 
-          {/* 截止时间选择器 */}
-          <TimeSelector
-            label='截止时间'
-            value={editForm.dueDate}
-            onChange={value => updateFormField('dueDate', value)}
-            placeholder='选择截止日期'
+          {/* 循环重复选择器（统一入口） */}
+          <RecurrenceSelector
+            value={editForm.recurrence}
+            reminderTime={editForm.reminderTime}
+            onChange={handleRecurrenceChange}
           />
 
-          {/* 提醒时间选择器 */}
-          <ReminderTimeSelector
-            value={editForm.reminderTime}
-            onChange={value => updateFormField('reminderTime', value)}
-            dueDate={editForm.dueDate}
-            validationError={timeValidationError}
-          />
+          {/* 非循环任务：显示截止时间 + 提醒时间 */}
+          {!isRecurring && (
+            <>
+              <TimeSelector
+                label='截止时间'
+                value={editForm.dueDate}
+                onChange={value => updateFormField('dueDate', value)}
+                placeholder='选择截止日期'
+              />
+
+              <ReminderTimeSelector
+                value={editForm.reminderTime}
+                onChange={value => updateFormField('reminderTime', value)}
+                dueDate={editForm.dueDate}
+                validationError={timeValidationError}
+              />
+            </>
+          )}
         </div>
 
         <SheetFooter className='flex items-center justify-between pt-2 mt-2'>

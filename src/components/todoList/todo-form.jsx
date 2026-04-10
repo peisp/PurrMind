@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { AlertCircle, Plus, Sparkles, Cpu, Coins } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
@@ -85,7 +85,8 @@ export function TodoForm({
           title: task.title,
           description: task.description,
           dueDate: task.dueDate,
-          reminderTime: task.reminderTime
+          reminderTime: task.reminderTime,
+          recurrence: task.recurrence || null
         }
         onAdd(todoNew)
       })

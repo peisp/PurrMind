@@ -1,6 +1,9 @@
 module.exports = {
   extends: ['standard'],
+  plugins: ['react'],
   rules: {
+    'react/jsx-uses-vars': 'error',
+    'react/jsx-uses-react': 'error',
     'jsx-quotes': ['error', 'prefer-single'], // 要求在 JSX 中使用单引号
     'space-before-function-paren': ['error', {
       anonymous: 'never',
@@ -19,5 +22,10 @@ module.exports = {
   env: {
     browser: true,
     es2021: true
+  },
+  settings: {
+    react: {
+      version: 'detect'
+    }
   }
 }

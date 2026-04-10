@@ -6,12 +6,14 @@ import {
   Calendar,
   FileText,
   AlarmClock,
-  CircleCheckBig
+  CircleCheckBig,
+  Repeat
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import * as Icons from 'lucide-react'
+import { getRecurrenceLabel } from '@/lib/recurrence'
 
 export function TodoCard({
   todo,
@@ -164,6 +166,13 @@ export function TodoCard({
               >
                 <AlarmClock className='h-3.5 w-3.5' />
                 <span>{formatDate(todo.reminderTime)}</span>
+              </div>
+            )}
+
+            {todo.recurrence && (
+              <div className='flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs'>
+                <Repeat className='h-3.5 w-3.5' />
+                <span>{getRecurrenceLabel(todo.recurrence)}</span>
               </div>
             )}
 

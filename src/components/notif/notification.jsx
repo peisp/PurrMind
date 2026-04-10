@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { barkService } from '@/services/bark'
+import { advanceRecurrence } from '@/lib/recurrence'
+import { updateTodo } from '@/db/todo'
 
 export function Notification({ todos }) {
   const checkInterval = useRef(null)
@@ -54,7 +56,17 @@ export function Notification({ todos }) {
           // 如果提醒时间在当前时间的前后1分钟内
           if (Math.abs(reminderTime - now) <= 60000) {
             sendNotification(todo)
-            notifiedTodos.current.add(todo.id)
+
+            // 循环任务：推进 reminderTime 到下一个周期，这样下次还能触发
+            if (todo.recurrence) {
+              const nextDates = advanceRecurrence(todo)
+              if (nextDates) {
+                updateTodo(todo.id, nextDates)
+                window.dispatchEvent(new Event('todo-updated'))
+              }
+            } else {
+              notifiedTodos.current.add(todo.id)
+            }
           }
         }
       })
