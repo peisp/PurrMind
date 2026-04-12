@@ -136,27 +136,38 @@ if (window.utools.registerTool) {
       todos = todos.filter((t) => t.dueDate && new Date(t.dueDate).getTime() <= end)
     }
 
-    return todos.map((t) => ({
+    const result = todos.map((t) => ({
       ...t,
       categoryName: t.categoryId ? categoryMap[t.categoryId] || null : null
-    }))
+    })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    return { total: result.length, todos: result }
   })
+
+  // 写操作后通知并刷新页面
+  const notifyAndRefresh = (message) => {
+    window.utools.showNotification(message)
+    window.dispatchEvent(new Event('todo-updated'))
+  }
 
   // 添加待办事项
   window.utools.registerTool('add_todo', (params) => {
-    return addTodo(params)
+    const result = addTodo(params)
+    notifyAndRefresh(`已添加待办：${result.title}`)
+    return result
   })
 
   // 更新待办事项
   window.utools.registerTool('update_todo', ({ id, ...updates }) => {
     const result = updateTodo(id, updates)
     if (!result) return { error: `待办事项 ${id} 不存在` }
+    notifyAndRefresh(`已更新待办：${result.title}`)
     return result
   })
 
   // 删除待办事项
   window.utools.registerTool('delete_todo', ({ id }) => {
     deleteTodo(id)
+    notifyAndRefresh('已删除待办')
     return { success: true }
   })
 
@@ -164,29 +175,35 @@ if (window.utools.registerTool) {
   window.utools.registerTool('toggle_todo_status', ({ id }) => {
     const result = toggleTodoStatus(id)
     if (!result) return { error: `待办事项 ${id} 不存在` }
+    notifyAndRefresh(`${result.completed ? '已完成' : '已恢复'}：${result.title}`)
     return result
   })
 
   // 查询所有分类
   window.utools.registerTool('query_categories', () => {
-    return getAllCategories()
+    const categories = getAllCategories()
+    return { total: categories.length, categories }
   })
 
   // 添加分类
   window.utools.registerTool('add_category', (params) => {
-    return addCategory(params)
+    const result = addCategory(params)
+    notifyAndRefresh(`已添加分类：${result.name}`)
+    return result
   })
 
   // 更新分类
   window.utools.registerTool('update_category', ({ id, ...updates }) => {
     const result = updateCategory(id, updates)
     if (!result) return { error: `分类 ${id} 不存在` }
+    notifyAndRefresh(`已更新分类：${result.name}`)
     return result
   })
 
   // 删除分类
   window.utools.registerTool('delete_category', ({ id }) => {
     deleteCategory(id)
+    notifyAndRefresh('已删除分类')
     return { success: true }
   })
 }
