@@ -67,15 +67,60 @@ function getStickyNoteData(filter, categoryId) {
     }
   }
 
-  // 未完成的排前面，按创建时间倒序
-  const pending = todos.filter(t => !t.completed).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-  const completed = todos.filter(t => t.completed).sort((a, b) => new Date(b.completedAt || b.updatedAt) - new Date(a.completedAt || a.updatedAt))
+  // 排序逻辑与主界面 TimelineView 完全一致：
+  // 1. sortTodos 排序
+  // 2. 按天分组（取 dueDate || reminderTime || createdAt 的日期）
+  // 3. 天按倒序排列（最新的天在前）
+  // 4. 展平为最终列表
+  const sorted = [...todos].sort((a, b) => {
+    if (a.completedAt && !b.completedAt) return 1
+    if (!a.completedAt && b.completedAt) return -1
+
+    const isCompleted = !!a.completedAt && !!b.completedAt
+
+    if (!isCompleted) {
+      if (a.dueDate && b.dueDate) {
+        const dateCompare = new Date(a.dueDate) - new Date(b.dueDate)
+        if (dateCompare !== 0) return dateCompare
+      } else if (a.dueDate) return -1
+      else if (b.dueDate) return 1
+
+      if (a.reminderTime && b.reminderTime) {
+        const reminderCompare = new Date(a.reminderTime) - new Date(b.reminderTime)
+        if (reminderCompare !== 0) return reminderCompare
+      } else if (a.reminderTime) return -1
+      else if (b.reminderTime) return 1
+
+      return new Date(a.createdAt) - new Date(b.createdAt)
+    } else {
+      return new Date(b.completedAt) - new Date(a.completedAt)
+    }
+  })
+
+  // 按天分组再按天倒序展平（与 TimelineView.groupTodosByDay + days.sort 一致）
+  const getDay = (t) => {
+    const time = t.dueDate || t.reminderTime || t.createdAt
+    const d = new Date(time)
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+  }
+  const groups = {}
+  sorted.forEach(t => {
+    const day = getDay(t)
+    if (!groups[day]) groups[day] = []
+    groups[day].push(t)
+  })
+  const days = Object.keys(groups).sort((a, b) => new Date(b) - new Date(a))
+  const finalTodos = days.flatMap(day => groups[day])
+
+  const pendingCount = finalTodos.filter(t => !t.completedAt).length
+  const completedCount = finalTodos.filter(t => !!t.completedAt).length
 
   return {
     title,
-    todos: [...pending, ...completed],
-    pendingCount: pending.length,
-    completedCount: completed.length
+    todos: finalTodos,
+    pendingCount,
+    completedCount,
+    filter: categoryId ? 'category' : (filter || 'all')
   }
 }
 
@@ -89,6 +134,11 @@ ipcRenderer.on('sticky-init', (event, params) => {
   currentFilter = params.filter || 'all'
   currentCategoryId = params.categoryId || null
   noteId = params.noteId
+  refreshData()
+})
+
+// 接收主插件发来的数据刷新通知（双向同步）
+ipcRenderer.on('sticky-refresh', () => {
   refreshData()
 })
 

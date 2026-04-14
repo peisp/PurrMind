@@ -212,6 +212,8 @@ if (window.utools.registerTool) {
 
 const { ipcRenderer } = require('electron')
 let stickyNoteIdCounter = 0
+// 跟踪所有打开的便签窗口，用于双向同步
+const openStickyWindows = new Map()
 
 const openStickyNote = ({ filter = 'all', categoryId = null } = {}) => {
   if (!window.utools.createBrowserWindow) return
@@ -241,25 +243,49 @@ const openStickyNote = ({ filter = 'all', categoryId = null } = {}) => {
     }
   )
 
+  // 记录窗口引用
+  openStickyWindows.set(noteId, win)
+
   // 使用唯一 channel 监听子窗口消息，避免多窗口互相干扰
   const onTogglePin = (event, pinned) => {
     try { win.setAlwaysOnTop(pinned) } catch (e) {}
   }
   const onClose = () => {
     try { win.close() } catch (e) {}
-    // 清理监听器
+    // 清理窗口引用和监听器
+    openStickyWindows.delete(noteId)
     ipcRenderer.removeListener('toggle-pin:' + noteId, onTogglePin)
     ipcRenderer.removeListener('close-window:' + noteId, onClose)
     ipcRenderer.removeListener('todo-changed:' + noteId, onTodoChanged)
   }
   const onTodoChanged = () => {
     window.dispatchEvent(new Event('todo-updated'))
+    // 同步刷新其他便签窗口（排除触发变更的窗口）
+    notifyStickyWindows(noteId)
   }
 
   ipcRenderer.on('toggle-pin:' + noteId, onTogglePin)
   ipcRenderer.on('close-window:' + noteId, onClose)
   ipcRenderer.on('todo-changed:' + noteId, onTodoChanged)
 }
+
+// 通知所有便签窗口刷新数据（可排除指定窗口）
+const notifyStickyWindows = (excludeNoteId) => {
+  openStickyWindows.forEach((win, noteId) => {
+    if (noteId === excludeNoteId) return
+    try {
+      win.webContents.send('sticky-refresh')
+    } catch (e) {
+      // 窗口可能已关闭，清理引用
+      openStickyWindows.delete(noteId)
+    }
+  })
+}
+
+// 主插件数据变更时，同步通知所有便签窗口
+window.addEventListener('todo-updated', () => {
+  notifyStickyWindows()
+})
 
 // 初始化
 initDB()

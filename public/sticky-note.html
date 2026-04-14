@@ -89,11 +89,48 @@
 
     /* 统计信息 */
     .stats {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 4px 14px 8px;
       font-size: 11px;
       color: #8d6e63;
       border-bottom: 1px dashed #e6d77a;
       flex-shrink: 0;
+    }
+
+    .stats-text {
+      flex: 1;
+    }
+
+    .btn-toggle-completed {
+      width: 20px;
+      height: 20px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      background: transparent;
+      color: #bcaaa4;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      margin-left: 6px;
+    }
+
+    .btn-toggle-completed:hover {
+      background: rgba(0,0,0,0.08);
+    }
+
+    .btn-toggle-completed.active {
+      color: #66bb6a;
+    }
+
+    .btn-toggle-completed.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     /* 待办列表 */
@@ -267,6 +304,18 @@
         border-bottom-color: rgba(255, 255, 255, 0.1);
       }
 
+      .btn-toggle-completed {
+        color: #78909c;
+      }
+
+      .btn-toggle-completed:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .btn-toggle-completed.active {
+        color: #66bb6a;
+      }
+
       .todo-item {
         border-bottom-color: rgba(255, 255, 255, 0.05);
       }
@@ -328,16 +377,29 @@
         <button class="btn-close" id="btnClose" title="关闭">&#x2715;</button>
       </div>
     </div>
-    <div class="stats" id="stats"></div>
+    <div class="stats">
+      <span class="stats-text" id="statsText"></span>
+      <button class="btn-toggle-completed" id="btnToggleCompleted" title="显示已完成事项">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      </button>
+    </div>
     <div class="todo-list" id="todoList"></div>
   </div>
 
   <script>
     let isPinned = true
+    let showCompleted = false
+    let currentData = null
 
     // 监听 preload 发出的数据就绪事件
     window.addEventListener('sticky-data-ready', (e) => {
-      renderNote(e.detail)
+      currentData = e.detail
+      // completed 筛选下强制显示已完成
+      if (currentData.filter === 'completed') {
+        showCompleted = true
+      }
+      updateToggleButton()
+      renderNote()
     })
 
     // 置顶按钮
@@ -353,19 +415,44 @@
       window.stickyNote.closeWindow()
     })
 
+    // 显示/隐藏已完成按钮
+    document.getElementById('btnToggleCompleted').addEventListener('click', () => {
+      if (currentData && currentData.filter === 'completed') return
+      showCompleted = !showCompleted
+      updateToggleButton()
+      renderNote()
+    })
+
+    function updateToggleButton() {
+      var btn = document.getElementById('btnToggleCompleted')
+      var isCompletedFilter = currentData && currentData.filter === 'completed'
+      btn.classList.toggle('active', showCompleted)
+      btn.classList.toggle('disabled', isCompletedFilter)
+      btn.title = isCompletedFilter
+        ? '\u5DF2\u5B8C\u6210\u8FC7\u6EE4\u5668\u4E0B\u5FC5\u987B\u663E\u793A\u5DF2\u5B8C\u6210\u4E8B\u9879'
+        : showCompleted ? '\u9690\u85CF\u5DF2\u5B8C\u6210\u4E8B\u9879' : '\u663E\u793A\u5DF2\u5B8C\u6210\u4E8B\u9879'
+    }
+
     // 渲染便签
-    function renderNote(data) {
-      const { title, todos, completedCount, pendingCount } = data
+    function renderNote() {
+      if (!currentData) return
+      var title = currentData.title
+      var todos = currentData.todos
+      var completedCount = currentData.completedCount
+      var pendingCount = currentData.pendingCount
+
+      // 根据 showCompleted 过滤显示
+      var displayTodos = showCompleted ? todos : todos.filter(function(t) { return !t.completedAt })
 
       document.getElementById('title').textContent = title
 
       // 统计信息
-      document.getElementById('stats').textContent =
+      document.getElementById('statsText').textContent =
         '\u5F85\u5B8C\u6210 ' + pendingCount + ' \u9879' + (completedCount > 0 ? ' \xB7 \u5DF2\u5B8C\u6210 ' + completedCount + ' \u9879' : '')
 
       const listEl = document.getElementById('todoList')
 
-      if (todos.length === 0) {
+      if (displayTodos.length === 0) {
         listEl.innerHTML =
           '<div class="empty-state">' +
             '<span class="icon">&#x1F389;</span>' +
@@ -375,7 +462,7 @@
       }
 
       listEl.innerHTML = ''
-      todos.forEach(function(todo) {
+      displayTodos.forEach(function(todo) {
         var item = document.createElement('div')
         item.className = 'todo-item'
 

@@ -68,6 +68,7 @@ export function TimelineView({
   }
 
   const sortedTodos = sortTodos(todos)
+
   const grouped = groupTodosByDay(sortedTodos)
   const days = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a))
 
