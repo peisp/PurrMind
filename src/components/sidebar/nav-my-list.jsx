@@ -8,7 +8,8 @@ import {
   StarOff,
   Trash2,
   MoreVertical,
-  Pencil
+  Pencil,
+  Pin
 } from 'lucide-react'
 
 import {
@@ -50,6 +51,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { IconPicker } from '@/components/ui/icon-picker'
 import * as Icons from 'lucide-react'
+import { openStickyNote } from '@/lib/sticky-note'
 
 export function NavMyList({ onCategoryChange, currentCategory }) {
   const [categories, setCategories] = useState([])
@@ -318,6 +320,17 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
                           >
                             <Pencil className='h-4 w-4 mr-2' />
                             编辑
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={e => {
+                              e.stopPropagation()
+                              e.preventDefault()
+                              setOpenDropdownId(null)
+                              openStickyNote({ categoryId: category.id })
+                            }}
+                          >
+                            <Pin className='h-4 w-4 mr-2' />
+                            钉到桌面
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem

@@ -15,6 +15,7 @@ import {
 } from '@/components/todoList/CalendarHeader'
 import { useState } from 'react'
 import { addMonths, subMonths, addWeeks, subWeeks } from 'date-fns'
+import { openStickyNote } from '@/lib/sticky-note'
 
 export function MainContent({
   todos,
@@ -113,6 +114,27 @@ export function MainContent({
             )}
             {/* 固定Tooltip位置容器 */}
             <div className='flex items-center'>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='h-8 w-8'
+                    onClick={() =>
+                      openStickyNote({
+                        filter: currentCategory ? undefined : currentFilter,
+                        categoryId: currentCategory || undefined
+                      })
+                    }
+                  >
+                    <Icons.Pin className='h-4 w-4' />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side='top' align='center'>
+                  钉到桌面便签
+                </TooltipContent>
+              </Tooltip>
+
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button

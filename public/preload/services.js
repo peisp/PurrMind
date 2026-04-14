@@ -208,6 +208,59 @@ if (window.utools.registerTool) {
   })
 }
 
+// ========== 桌面便签 ==========
+
+const { ipcRenderer } = require('electron')
+let stickyNoteIdCounter = 0
+
+const openStickyNote = ({ filter = 'all', categoryId = null } = {}) => {
+  if (!window.utools.createBrowserWindow) return
+
+  const noteId = 'sticky_' + Date.now() + '_' + (++stickyNoteIdCounter)
+
+  const win = window.utools.createBrowserWindow(
+    'sticky-note.html',
+    {
+      show: false,
+      title: '便签',
+      width: 280,
+      height: 400,
+      minWidth: 220,
+      minHeight: 200,
+      frame: false,
+      transparent: true,
+      alwaysOnTop: true,
+      resizable: true,
+      webPreferences: {
+        preload: 'preload/sticky-note.js'
+      }
+    },
+    () => {
+      win.webContents.send('sticky-init', { filter, categoryId, noteId })
+      win.show()
+    }
+  )
+
+  // 使用唯一 channel 监听子窗口消息，避免多窗口互相干扰
+  const onTogglePin = (event, pinned) => {
+    try { win.setAlwaysOnTop(pinned) } catch (e) {}
+  }
+  const onClose = () => {
+    try { win.close() } catch (e) {}
+    // 清理监听器
+    ipcRenderer.removeListener('toggle-pin:' + noteId, onTogglePin)
+    ipcRenderer.removeListener('close-window:' + noteId, onClose)
+    ipcRenderer.removeListener('todo-changed:' + noteId, onTodoChanged)
+  }
+  const onTodoChanged = () => {
+    window.dispatchEvent(new Event('todo-updated'))
+  }
+
+  ipcRenderer.on('toggle-pin:' + noteId, onTogglePin)
+  ipcRenderer.on('close-window:' + noteId, onClose)
+  ipcRenderer.on('todo-changed:' + noteId, onTodoChanged)
+}
+
 // 初始化
 initDB()
 
@@ -221,5 +274,6 @@ window.todoServices = {
   getAllCategories,
   addCategory,
   updateCategory,
-  deleteCategory
+  deleteCategory,
+  openStickyNote
 }

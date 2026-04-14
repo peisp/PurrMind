@@ -17,7 +17,9 @@
       "Bash(npx eslint:*)",
       "Bash(npx update-browserslist-db@latest:*)",
       "Bash(pnpm list:*)",
-      "Bash(pnpm up:*)"
+      "Bash(pnpm up:*)",
+      "WebFetch(domain:www.u-tools.cn)",
+      "Bash(npx vite:*)"
     ]
   }
 }
