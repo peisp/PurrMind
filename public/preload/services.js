@@ -231,6 +231,8 @@ const openStickyNote = ({ filter = 'all', categoryId = null } = {}) => {
       minHeight: 200,
       frame: false,
       transparent: true,
+      backgroundColor: '#00000000',
+      hasShadow: false,
       alwaysOnTop: true,
       resizable: true,
       webPreferences: {
