@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" style="background: transparent;">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,28 +11,21 @@
       box-sizing: border-box;
     }
 
-    html, body {
-      background: transparent !important;
-    }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       overflow: hidden;
       user-select: none;
-      margin: 0;
-      padding: 0;
+      background: transparent;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
     }
 
     .sticky-note {
       display: flex;
       flex-direction: column;
       height: 100vh;
-      border-radius: 8px;
-      overflow: hidden;
       background: #fff9c4;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-      /* Windows 透明窗口圆角修复 */
-      -webkit-mask-image: -webkit-radial-gradient(white, black);
+      border-radius: 8px;
+      clip-path: inset(0 round 8px);
     }
 
     /* 标题栏 - 可拖拽 */
