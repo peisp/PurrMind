@@ -19,7 +19,8 @@
       "Bash(pnpm list:*)",
       "Bash(pnpm up:*)",
       "WebFetch(domain:www.u-tools.cn)",
-      "Bash(npx vite:*)"
+      "Bash(npx vite:*)",
+      "Bash(curl:*)"
     ]
   }
 }
