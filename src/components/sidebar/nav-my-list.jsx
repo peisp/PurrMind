@@ -279,7 +279,7 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
                       <span className='truncate'>{category.name}</span>
                     </div>
                     <div
-                      className='relative flex items-center transition-all duration-200'
+                      className='relative flex items-center transition-all duration-200 -mr-6'
                       data-sidebar='menu-action'
                     >
                       <span
