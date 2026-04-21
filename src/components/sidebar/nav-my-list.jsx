@@ -268,7 +268,7 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
                     }}
                   >
                     <div className='flex items-center gap-2 min-w-0 flex-1'>
-                      <div className='bg-background rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0'>
+                      <div className='bg-background rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.1)]'>
                         <Icon
                           className={cn(
                             'h-4 w-4',
