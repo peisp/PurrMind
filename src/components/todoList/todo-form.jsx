@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AlertCircle, Sparkles, Cpu, Coins } from 'lucide-react'
+import { AlertCircle, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
 import { Input } from '@/components/ui/input'
@@ -8,7 +8,8 @@ export function TodoForm({
   onAdd,
   defaultCategory,
   defaultStarred,
-  defaultDueDate
+  defaultDueDate,
+  categories = []
 }) {
   const [title, setTitle] = useState('')
   const [isAIActive, setIsAIActive] = useState(() => {
@@ -18,7 +19,6 @@ export function TodoForm({
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
-  const [showAiTip, setShowAiTip] = useState(false)
   const [streamContent, setStreamContent] = useState('')
 
   // 监听设置变更，同步autoAI状态
@@ -48,19 +48,6 @@ export function TodoForm({
     }
   }, [streamContent, isProcessing])
 
-  // 获取当前AI模型设置
-  const getAIModelSetting = () => {
-    const settings = window.utools?.dbStorage?.getItem('purrmind_settings')
-    return (
-      settings?.aiSetting || {
-        model: 'deepseek-v3',
-        icon: 'sparkles',
-        cost: 1,
-        custom: false
-      }
-    )
-  }
-
   // 创建基础任务对象
   const createBaseTask = taskTitle => ({
     title: taskTitle.trim(),
@@ -76,15 +63,20 @@ export function TodoForm({
     try {
       let fullContent = ''
       setTitle(' ') // 清空输入框,空字符替换placeholder
+      const aiCategories = defaultCategory ? null : categories
       const tasks = await new Promise((resolve, reject) => {
-        getTaskObjByAi(taskTitle, chunk => {
-          if (chunk.content || chunk.reasoning_content) {
-            fullContent += chunk.reasoning_content
-              ? chunk.reasoning_content
-              : chunk.content
-            setStreamContent(fullContent)
-          }
-        })
+        getTaskObjByAi(
+          taskTitle,
+          chunk => {
+            if (chunk.content || chunk.reasoning_content) {
+              fullContent += chunk.reasoning_content
+                ? chunk.reasoning_content
+                : chunk.content
+              setStreamContent(fullContent)
+            }
+          },
+          aiCategories
+        )
           .then(resolve)
           .catch(reject)
       })
@@ -100,7 +92,10 @@ export function TodoForm({
           description: task.description,
           dueDate: task.dueDate,
           reminderTime: task.reminderTime,
-          recurrence: task.recurrence || null
+          recurrence: task.recurrence || null,
+          ...(task.categoryId && !defaultCategory
+            ? { categoryId: task.categoryId }
+            : {})
         }
         onAdd(todoNew)
       })
@@ -149,50 +144,13 @@ export function TodoForm({
   }
 
   const toggleAI = () => {
-    if (!isAIActive) {
-      setShowAiTip(true)
-      setTimeout(() => setShowAiTip(false), 3000) // 延长显示时间
-    }
     setIsAIActive(!isAIActive)
     setError(null)
   }
 
-  // 获取当前模型设置用于显示
-  const currentModelSetting = getAIModelSetting()
-
   return (
     <form onSubmit={handleSubmit} className='flex items-center w-full'>
       <div className='relative w-full'>
-        {/* AI模型计费提示 */}
-        {showAiTip && (
-          <div
-            className='absolute left-1/2 -translate-x-1/2 -top-16 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg z-50
-              bg-gradient-to-r text-white font-medium text-sm animate-fade-in-out'
-            style={{
-              pointerEvents: 'none',
-              opacity: showAiTip ? 1 : 0,
-              transition: 'opacity 0.5s',
-              background: currentModelSetting.custom
-                ? 'linear-gradient(135deg, #3b82f6, #1d4ed8)'
-                : 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
-            }}
-          >
-            {currentModelSetting.custom
-              ? (
-              <>
-                <Cpu className='w-4 h-4 text-white drop-shadow' />
-                <span>自定义模型 - 按token计费</span>
-              </>
-                )
-              : (
-              <>
-                <Coins className='w-4 h-4 text-white drop-shadow' />
-                <span>消耗 {currentModelSetting.cost} 点uTools AI能量</span>
-              </>
-                )}
-          </div>
-        )}
-
         {/* 错误提示 */}
         {error && (
           <div className='absolute -top-8 left-0.5 flex items-center text-sm text-red-600 bg-red-50 px-3 py-1.5 rounded-lg shadow'>

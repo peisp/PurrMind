@@ -219,6 +219,7 @@ export function MainContent({
                 defaultCategory={currentCategory}
                 defaultStarred={currentFilter === 'starred'}
                 defaultDueDate={defaultDueDate}
+                categories={categories}
               />
             </div>
           )}

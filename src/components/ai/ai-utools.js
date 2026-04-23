@@ -11,7 +11,7 @@ const getAIModelSetting = () => {
   )
 }
 
-export async function getTaskObjByAi(taskMsg, onChunk) {
+export async function getTaskObjByAi(taskMsg, onChunk, categories) {
   const modelSetting = getAIModelSetting()
   const model = modelSetting.model
 
@@ -26,18 +26,32 @@ export async function getTaskObjByAi(taskMsg, onChunk) {
   }
 
   const now = new Date().toISOString()
+
+  const categoryList =
+    categories && categories.length > 0
+      ? categories.map(c => `${c.id}:${c.name}`).join('、')
+      : null
+
+  const categoryPrompt = categoryList
+    ? `\n分类：
+- categoryId：从以下分类中选择最匹配的，无合适分类则为null
+- 可选分类：${categoryList}`
+    : ''
+
+  const categoryFormat = categoryList ? ',"categoryId":"分类id或null"' : ''
+
   const prompt = `将用户输入解析为待办任务JSON数组。仅输出JSON，无其他内容。
 
 当前时间：${now}
 
-格式：[{"title":"简短任务标题","description":"用户原始输入","dueDate":"ISO8601或null","reminderTime":"ISO8601或null","recurrence":null}]
+格式：[{"title":"简短任务标题","description":"用户原始输入","dueDate":"ISO8601或null","reminderTime":"ISO8601或null","recurrence":null${categoryFormat}}]
 
 字段说明：
 - title：提炼简短的任务标题（如"开会"、"喝水"）
 - description：固定填入用户的原始输入内容
 - dueDate：任务实际发生/截止时间
 - reminderTime：提前提醒时间，用户明确说"提醒"时设置，早于dueDate
-- 若用户未区分提醒和截止，仅设dueDate，reminderTime=null
+- 若用户未区分提醒和截止，仅设dueDate，reminderTime=null${categoryPrompt}
 
 规则：
 - 语言与用户输入保持一致
