@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { AlertCircle, Plus, Sparkles, Cpu, Coins } from 'lucide-react'
+import { AlertCircle, Sparkles, Cpu, Coins } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
 import { Input } from '@/components/ui/input'
@@ -11,12 +11,26 @@ export function TodoForm({
   defaultDueDate
 }) {
   const [title, setTitle] = useState('')
-  const [isAIActive, setIsAIActive] = useState(false)
+  const [isAIActive, setIsAIActive] = useState(() => {
+    const settings = window.utools?.dbStorage?.getItem('purrmind_settings')
+    return settings?.autoAI || false
+  })
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [showAiTip, setShowAiTip] = useState(false)
   const [streamContent, setStreamContent] = useState('')
+
+  // 监听设置变更，同步autoAI状态
+  useEffect(() => {
+    const handleSettingsUpdate = () => {
+      const settings = window.utools?.dbStorage?.getItem('purrmind_settings')
+      setIsAIActive(settings?.autoAI || false)
+    }
+    window.addEventListener('settings-updated', handleSettingsUpdate)
+    return () =>
+      window.removeEventListener('settings-updated', handleSettingsUpdate)
+  }, [])
 
   // 优化滚动效果 - 使用useEffect但减少不必要的重复计算
   useEffect(() => {
@@ -198,8 +212,8 @@ export function TodoForm({
             className="
               absolute inset-0 rounded-lg
               before:content-[''] before:absolute before:inset-0 before:rounded-lg
-              before:bg-gradient-to-r before:from-red-800 before:via-yellow-800 before:via-green-800 before:via-blue-800 before:via-indigo-800 before:via-purple-800 before:to-red-800
-              before:blur-[15px] before:opacity-80 before:animate-gradient-x animate-pulse
+              before:bg-gradient-to-r before:from-red-300 before:via-yellow-300 before:via-green-300 before:via-blue-300 before:via-indigo-300 before:via-purple-300 before:to-red-300
+              before:blur-[15px] before:opacity-60 before:animate-gradient-x animate-pulse
             "
           />
         </div>
@@ -208,7 +222,7 @@ export function TodoForm({
           className={cn(
             'relative rounded-lg z-10 p-[2px] transition-all duration-300',
             isAIActive
-              ? 'bg-gradient-to-r from-red-300 via-yellow-300 via-green-300 via-blue-300 via-indigo-300 via-purple-300 to-red-300 animate-gradient-x'
+              ? 'bg-gradient-to-r from-red-200 via-yellow-200 via-green-200 via-blue-200 via-indigo-200 via-purple-200 to-red-200 animate-gradient-x'
               : 'bg-transparent'
           )}
         >
@@ -224,7 +238,7 @@ export function TodoForm({
               placeholder='添加任务...'
               disabled={isSubmitting || isProcessing}
               className={cn(
-                'h-12 text-lg pl-10 pr-10 transition-all duration-200 focus:ring-0',
+                'h-12 text-lg pl-10 pr-4 transition-colors duration-200 focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0',
                 isAIActive && 'bg-background',
                 (isSubmitting || isProcessing) &&
                   'opacity-70 cursor-not-allowed',
@@ -240,15 +254,25 @@ export function TodoForm({
             )}
           </div>
         </div>
-        <Plus className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-20' />
-        <Sparkles
+        <button
+          type='button'
+          onClick={toggleAI}
+          disabled={isSubmitting || isProcessing}
           className={cn(
-            'absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 cursor-pointer transition-colors duration-200 z-20',
-            isAIActive ? 'text-purple-800' : 'text-muted-foreground',
+            'absolute left-2.5 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center h-7 w-7 rounded-md transition-all duration-200',
+            isAIActive
+              ? 'bg-purple-100 text-purple-600 shadow-[0_0_0_1px_rgba(139,92,246,0.3),0_1px_3px_rgba(139,92,246,0.2)] hover:bg-purple-200 hover:shadow-[0_0_0_1px_rgba(139,92,246,0.4),0_2px_6px_rgba(139,92,246,0.25)]'
+              : 'bg-purple-50 text-purple-400 animate-ai-breathe hover:bg-purple-100 hover:text-purple-500 hover:shadow-[0_0_0_1px_rgba(139,92,246,0.3),0_0_14px_rgba(139,92,246,0.25)]',
             (isSubmitting || isProcessing) && 'cursor-not-allowed opacity-70'
           )}
-          onClick={toggleAI}
-        />
+        >
+          <Sparkles
+            className={cn(
+              'h-4 w-4 transition-transform duration-200',
+              isAIActive && 'scale-110'
+            )}
+          />
+        </button>
       </div>
     </form>
   )
