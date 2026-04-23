@@ -25,75 +25,34 @@ export async function getTaskObjByAi(taskMsg, onChunk) {
     console.log('使用内置模型，消耗AI点数:', modelSetting.cost)
   }
 
-  const messages = [
-    {
-      role: 'user',
-      content:
-        "# Extract and break down the user's input into a list of to-do tasks.\n" +
-        'Return the result strictly in the following JSON array format:\n' +
-        '\n' +
-        '```json\n' +
-        '[\n' +
-        '  {\n' +
-        '    "title": "Task title",\n' +
-        '    "description": "Task description or null",\n' +
-        '    "dueDate": "ISO 8601 string or null",\n' +
-        '    "reminderTime": "ISO 8601 string or null",\n' +
-        '    "recurrence": null\n' +
-        '  }\n' +
-        ']\n' +
-        '```\n' +
-        '\n' +
-        '## Rules\n' +
-        '1. The response must be a JSON array, even if there is only one task.\n' +
-        '2. Field definitions:\n' +
-        '    - title: required, non-empty string.\n' +
-        "    - description: string or null. The user's original question can be output here.\n" +
-        '    - dueDate: ISO 8601 string (e.g., "2025-05-18T09:00:00.000Z") or null. Only for one-time tasks.\n' +
-        '    - reminderTime: ISO 8601 string or null. For one-time tasks: an optional reminder before dueDate. For recurring tasks: the next occurrence time.\n' +
-        '    - recurrence: object or null. When set, it must be a JSON object (NOT a string).\n' +
-        '3. Your response must only contain the JSON—no explanations, comments, or formatting outside the JSON.\n' +
-        "4. Detect and match the language of the user's input. If the user speaks Chinese, return titles and descriptions in Chinese, etc.\n" +
-        '5. Current time is ' +
-        new Date().toISOString() +
-        '. Calculate dates relative to this.\n' +
-        "6. If the user mentions 'later' without a concrete time, calculate an appropriate time based on current time.\n" +
-        '7. If the user mentions a day without a specific time, default to 9:00 AM. For "morning" use 9:00, "afternoon" 14:00, "evening" 19:00.\n' +
-        '\n' +
-        '## Recurring tasks (IMPORTANT)\n' +
-        'There are TWO types of tasks with completely different field rules:\n' +
-        '\n' +
-        '### One-time tasks (no recurrence)\n' +
-        '- Set dueDate and/or reminderTime as needed\n' +
-        '- recurrence = null\n' +
-        '\n' +
-        '### Recurring tasks\n' +
-        'Triggered by patterns like "every day", "every Monday", "every month on the 15th", etc.\n' +
-        '- dueDate MUST be null (recurring tasks have no deadline)\n' +
-        '- reminderTime = the next occurrence time (ISO 8601)\n' +
-        '- recurrence = one of these objects:\n' +
-        '  - Daily: { "type": "daily" }\n' +
-        '  - Weekly: { "type": "weekly", "dayOfWeek": N } where N is 0=Sunday, 1=Monday, ..., 6=Saturday\n' +
-        '  - Monthly: { "type": "monthly", "dayOfMonth": N } where N is 1-31\n' +
-        '\n' +
-        '## Examples\n' +
-        'Input: "明天下午3点开会"\n' +
-        'Output: [{ "title": "开会", "description": "明天下午3点开会", "dueDate": "2025-05-19T07:00:00.000Z", "reminderTime": null, "recurrence": null }]\n' +
-        '\n' +
-        'Input: "每天早上8点提醒我喝水"\n' +
-        'Output: [{ "title": "喝水", "description": "每天早上8点提醒喝水", "dueDate": null, "reminderTime": "2025-05-19T00:00:00.000Z", "recurrence": { "type": "daily" } }]\n' +
-        '\n' +
-        'Input: "每周一上午9点开周会"\n' +
-        'Output: [{ "title": "开周会", "description": "每周一上午9点开周会", "dueDate": null, "reminderTime": "2025-05-19T01:00:00.000Z", "recurrence": { "type": "weekly", "dayOfWeek": 1 } }]\n' +
-        '\n' +
-        'Input: "每月15号提醒还房贷"\n' +
-        'Output: [{ "title": "还房贷", "description": "每月15号提醒还房贷", "dueDate": null, "reminderTime": "2025-06-15T01:00:00.000Z", "recurrence": { "type": "monthly", "dayOfMonth": 15 } }]'
-    },
-    {
-      role: 'user',
-      content: taskMsg
-    }
-  ]
+  const now = new Date().toISOString()
+  const prompt = `将用户输入解析为待办任务JSON数组。仅输出JSON，无其他内容。
+
+当前时间：${now}
+
+格式：[{"title":"简短任务标题","description":"用户原始输入","dueDate":"ISO8601或null","reminderTime":"ISO8601或null","recurrence":null}]
+
+字段说明：
+- title：提炼简短的任务标题（如"开会"、"喝水"）
+- description：固定填入用户的原始输入内容
+- dueDate：任务实际发生/截止时间
+- reminderTime：提前提醒时间，用户明确说"提醒"时设置，早于dueDate
+- 若用户未区分提醒和截止，仅设dueDate，reminderTime=null
+
+规则：
+- 语言与用户输入保持一致
+- 未指定具体时间：早上9:00，下午14:00，晚上19:00，默认9:00
+- 一次性任务：设dueDate，recurrence=null
+- 重复任务：dueDate=null，reminderTime=下次触发时间，recurrence为以下之一：
+  {"type":"daily"} | {"type":"weekly","dayOfWeek":0-6} | {"type":"monthly","dayOfMonth":1-31}
+  (dayOfWeek: 0=周日,1=周一,...,6=周六)
+
+示例："明天早上九点半提醒我十点钟需要去开会"
+→ [{"title":"开会","description":"明天早上九点半提醒我十点钟需要去开会","dueDate":"明天T10:00:00","reminderTime":"明天T09:30:00","recurrence":null}]
+
+用户输入：${taskMsg}`
+
+  const messages = [{ role: 'user', content: prompt }]
 
   let fullContent = ''
   await window.utools.ai({ messages, model }, chunk => {
