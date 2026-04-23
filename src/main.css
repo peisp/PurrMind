@@ -128,4 +128,22 @@
     background-size: 200% 200%;
     animation: gradient-x 3s ease infinite;
   }
+
+  @keyframes ai-breathe {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 1px rgba(139, 92, 246, 0.3),
+        0 0 8px rgba(139, 92, 246, 0.25);
+    }
+    50% {
+      box-shadow:
+        0 0 0 1px rgba(139, 92, 246, 0.45),
+        0 0 14px rgba(139, 92, 246, 0.4);
+    }
+  }
+
+  .animate-ai-breathe {
+    animation: ai-breathe 2.5s ease-in-out infinite;
+  }
 }

@@ -6,7 +6,7 @@ import {
   SelectValue
 } from '@/components/ui/select.jsx'
 import { cn } from '@/lib/utils.js'
-import * as Icons from 'lucide-react'
+import { CategoryIcon } from '@/components/ui/category-icon'
 
 export function CategorySelector({
   value,
@@ -14,46 +14,16 @@ export function CategorySelector({
   categories = [],
   className
 }) {
-  const getIconComponent = iconName => {
-    return Icons[iconName] || Icons.FolderIcon
-  }
-
-  const getColorClass = color => {
-    switch (color) {
-      case 'red':
-        return 'text-red-500'
-      case 'blue':
-        return 'text-blue-500'
-      case 'green':
-        return 'text-green-500'
-      case 'yellow':
-        return 'text-yellow-500'
-      case 'purple':
-        return 'text-purple-500'
-      case 'pink':
-        return 'text-pink-500'
-      default:
-        return 'text-gray-500'
-    }
-  }
-
-  const renderCategoryItem = (category, isSelected = false) => {
-    const Icon = getIconComponent(category?.icon)
-    return (
-      <div className='flex items-center gap-2'>
-        <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
-          <Icon className={cn('h-4 w-4', getColorClass(category?.color))} />
-        </div>
-        <span>{category?.name}</span>
-      </div>
-    )
-  }
+  const renderCategoryItem = category => (
+    <div className='flex items-center gap-2'>
+      <CategoryIcon icon={category?.icon} color={category?.color} />
+      <span>{category?.name}</span>
+    </div>
+  )
 
   const renderNoneItem = () => (
     <div className='flex items-center gap-2'>
-      <div className='bg-amber-50 rounded-full h-6 w-6 flex items-center justify-center'>
-        <Icons.FolderIcon className='h-4 w-4 text-gray-500' />
-      </div>
+      <CategoryIcon icon='FolderIcon' color='default' />
       <span>无列表</span>
     </div>
   )

@@ -4,7 +4,6 @@ import {
   Link,
   MoreHorizontal,
   Plus,
-  FolderIcon,
   StarOff,
   Trash2,
   MoreVertical,
@@ -50,8 +49,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { IconPicker } from '@/components/ui/icon-picker'
-import * as Icons from 'lucide-react'
 import { openStickyNote } from '@/lib/sticky-note'
+import { CategoryIcon } from '@/components/ui/category-icon'
 
 export function NavMyList({ onCategoryChange, currentCategory }) {
   const [categories, setCategories] = useState([])
@@ -182,29 +181,6 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
     [categoryCountMap]
   )
 
-  const getColorClass = useCallback(color => {
-    switch (color) {
-      case 'red':
-        return 'text-red-500'
-      case 'blue':
-        return 'text-blue-500'
-      case 'green':
-        return 'text-green-500'
-      case 'yellow':
-        return 'text-yellow-500'
-      case 'purple':
-        return 'text-purple-500'
-      case 'pink':
-        return 'text-pink-500'
-      default:
-        return 'text-gray-500'
-    }
-  }, [])
-
-  const getIconComponent = useCallback(iconName => {
-    return Icons[iconName] || FolderIcon
-  }, [])
-
   const handleDropdownOpenChange = useCallback(
     (open, categoryId) => {
       if (!open) {
@@ -235,7 +211,6 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
       <SidebarGroupContent>
         <SidebarMenu>
           {categories.map(category => {
-            const Icon = getIconComponent(category.icon)
             const count = getCategoryCount(category.id)
             const isActive = currentCategory === category.id
             const isHovered = hoveredItem === category.id
@@ -268,14 +243,10 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
                     }}
                   >
                     <div className='flex items-center gap-2 min-w-0 flex-1'>
-                      <div className='bg-background rounded-full h-6 w-6 flex items-center justify-center flex-shrink-0 shadow-[0_0_0_1px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.1)]'>
-                        <Icon
-                          className={cn(
-                            'h-4 w-4',
-                            getColorClass(category.color)
-                          )}
-                        />
-                      </div>
+                      <CategoryIcon
+                        icon={category.icon}
+                        color={category.color}
+                      />
                       <span className='truncate'>{category.name}</span>
                     </div>
                     <div
