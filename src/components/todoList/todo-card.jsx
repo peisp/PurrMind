@@ -26,6 +26,7 @@ export function TodoCard({
   const formatDate = date => {
     if (!date) return ''
     const d = new Date(date)
+    if (isNaN(d.getTime())) return ''
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const tomorrow = new Date(today)
@@ -55,8 +56,9 @@ export function TodoCard({
 
   const getTimeStatus = time => {
     if (!time || todo.completed) return 'default'
-    const now = new Date()
     const target = new Date(time)
+    if (isNaN(target.getTime())) return 'default'
+    const now = new Date()
     const diff = target - now
     if (diff < 0) return 'red' // 已过期
     if (diff < 2 * 60 * 60 * 1000) return 'yellow' // 2小时内

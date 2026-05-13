@@ -86,18 +86,42 @@ export async function getTaskObjByAi(taskMsg, onChunk, categories) {
   const jsonString = match ? match[1] : fullContent.trim()
 
   // 2. 解析 JSON
+  let parsed
   try {
-    return JSON.parse(jsonString)
+    parsed = JSON.parse(jsonString)
   } catch (e) {
     console.error('JSON解析失败:', e)
     // 3. 最后尝试提取第一个 [ ... ] 数组
     const arrayMatch = fullContent.match(/\[[\s\S]*\]/)
     if (arrayMatch) {
       try {
-        return JSON.parse(arrayMatch[0])
+        parsed = JSON.parse(arrayMatch[0])
       } catch (e2) {
         console.error('二次JSON解析失败:', e2)
       }
     }
   }
+
+  // 确保返回有效数组
+  if (!Array.isArray(parsed)) {
+    throw new Error('AI返回的数据格式无效')
+  }
+
+  // 校验每个任务对象的基本结构
+  return parsed
+    .filter(
+      task =>
+        task &&
+        typeof task === 'object' &&
+        typeof task.title === 'string' &&
+        task.title.trim()
+    )
+    .map(task => ({
+      title: task.title,
+      description: typeof task.description === 'string' ? task.description : '',
+      dueDate: task.dueDate || null,
+      reminderTime: task.reminderTime || null,
+      recurrence: task.recurrence || null,
+      categoryId: task.categoryId || null
+    }))
 }

@@ -261,18 +261,21 @@ export function useTodoManagement(enterAction) {
 
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      const todoDate = new Date(todo.dueDate)
-      todoDate.setHours(0, 0, 0, 0)
+      const todoDate = todo.dueDate ? new Date(todo.dueDate) : null
+      const isValidDate = todoDate && !isNaN(todoDate.getTime())
+      if (isValidDate) todoDate.setHours(0, 0, 0, 0)
 
       switch (state.currentFilter) {
         case 'today':
           return (
             (state.showCompleted || !todo.completed) &&
+            isValidDate &&
             todoDate.getTime() === today.getTime()
           )
         case 'planned':
           return (
             (state.showCompleted || !todo.completed) &&
+            isValidDate &&
             todoDate.getTime() > today.getTime()
           )
         case 'starred':

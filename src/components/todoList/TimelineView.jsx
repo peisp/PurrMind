@@ -60,7 +60,8 @@ export function TimelineView({
     const groups = {}
     todos.forEach(todo => {
       const time = getTimelineTime(todo)
-      const day = format(new Date(time), 'yyyy-MM-dd')
+      const d = new Date(time)
+      const day = isNaN(d.getTime()) ? 'invalid' : format(d, 'yyyy-MM-dd')
       if (!groups[day]) groups[day] = []
       groups[day].push(todo)
     })

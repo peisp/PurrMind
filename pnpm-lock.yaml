@@ -47,6 +47,9 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
+      didida-sdk:
+        specifier: link:/Users/peishaopeng/GolandProjects/didida/sdk/web
+        version: link:../../GolandProjects/didida/sdk/web
       react:
         specifier: ^19.0.0
         version: 19.1.0

@@ -16,6 +16,7 @@ import {
 import { useState } from 'react'
 import { addMonths, subMonths, addWeeks, subWeeks } from 'date-fns'
 import { openStickyNote } from '@/lib/sticky-note'
+import { trackEvent } from '@/lib/tracker'
 
 export function MainContent({
   todos,
@@ -172,12 +173,13 @@ export function MainContent({
                     size='icon'
                     className='h-8 w-8'
                     onClick={() => {
-                      console.log('Current viewMode:', viewMode)
                       if (viewMode === 'timeline') {
                         setViewMode('calendar')
-                        setCalendarViewMode('week') // 默认显示周视图
+                        setCalendarViewMode('week')
+                        trackEvent('switch_calendar_view')
                       } else {
                         setViewMode('timeline')
+                        trackEvent('switch_timeline_view')
                       }
                     }}
                   >
