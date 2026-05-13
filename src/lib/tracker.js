@@ -1,7 +1,9 @@
 import tracker from 'didida-sdk'
+import pluginInfo from '../../public/plugin.json'
 
 const SERVER = 'https://dd.peisp.com'
 const APP_ID = 'purrmind'
+const APP_VERSION = pluginInfo.version
 
 let initialized = false
 const isDev = () => !!window.utools?.isDev?.()
@@ -16,6 +18,7 @@ export function initTracker() {
     tracker.init({
       appId: APP_ID,
       server: SERVER,
+      appVersion: APP_VERSION,
       autoPageView: false,
       autoStayTime: true,
       autoEventTrack: false,
@@ -27,6 +30,7 @@ export function initTracker() {
       console.log('[Tracker] 初始化成功', {
         server: SERVER,
         appId: APP_ID,
+        appVersion: APP_VERSION,
         userId
       })
     }

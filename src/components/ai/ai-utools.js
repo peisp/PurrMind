@@ -25,7 +25,11 @@ export async function getTaskObjByAi(taskMsg, onChunk, categories) {
     console.log('使用内置模型，消耗AI点数:', modelSetting.cost)
   }
 
-  const now = new Date().toISOString()
+  const nowDate = new Date()
+  const now = nowDate.toISOString()
+  const tomorrow = new Date(nowDate)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const tomorrowDate = tomorrow.toISOString().split('T')[0]
 
   const categoryList =
     categories && categories.length > 0
@@ -61,8 +65,11 @@ export async function getTaskObjByAi(taskMsg, onChunk, categories) {
   {"type":"daily"} | {"type":"weekly","dayOfWeek":0-6} | {"type":"monthly","dayOfMonth":1-31}
   (dayOfWeek: 0=周日,1=周一,...,6=周六)
 
-示例："明天早上九点半提醒我十点钟需要去开会"
-→ [{"title":"开会","description":"明天早上九点半提醒我十点钟需要去开会","dueDate":"明天T10:00:00","reminderTime":"明天T09:30:00","recurrence":null}]
+示例（假设当前时间是${now}）：
+输入："明天早上九点半提醒我十点钟需要去开会"
+输出：[{"title":"开会","description":"明天早上九点半提醒我十点钟需要去开会","dueDate":"${tomorrowDate}T10:00:00.000+08:00","reminderTime":"${tomorrowDate}T09:30:00.000+08:00","recurrence":null}]
+
+重要：所有时间字段必须是完整的ISO8601格式（如 2026-05-15T09:00:00.000+08:00），不要使用"明天"、"今天"等中文描述。
 
 用户输入：${taskMsg}`
 
@@ -107,6 +114,12 @@ export async function getTaskObjByAi(taskMsg, onChunk, categories) {
     throw new Error('AI返回的数据格式无效')
   }
 
+  const validDate = v => {
+    if (!v || typeof v !== 'string') return null
+    const d = new Date(v)
+    return isNaN(d.getTime()) ? null : v
+  }
+
   // 校验每个任务对象的基本结构
   return parsed
     .filter(
@@ -119,8 +132,8 @@ export async function getTaskObjByAi(taskMsg, onChunk, categories) {
     .map(task => ({
       title: task.title,
       description: typeof task.description === 'string' ? task.description : '',
-      dueDate: task.dueDate || null,
-      reminderTime: task.reminderTime || null,
+      dueDate: validDate(task.dueDate),
+      reminderTime: validDate(task.reminderTime),
       recurrence: task.recurrence || null,
       categoryId: task.categoryId || null
     }))
