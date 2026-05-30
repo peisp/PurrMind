@@ -21,7 +21,8 @@
       "WebFetch(domain:www.u-tools.cn)",
       "Bash(npx vite:*)",
       "Bash(curl:*)",
-      "Bash(pnpm run:*)"
+      "Bash(pnpm run:*)",
+      "Bash(pnpm install:*)"
     ]
   }
 }

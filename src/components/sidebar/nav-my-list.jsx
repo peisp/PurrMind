@@ -51,7 +51,6 @@ import { Label } from '@/components/ui/label'
 import { IconPicker } from '@/components/ui/icon-picker'
 import { openStickyNote } from '@/lib/sticky-note'
 import { CategoryIcon } from '@/components/ui/category-icon'
-import { trackEvent } from '@/lib/tracker'
 
 export function NavMyList({ onCategoryChange, currentCategory }) {
   const [categories, setCategories] = useState([])
@@ -298,7 +297,6 @@ export function NavMyList({ onCategoryChange, currentCategory }) {
                               e.stopPropagation()
                               e.preventDefault()
                               setOpenDropdownId(null)
-                              trackEvent('pin_to_desktop')
                               openStickyNote({ categoryId: category.id })
                             }}
                           >

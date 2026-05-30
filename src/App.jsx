@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Index } from '@/Index.jsx'
-import { initTracker, trackEvent } from '@/lib/tracker'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 export default function App() {
@@ -26,14 +25,10 @@ export default function App() {
     // 监听主题变化
     darkModeMediaQuery.addEventListener('change', handleSystemThemeChange)
 
-    // 初始化数据统计
-    initTracker()
-
     // uTools插件生命周期事件
     window.utools.onPluginEnter(action => {
       setRoute(action.code)
       setEnterAction(action)
-      trackEvent('plugin_enter', action.code)
     })
 
     window.utools.onPluginOut(isKill => {

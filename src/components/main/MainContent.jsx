@@ -16,7 +16,6 @@ import {
 import { useState } from 'react'
 import { addMonths, subMonths, addWeeks, subWeeks } from 'date-fns'
 import { openStickyNote } from '@/lib/sticky-note'
-import { trackEvent } from '@/lib/tracker'
 
 export function MainContent({
   todos,
@@ -176,10 +175,8 @@ export function MainContent({
                       if (viewMode === 'timeline') {
                         setViewMode('calendar')
                         setCalendarViewMode('week')
-                        trackEvent('switch_calendar_view')
                       } else {
                         setViewMode('timeline')
-                        trackEvent('switch_timeline_view')
                       }
                     }}
                   >

@@ -3,7 +3,6 @@ import { AlertCircle, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getTaskObjByAi } from '@/components/ai/ai-utools'
 import { Input } from '@/components/ui/input'
-import { trackEvent } from '@/lib/tracker'
 
 export function TodoForm({
   onAdd,
@@ -131,12 +130,8 @@ export function TodoForm({
     try {
       if (isAIActive) {
         setIsProcessing(true)
-        const aiSettings =
-          window.utools?.dbStorage?.getItem('purrmind_settings')
-        trackEvent('add_todo_ai', aiSettings?.aiSetting?.model || 'unknown')
         await handleAITaskCreation(title)
       } else {
-        trackEvent('add_todo')
         handleNormalTaskCreation(title)
       }
       setTitle('')
