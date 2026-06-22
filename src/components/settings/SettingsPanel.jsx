@@ -106,6 +106,7 @@ export function SettingsPanel({ open, onOpenChange }) {
     setSettings(newSettings)
     // 保存设置
     window.utools.dbStorage.setItem('purrmind_settings', newSettings)
+    window.dispatchEvent(new Event('settings-updated'))
   }
 
   const handleBarkChange = (key, value) => {
@@ -142,7 +143,9 @@ export function SettingsPanel({ open, onOpenChange }) {
       const meta = []
       if (todo.dueDate) meta.push(`截止: ${formatDate(todo.dueDate)}`)
       if (todo.reminderTime) meta.push(`提醒: ${formatDate(todo.reminderTime)}`)
-      if (todo.categoryId && categoryMap[todo.categoryId]) { meta.push(`分类: ${categoryMap[todo.categoryId]}`) }
+      if (todo.categoryId && categoryMap[todo.categoryId]) {
+        meta.push(`分类: ${categoryMap[todo.categoryId]}`)
+      }
       if (todo.starred) meta.push('⭐ 收藏')
       if (meta.length > 0) line += `  (${meta.join(' | ')})`
       if (todo.description) line += `\n  > ${todo.description}`
@@ -346,6 +349,17 @@ export function SettingsPanel({ open, onOpenChange }) {
                 </div>
               </>
             )}
+
+            <div className='col-span-1 flex items-center'>
+              <Label htmlFor='auto-ai'>自动开启AI</Label>
+            </div>
+            <div className='col-span-3 flex items-center'>
+              <Switch
+                id='auto-ai'
+                checked={settings.autoAI || false}
+                onCheckedChange={val => handleChange('autoAI', val)}
+              />
+            </div>
 
             {/* Bark推送设置 */}
             <div className='col-span-4'>

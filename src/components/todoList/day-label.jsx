@@ -28,6 +28,18 @@ export function getRelativeDayLabel(dateInput) {
 
 export function DayLabel({ date, className }) {
   const day = new Date(date)
+  if (isNaN(day.getTime())) {
+    return (
+      <div
+        className={cn(
+          'my-2 text-sm font-semibold text-muted-foreground',
+          className
+        )}
+      >
+        未知日期
+      </div>
+    )
+  }
   const label = getRelativeDayLabel(day)
   const weekday = format(day, 'EEE', { locale: zhCN })
 

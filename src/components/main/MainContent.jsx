@@ -172,10 +172,9 @@ export function MainContent({
                     size='icon'
                     className='h-8 w-8'
                     onClick={() => {
-                      console.log('Current viewMode:', viewMode)
                       if (viewMode === 'timeline') {
                         setViewMode('calendar')
-                        setCalendarViewMode('week') // 默认显示周视图
+                        setCalendarViewMode('week')
                       } else {
                         setViewMode('timeline')
                       }
@@ -219,6 +218,7 @@ export function MainContent({
                 defaultCategory={currentCategory}
                 defaultStarred={currentFilter === 'starred'}
                 defaultDueDate={defaultDueDate}
+                categories={categories}
               />
             </div>
           )}

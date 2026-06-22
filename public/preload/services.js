@@ -231,6 +231,8 @@ const openStickyNote = ({ filter = 'all', categoryId = null } = {}) => {
       minHeight: 200,
       frame: false,
       transparent: true,
+      backgroundColor: '#00000000',
+      hasShadow: false,
       alwaysOnTop: true,
       resizable: true,
       webPreferences: {
@@ -286,6 +288,102 @@ const notifyStickyWindows = (excludeNoteId) => {
 window.addEventListener('todo-updated', () => {
   notifyStickyWindows()
 })
+
+// ========== 后台通知检查 ==========
+
+// Bark推送（后台版本，直接读取配置）
+const sendBarkNotification = async (title, content) => {
+  const settings = dbStorage.getItem('purrmind_bark_settings') || {}
+  if (!settings.enabled || !settings.token) return
+
+  const apiUrl = settings.apiUrl || 'https://api.day.app'
+  const icon = settings.icon || 'https://res.u-tools.cn/plugins/logo/tmdyai7glykmor3my3vp2sy88dao1fgk.png'
+
+  let url = `${apiUrl}/${settings.token}/${encodeURIComponent(title)}`
+  if (content) url += `/${encodeURIComponent(content)}`
+
+  const params = new URLSearchParams()
+  params.append('sound', 'alarm')
+  params.append('group', '喵咚咚任务提醒')
+  if (icon) params.append('icon', icon)
+  url += '?' + params.toString()
+
+  try {
+    await fetch(url)
+  } catch (e) {
+    console.error('Bark后台推送失败:', e)
+  }
+}
+
+// 循环任务推进逻辑（与 src/lib/recurrence.js 保持一致）
+const getNextOccurrence = (currentDate, recurrence) => {
+  if (!recurrence || !recurrence.type) return null
+  const next = new Date(currentDate)
+  switch (recurrence.type) {
+    case 'daily':
+      next.setDate(next.getDate() + 1)
+      break
+    case 'weekly':
+      next.setDate(next.getDate() + 7)
+      break
+    case 'monthly': {
+      const targetDay = recurrence.dayOfMonth
+      next.setMonth(next.getMonth() + 1)
+      const maxDay = new Date(next.getFullYear(), next.getMonth() + 1, 0).getDate()
+      next.setDate(Math.min(targetDay, maxDay))
+      break
+    }
+    default:
+      return null
+  }
+  return next
+}
+
+// 已通知的非循环任务ID集合
+const bgNotifiedTodos = new Set()
+
+const checkReminders = () => {
+  const todos = getAllTodos()
+  const now = new Date()
+
+  todos.forEach((todo) => {
+    if (!todo.reminderTime || todo.completed || bgNotifiedTodos.has(todo.id)) return
+
+    const reminderTime = new Date(todo.reminderTime)
+    if (Math.abs(reminderTime - now) <= 60000) {
+      // 发送系统通知
+      if (window.utools && window.utools.showNotification) {
+        window.utools.showNotification(todo.title, 'index')
+      }
+
+      // 发送Bark推送
+      sendBarkNotification(todo.title, todo.description || '该任务需要您的关注')
+
+      // 循环任务：推进到下一个周期
+      if (todo.recurrence) {
+        const currentReminder = new Date(todo.reminderTime)
+        const nextReminder = getNextOccurrence(currentReminder, todo.recurrence)
+        if (nextReminder) {
+          updateTodo(todo.id, { reminderTime: nextReminder.toISOString() })
+          window.dispatchEvent(new Event('todo-updated'))
+        }
+      } else {
+        bgNotifiedTodos.add(todo.id)
+      }
+    }
+  })
+}
+
+// 对齐到每分钟的第0秒执行检查
+const startAlignedInterval = () => {
+  const now = new Date()
+  const msUntilNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds()
+  setTimeout(() => {
+    checkReminders()
+    setInterval(checkReminders, 60000)
+  }, msUntilNextMinute)
+}
+startAlignedInterval()
 
 // 初始化
 initDB()

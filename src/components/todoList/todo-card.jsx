@@ -12,8 +12,8 @@ import {
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
-import * as Icons from 'lucide-react'
 import { getRecurrenceLabel } from '@/lib/recurrence'
+import { getIconComponent, getColorClass } from '@/components/ui/category-icon'
 
 export function TodoCard({
   todo,
@@ -26,6 +26,7 @@ export function TodoCard({
   const formatDate = date => {
     if (!date) return ''
     const d = new Date(date)
+    if (isNaN(d.getTime())) return ''
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const tomorrow = new Date(today)
@@ -53,37 +54,15 @@ export function TodoCard({
     }
   }
 
-  const getIconComponent = iconName => {
-    return Icons[iconName] || Icons.FolderIcon
-  }
-
   const getTimeStatus = time => {
     if (!time || todo.completed) return 'default'
-    const now = new Date()
     const target = new Date(time)
+    if (isNaN(target.getTime())) return 'default'
+    const now = new Date()
     const diff = target - now
     if (diff < 0) return 'red' // 已过期
     if (diff < 2 * 60 * 60 * 1000) return 'yellow' // 2小时内
     return 'default'
-  }
-
-  const getColorClass = color => {
-    switch (color) {
-      case 'red':
-        return 'text-red-500'
-      case 'blue':
-        return 'text-blue-500'
-      case 'green':
-        return 'text-green-500'
-      case 'yellow':
-        return 'text-yellow-500'
-      case 'purple':
-        return 'text-purple-500'
-      case 'pink':
-        return 'text-pink-500'
-      default:
-        return 'text-gray-500'
-    }
   }
 
   return (
@@ -109,7 +88,7 @@ export function TodoCard({
 
           <div className='mt-2 flex flex-wrap gap-1.5'>
             {todo.categoryId && (
-              <div className='flex items-center gap-1 px-2 py-1 rounded-md bg-accent text-xs'>
+              <div className='flex items-center gap-1 px-2 py-1 rounded-md bg-accent text-xs shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.08)]'>
                 {(() => {
                   const category = categories.find(
                     cat => cat.id === todo.categoryId
@@ -129,7 +108,7 @@ export function TodoCard({
             )}
 
             {todo.description && (
-              <div className='flex items-center gap-1 px-2 py-1 rounded-md bg-accent text-xs'>
+              <div className='flex items-center gap-1 px-2 py-1 rounded-md bg-accent text-xs shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.08)]'>
                 <FileText className='h-3.5 w-3.5 text-muted-foreground' />
                 <span className='max-w-[140px] truncate'>
                   {todo.description}
@@ -140,7 +119,7 @@ export function TodoCard({
             {todo.dueDate && (
               <div
                 className={cn(
-                  'flex items-center gap-1 px-2 py-1 rounded-md text-xs',
+                  'flex items-center gap-1 px-2 py-1 rounded-md text-xs shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.08)]',
                   getTimeStatus(todo.dueDate) === 'red'
                     ? 'bg-red-100 text-red-700'
                     : getTimeStatus(todo.dueDate) === 'yellow'
@@ -156,7 +135,7 @@ export function TodoCard({
             {todo.reminderTime && (
               <div
                 className={cn(
-                  'flex items-center gap-1 px-2 py-1 rounded-md text-xs',
+                  'flex items-center gap-1 px-2 py-1 rounded-md text-xs shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.08)]',
                   getTimeStatus(todo.reminderTime) === 'red'
                     ? 'bg-red-100 text-red-700'
                     : getTimeStatus(todo.reminderTime) === 'yellow'
@@ -170,14 +149,14 @@ export function TodoCard({
             )}
 
             {todo.recurrence && (
-              <div className='flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs'>
+              <div className='flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-xs shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.08)]'>
                 <Repeat className='h-3.5 w-3.5' />
                 <span>{getRecurrenceLabel(todo.recurrence)}</span>
               </div>
             )}
 
             {todo.completed && (
-              <div className='flex items-center gap-1 px-2 py-1 rounded-md bg-green-100 text-green-700 text-xs'>
+              <div className='flex items-center gap-1 px-2 py-1 rounded-md bg-green-100 text-green-700 text-xs shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_2px_rgba(0,0,0,0.08)]'>
                 <CircleCheckBig className='h-3.5 w-3.5' />
                 <span>{formatDate(todo.completedAt)}</span>
               </div>

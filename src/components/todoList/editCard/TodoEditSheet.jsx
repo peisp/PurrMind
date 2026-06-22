@@ -86,12 +86,17 @@ export function TodoEditSheet({
   // 初始化表单 - 当todo改变时重置表单
   useEffect(() => {
     if (todo) {
+      const parseDate = v => {
+        if (!v) return null
+        const d = new Date(v)
+        return isNaN(d.getTime()) ? null : d
+      }
       setEditForm({
         title: todo.title || '',
         description: todo.description || '',
         categoryId: todo.categoryId || '',
-        dueDate: todo.dueDate ? new Date(todo.dueDate) : null,
-        reminderTime: todo.reminderTime ? new Date(todo.reminderTime) : null,
+        dueDate: parseDate(todo.dueDate),
+        reminderTime: parseDate(todo.reminderTime),
         recurrence: todo.recurrence || null
       })
     }
@@ -233,11 +238,13 @@ export function TodoEditSheet({
         <SheetFooter className='flex items-center justify-between pt-2 mt-2'>
           <div className='flex-1 text-xs text-muted-foreground'>
             创建于{' '}
-            {todo?.createdAt
-              ? format(new Date(todo.createdAt), 'yyyy-MM-dd HH:mm', {
-                locale: zhCN
-              })
-              : ''}
+            {(() => {
+              if (!todo?.createdAt) return ''
+              const d = new Date(todo.createdAt)
+              return isNaN(d.getTime())
+                ? ''
+                : format(d, 'yyyy-MM-dd HH:mm', { locale: zhCN })
+            })()}
           </div>
           <div className='flex items-center gap-2'>
             <Button variant='destructive' onClick={onDelete}>

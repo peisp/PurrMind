@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Index } from '@/Index.jsx'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 export default function App() {
   const [route, setRoute] = useState('')
@@ -48,7 +49,11 @@ export default function App() {
   }
 
   if (route === 'index' || route === 'addItem') {
-    return <Index enterAction={enterAction} isDarkMode={isDarkMode} />
+    return (
+      <ErrorBoundary>
+        <Index enterAction={enterAction} isDarkMode={isDarkMode} />
+      </ErrorBoundary>
+    )
   }
 
   return null

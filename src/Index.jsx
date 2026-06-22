@@ -1,6 +1,5 @@
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar.jsx'
 import { AppSidebar } from '@/components/sidebar/app-sidebar.jsx'
-import { Notification } from '@/components/notif/notification.jsx'
 import { MainContent } from '@/components/main/MainContent.jsx'
 import { useState, useEffect } from 'react'
 import { useTodoManagement } from '@/hooks/useTodoManagement.js'
@@ -81,7 +80,6 @@ export function Index({ enterAction }) {
             />
           </SidebarInset>
         </div>
-        <Notification todos={todos} />
       </SidebarProvider>
     </div>
   )

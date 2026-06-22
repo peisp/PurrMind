@@ -18,6 +18,12 @@ export const getAllTodos = () => {
   return db.get(TODO_DB_NAME) || []
 }
 
+const safeDate = v => {
+  if (!v) return null
+  const d = new Date(v)
+  return isNaN(d.getTime()) ? null : v
+}
+
 // 添加待办事项
 export const addTodo = todo => {
   const todos = getAllTodos()
@@ -29,8 +35,8 @@ export const addTodo = todo => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     categoryId: todo.categoryId || null,
-    dueDate: todo.dueDate || null,
-    reminderTime: todo.reminderTime || null,
+    dueDate: safeDate(todo.dueDate),
+    reminderTime: safeDate(todo.reminderTime),
     starred: todo.starred || false,
     recurrence: todo.recurrence || null
   }
