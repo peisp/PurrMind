@@ -315,6 +315,40 @@ const sendBarkNotification = async (title, content) => {
   }
 }
 
+// 飞书群机器人推送（后台版本，直接读取配置）
+const sendFeishuNotification = async (title, content) => {
+  const settings = dbStorage.getItem('purrmind_feishu_settings') || {}
+  if (!settings.enabled || !settings.webhookUrl) return
+
+  // 关键词校验要求消息中包含关键词
+  let text = content ? `${title}\n${content}` : title
+  if (settings.keyword && !text.includes(settings.keyword)) {
+    text = `【${settings.keyword}】${text}`
+  }
+
+  const body = { msg_type: 'text', content: { text } }
+
+  // 签名校验：HmacSHA256(key = timestamp + "\n" + secret, message = "") 后 Base64
+  if (settings.secret) {
+    const timestamp = Math.floor(Date.now() / 1000).toString()
+    body.timestamp = timestamp
+    body.sign = require('crypto')
+      .createHmac('sha256', `${timestamp}\n${settings.secret}`)
+      .update('')
+      .digest('base64')
+  }
+
+  try {
+    await fetch(settings.webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+  } catch (e) {
+    console.error('飞书后台推送失败:', e)
+  }
+}
+
 // 循环任务推进逻辑（与 src/lib/recurrence.js 保持一致）
 const getNextOccurrence = (currentDate, recurrence) => {
   if (!recurrence || !recurrence.type) return null
@@ -358,6 +392,9 @@ const checkReminders = () => {
 
       // 发送Bark推送
       sendBarkNotification(todo.title, todo.description || '该任务需要您的关注')
+
+      // 发送飞书推送
+      sendFeishuNotification(todo.title, todo.description || '该任务需要您的关注')
 
       // 循环任务：推进到下一个周期
       if (todo.recurrence) {

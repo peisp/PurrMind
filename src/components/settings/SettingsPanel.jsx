@@ -33,6 +33,7 @@ import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { barkService } from '@/services/bark'
+import { feishuService } from '@/services/feishu'
 import { getAllTodos, getAllCategories } from '@/db/todo'
 
 export function SettingsPanel({ open, onOpenChange }) {
@@ -54,6 +55,14 @@ export function SettingsPanel({ open, onOpenChange }) {
   })
   const [testResult, setTestResult] = useState(null)
   const [testing, setTesting] = useState(false)
+  const [feishuSettings, setFeishuSettings] = useState({
+    enabled: false,
+    webhookUrl: '',
+    keyword: '',
+    secret: ''
+  })
+  const [feishuTestResult, setFeishuTestResult] = useState(null)
+  const [feishuTesting, setFeishuTesting] = useState(false)
 
   // 分离内置模型和自定义模型
   const builtInModels = aiModels.filter(model => !model.custom)
@@ -68,6 +77,9 @@ export function SettingsPanel({ open, onOpenChange }) {
 
     const savedBarkSettings = barkService.getSettings()
     setBarkSettings(savedBarkSettings)
+
+    const savedFeishuSettings = feishuService.getSettings()
+    setFeishuSettings(savedFeishuSettings)
 
     // 异步获取AI模型列表
     if (window.utools?.allAiModels) {
@@ -115,6 +127,14 @@ export function SettingsPanel({ open, onOpenChange }) {
     barkService.saveSettings(newBarkSettings)
     // 清除上次的测试结果
     setTestResult(null)
+  }
+
+  const handleFeishuChange = (key, value) => {
+    const newFeishuSettings = { ...feishuSettings, [key]: value }
+    setFeishuSettings(newFeishuSettings)
+    feishuService.saveSettings(newFeishuSettings)
+    // 清除上次的测试结果
+    setFeishuTestResult(null)
   }
 
   const handleExportMarkdown = () => {
@@ -194,14 +214,31 @@ export function SettingsPanel({ open, onOpenChange }) {
     }
   }
 
+  const handleTestFeishu = async () => {
+    setFeishuTesting(true)
+    setFeishuTestResult(null)
+
+    try {
+      const result = await feishuService.testConnection()
+      setFeishuTestResult(result)
+    } catch (error) {
+      setFeishuTestResult({
+        success: false,
+        error: '测试失败: ' + error.message
+      })
+    } finally {
+      setFeishuTesting(false)
+    }
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className='max-h-[80vh] flex flex-col'>
         <DialogHeader>
           <DialogTitle>设置</DialogTitle>
         </DialogHeader>
 
-        <div className='space-y-4 py-4'>
+        <div className='space-y-4 py-4 flex-1 overflow-y-auto pr-1'>
           <div className='grid grid-cols-4 gap-4 items-center'>
             {/* <div className="col-span-1"> */}
             {/* <Label htmlFor="dark-mode">深色模式</Label> */}
@@ -416,33 +453,141 @@ export function SettingsPanel({ open, onOpenChange }) {
               </div>
             </div>
 
-            <div className='col-span-1'>
-              <Label htmlFor='bark-api-url'>API地址</Label>
+            {barkSettings.enabled && (
+              <>
+                <div className='col-span-1'>
+                  <Label htmlFor='bark-api-url'>API地址</Label>
+                </div>
+                <div className='col-span-3'>
+                  <Input
+                    id='bark-api-url'
+                    type='url'
+                    placeholder='https://api.day.app'
+                    value={barkSettings.apiUrl}
+                    onChange={e => handleBarkChange('apiUrl', e.target.value)}
+                  />
+                </div>
+
+                <div className='col-span-1'>
+                  <Label htmlFor='bark-token'>Token</Label>
+                </div>
+                <div className='col-span-3'>
+                  <Input
+                    id='bark-token'
+                    type='text'
+                    placeholder='输入您的Bark Token'
+                    value={barkSettings.token}
+                    onChange={e => handleBarkChange('token', e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* 飞书群机器人推送设置 */}
+            <div className='col-span-4'>
+              <Separator className='my-4' />
             </div>
-            <div className='col-span-3'>
-              <Input
-                id='bark-api-url'
-                type='url'
-                placeholder='https://api.day.app'
-                value={barkSettings.apiUrl}
-                onChange={e => handleBarkChange('apiUrl', e.target.value)}
-                disabled={!barkSettings.enabled}
+            <div className='col-span-1 flex items-center'>
+              <Label htmlFor='feishu-enabled'>飞书推送</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className='text-muted-foreground cursor-help ml-auto'>
+                    <Info className='w-4 h-4' />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side='top' className='max-w-[300px]'>
+                  配置飞书群机器人Webhook，用于发送任务提醒到飞书群。关键词、签名对应机器人的安全设置，未开启可留空。
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <div className='col-span-3 flex items-center justify-between'>
+              <Switch
+                id='feishu-enabled'
+                checked={feishuSettings.enabled}
+                onCheckedChange={val => handleFeishuChange('enabled', val)}
               />
+              <div className='flex items-center gap-2'>
+                {feishuTestResult && (
+                  <div
+                    className={`flex items-center gap-1 text-xs ${
+                      feishuTestResult.success
+                        ? 'text-green-600'
+                        : 'text-red-600'
+                    }`}
+                  >
+                    {feishuTestResult.success
+                      ? (
+                      <CheckCircle className='w-3 h-3' />
+                        )
+                      : (
+                      <XCircle className='w-3 h-3' />
+                        )}
+                    <span>{feishuTestResult.success ? '成功' : '失败'}</span>
+                  </div>
+                )}
+                <Button
+                  onClick={handleTestFeishu}
+                  disabled={
+                    !feishuSettings.enabled ||
+                    !feishuSettings.webhookUrl ||
+                    feishuTesting
+                  }
+                  variant='outline'
+                  size='xs'
+                  className='h-6 text-xs px-2'
+                >
+                  <Send className='w-3 h-3 mr-1' />
+                  {feishuTesting ? '测试中' : '测试'}
+                </Button>
+              </div>
             </div>
 
-            <div className='col-span-1'>
-              <Label htmlFor='bark-token'>Token</Label>
-            </div>
-            <div className='col-span-3'>
-              <Input
-                id='bark-token'
-                type='text'
-                placeholder='输入您的Bark Token'
-                value={barkSettings.token}
-                onChange={e => handleBarkChange('token', e.target.value)}
-                disabled={!barkSettings.enabled}
-              />
-            </div>
+            {feishuSettings.enabled && (
+              <>
+                <div className='col-span-1'>
+                  <Label htmlFor='feishu-webhook-url'>地址</Label>
+                </div>
+                <div className='col-span-3'>
+                  <Input
+                    id='feishu-webhook-url'
+                    type='url'
+                    placeholder='https://open.feishu.cn/open-apis/bot/v2/hook/xxx'
+                    value={feishuSettings.webhookUrl}
+                    onChange={e =>
+                      handleFeishuChange('webhookUrl', e.target.value)
+                    }
+                  />
+                </div>
+
+                <div className='col-span-1'>
+                  <Label htmlFor='feishu-keyword'>关键词</Label>
+                </div>
+                <div className='col-span-3'>
+                  <Input
+                    id='feishu-keyword'
+                    type='text'
+                    placeholder='自定义关键词（可选）'
+                    value={feishuSettings.keyword}
+                    onChange={e =>
+                      handleFeishuChange('keyword', e.target.value)
+                    }
+                  />
+                </div>
+
+                <div className='col-span-1'>
+                  <Label htmlFor='feishu-secret'>签名</Label>
+                </div>
+                <div className='col-span-3'>
+                  <Input
+                    id='feishu-secret'
+                    type='text'
+                    placeholder='签名校验密钥（可选）'
+                    value={feishuSettings.secret}
+                    onChange={e => handleFeishuChange('secret', e.target.value)}
+                  />
+                </div>
+              </>
+            )}
 
             {/* 数据导出 */}
             <div className='col-span-4'>
