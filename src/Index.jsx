@@ -34,7 +34,7 @@ export function Index({ enterAction }) {
   }, [])
 
   return (
-    <div className='relative'>
+    <div className='relative h-full overflow-hidden'>
       {/* 开发环境标识 */}
       {isDev && (
         <div className='absolute z-50 group'>
@@ -51,15 +51,15 @@ export function Index({ enterAction }) {
         </div>
       )}
 
-      <SidebarProvider className='border-t'>
-        <div className='grid w-full grid-cols-[auto_1fr]'>
+      <SidebarProvider className='h-full overflow-hidden border-t'>
+        <div className='flex h-full w-full min-w-0'>
           <AppSidebar
             onFilterChange={handleFilterChange}
             onCategoryChange={handleCategoryChange}
             currentFilter={currentFilter}
             currentCategory={currentCategory}
           />
-          <SidebarInset>
+          <SidebarInset className='min-w-0 overflow-hidden'>
             <MainContent
               todos={todos}
               categories={categories}

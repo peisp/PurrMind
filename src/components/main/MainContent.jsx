@@ -81,7 +81,7 @@ export function MainContent({
 
   return (
     <TooltipProvider>
-      <div className='flex h-[calc(100vh-1px)] min-w-0 flex-col'>
+      <div className='flex h-full min-h-0 min-w-0 flex-col overflow-hidden'>
         <header className='flex h-14 shrink-0 items-center border-b'>
           <div className='flex items-center gap-4 px-3'>
             <div className='flex items-center gap-2'>

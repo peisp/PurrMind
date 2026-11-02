@@ -72,6 +72,15 @@
   * {
     @apply border-border;
   }
+
+  /* uTools 是固定窗口的桌面应用，禁止 html/body 出现页面级滚动条，
+     所有滚动都交给内部容器处理 */
+  html,
+  body,
+  #root {
+    @apply h-full overflow-hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
